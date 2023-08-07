@@ -82,6 +82,8 @@ function extractStoryData(passages) {
 }
 
 function buildNode(passageTitle, storyData) {
+  // TODO: point to the right node if it has the -> symbol
+
   const passage = storyData.passages[passageTitle];
   const node = {
     title: passageTitle,
