@@ -36,10 +36,10 @@ export const uploadFile = (req: Request, res: Response) => {
           }
 
           const declaration: string = line.slice(2).trim();
-          const [unname, rest] = declaration.split("[");
+          const [declareName, rest] = declaration.split("[");
           const tags: string[] = rest ? rest.slice(0, -1).split(" ") : [];
 
-          const name: string = unname.split("{")[0].trim();
+          const name: string = declareName.split("{")[0].trim();
 
           let affectionToAdd: number = 0;
           let affectionRequired: number = 0;
@@ -87,9 +87,8 @@ export const uploadFile = (req: Request, res: Response) => {
       }
 
       const data: StoryData = { title, start, nodes };
-      const jsonFile = JSON.stringify(data, null, 2);
 
-      res.send({ file: jsonFile });
+      res.send({ file: data });
     }
   } catch (error) {
     console.log(error);

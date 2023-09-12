@@ -3,9 +3,16 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
+import { UseJsonDataStore } from "./Store/JsonData";
+import DownloadButton from "./components/DownloadButton";
+import DialogViewer from "./components/DialogViewer";
+import { UseNodeStore } from "./Store/Node";
+import NodeEditor from "./components/NodeEditor";
 
 function App() {
   const [count, setCount] = useState(0);
+  const { name } = UseJsonDataStore((state) => state);
+  const { node } = UseNodeStore((state) => state);
 
   return (
     <>
@@ -18,7 +25,23 @@ function App() {
         </a>
       </div>
       <h1>Twee ➡ JSON</h1>
-      <FileUpload />
+      {name === "" ? (
+        <FileUpload />
+      ) : (
+        <button onClick={() => window.location.reload()}>Upload another file</button>
+      )}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          width: "1250px",
+          padding: "15px 0",
+        }}>
+        {name !== "" && <DialogViewer />}
+        {node !== null && <NodeEditor />}
+      </div>
+      {name !== "" && <DownloadButton />}
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
         <p>

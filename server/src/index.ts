@@ -36,6 +36,6 @@ app.get("*", (req: Request, res: Response) => {
   res.sendFile(path.join(__dirname, "../../client/build/index.html"));
 });
 
-app.listen(process.env.PORT || 3001, () => {
-  console.log(`App running on port ${process.env.PORT || 3001}`);
+app.listen(process.env.PORT || 5000, () => {
+  console.log(`App running on port ${process.env.PORT || 5000}`);
 });
