@@ -1,13 +1,12 @@
-import { Request, Response } from "express";
-import { StoryNode } from "../interfaces/Node";
 import { Choice } from "../interfaces/Choice";
+import { StoryNode } from "../interfaces/Node";
 import { StoryData } from "../interfaces/StoryData";
 
-export const uploadFile = (req: Request, res: Response) => {
-  try {
-    const fileBuffer = req.file?.buffer?.toString();
-    if (fileBuffer) {
-      const lines: string[] = fileBuffer.split("\n");
+export const converter = async (file: File) => {
+  return file?.text().then((value) => {
+    console.log(value);
+    if (value) {
+      const lines: string[] = value.split("\n");
 
       const nodes: StoryNode[] = [];
       let currentNode: StoryNode | null = null;
@@ -37,14 +36,16 @@ export const uploadFile = (req: Request, res: Response) => {
 
           const declaration: string = line.slice(2).trim();
           const [declareName, rest] = declaration.split("[");
-          const tags: string[] = rest ? rest.slice(0, -1).split(" ") : [];
+          // const tags: string[] = rest ? rest.slice(0, -1).split(" ") : [];
+
+          console.log(rest);
 
           const name: string = declareName.split("{")[0].trim();
 
-          let affectionToAdd: number = 0;
-          let affectionRequired: number = 0;
-          let giveBlessing: boolean = false;
-          let giveHead: boolean = false;
+          const affectionToAdd: number = 0;
+          const affectionRequired: number = 0;
+          const giveBlessing: boolean = false;
+          const giveHead: boolean = false;
 
           currentNode = {
             name,
@@ -88,10 +89,9 @@ export const uploadFile = (req: Request, res: Response) => {
 
       const data: StoryData = { title, start, nodes };
 
-      res.send({ file: data });
+      return data;
+    } else {
+      console.log("Error");
     }
-  } catch (error) {
-    console.log(error);
-    res.sendStatus(500);
-  }
+  });
 };

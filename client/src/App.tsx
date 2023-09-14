@@ -35,7 +35,8 @@ function App() {
           display: "flex",
           flexDirection: "row",
           justifyContent: "space-evenly",
-          width: "1250px",
+          margin: "0 auto",
+          width: "80vw",
           padding: "15px 0",
         }}>
         {name !== "" && <DialogViewer />}

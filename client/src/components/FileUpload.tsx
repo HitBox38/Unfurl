@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from "react";
-import axios from "axios";
 import { UseJsonDataStore } from "../Store/JsonData";
+import { converter } from "../functions/converter";
 
 const FileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -21,14 +21,14 @@ const FileUpload = () => {
   const onFileUpload = async () => {
     if (file) {
       setIsLoading(true);
-      const formData = new FormData();
-      formData.append("file", file, file.name);
 
-      axios.post("http://localhost:5000/api/files/upload", formData).then((res) => {
+      converter(file).then((value) => {
         if (name !== "") {
           setJsonData({ nodes: [], start: null, title: null }, "");
         }
-        setJsonData(res.data.file, file.name.split(".")[0]);
+        if (value) {
+          setJsonData(value, file.name.split(".")[0]);
+        }
         setIsLoading(false);
       });
     }
