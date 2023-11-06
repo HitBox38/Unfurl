@@ -1,4 +1,5 @@
 import { UseJsonDataStore } from "../Store/JsonData";
+import { Button } from "@mui/material";
 
 const DownloadButton = () => {
   const { content, name } = UseJsonDataStore((state) => state);
@@ -15,7 +16,11 @@ const DownloadButton = () => {
     }
   };
 
-  return <button onClick={handleDownload}>DownloadButton</button>;
+  return (
+    <Button variant="contained" onClick={handleDownload}>
+      DownloadButton
+    </Button>
+  );
 };
 
 export default DownloadButton;

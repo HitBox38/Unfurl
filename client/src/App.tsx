@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { ThemeProvider } from "@mui/material/styles";
+import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -8,14 +9,19 @@ import DownloadButton from "./components/DownloadButton";
 import DialogViewer from "./components/DialogViewer";
 import { UseNodeStore } from "./Store/Node";
 import NodeEditor from "./components/NodeEditor";
+import { darkTheme } from "./theme";
+import { CircularProgress } from "@mui/material";
 
 function App() {
   const [count, setCount] = useState(0);
-  const { name } = UseJsonDataStore((state) => state);
+  const { name, isLoading, content } = UseJsonDataStore((state) => state);
   const { node } = UseNodeStore((state) => state);
+  useEffect(() => {
+    console.log(content);
+  }, [content]);
 
   return (
-    <>
+    <ThemeProvider theme={darkTheme}>
       <div>
         <a href="https://vitejs.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
@@ -39,8 +45,13 @@ function App() {
           width: "80vw",
           padding: "15px 0",
         }}>
-        {name !== "" && <DialogViewer />}
-        {node !== null && <NodeEditor />}
+        {name !== "" ? (
+          <>
+            <DialogViewer /> {node && <NodeEditor />}
+          </>
+        ) : (
+          isLoading && <CircularProgress />
+        )}
       </div>
       {name !== "" && <DownloadButton />}
       <div className="card">
@@ -49,7 +60,7 @@ function App() {
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
-    </>
+    </ThemeProvider>
   );
 }
 

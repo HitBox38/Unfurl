@@ -4,7 +4,6 @@ import { StoryData } from "../interfaces/StoryData";
 
 export const converter = async (file: File) => {
   return file?.text().then((value) => {
-    console.log(value);
     if (value) {
       const lines: string[] = value.split("\n");
 
@@ -36,9 +35,9 @@ export const converter = async (file: File) => {
 
           const declaration: string = line.slice(2).trim();
           const [declareName, rest] = declaration.split("[");
-          // const tags: string[] = rest ? rest.slice(0, -1).split(" ") : [];
+          const tags: string[] = rest ? rest.slice(0, -1).split(" ") : [];
 
-          console.log(rest);
+          console.log(tags);
 
           const name: string = declareName.split("{")[0].trim();
 
@@ -77,7 +76,7 @@ export const converter = async (file: File) => {
             currentNode.giveBlessing = true;
           } else if (line.match(/#\*#\*/)) {
             currentNode.giveHead = true;
-          } else {
+          } else if (line !== "") {
             currentNode.content.push(line);
           }
         }

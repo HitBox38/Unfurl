@@ -1,4 +1,5 @@
 import { ChangeEvent, useState } from "react";
+import { Button } from "@mui/material";
 import { UseJsonDataStore } from "../Store/JsonData";
 import { converter } from "../functions/converter";
 
@@ -18,7 +19,7 @@ const FileUpload = () => {
     }
   };
 
-  const onFileUpload = async () => {
+  const onFileUpload = () => {
     if (file) {
       setIsLoading(true);
 
@@ -37,7 +38,7 @@ const FileUpload = () => {
   return (
     <div>
       <input type="file" onChange={onFileChange} accept=".twee" />
-      <button disabled={isLoading} onClick={onFileUpload}>
+      <Button variant="contained" disabled={isLoading} onClick={onFileUpload}>
         {isLoading ? (
           <svg
             width="13"
@@ -53,7 +54,7 @@ const FileUpload = () => {
         ) : (
           "Upload"
         )}
-      </button>
+      </Button>
     </div>
   );
 };

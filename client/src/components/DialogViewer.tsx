@@ -2,7 +2,7 @@ import ReactFlow, { useNodesState, useEdgesState, Node, Edge, ConnectionLineType
 import "reactflow/dist/style.css";
 import { UseJsonDataStore } from "../Store/JsonData";
 import { StoryData } from "../interfaces/StoryData";
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { StoryNode } from "../interfaces/Node";
 import dagre from "dagre";
 import { UseNodeStore } from "../Store/Node";
@@ -44,7 +44,7 @@ const transformJsonToNodesAndEdges = (json: StoryData) => {
 
   // First pass: Add all nodes to dagre graph and nodes state
   json.nodes.forEach((node, index) => {
-    const nodeId = String(index);
+    const nodeId = index.toString();
     elements.nodes.push({
       id: nodeId,
       data: { label: node.name, metadata: node },
@@ -54,14 +54,14 @@ const transformJsonToNodesAndEdges = (json: StoryData) => {
 
   // Second pass: Add all edges to dagre graph and edges state
   json.nodes.forEach((node, index) => {
-    const nodeId = String(index);
+    const nodeId = index.toString();
 
     node.choices.forEach((choice) => {
       const targetIndex = json.nodes.findIndex((n) => n.name === choice.destination);
       elements.edges.push({
         id: "e" + nodeId + "-" + targetIndex,
         source: nodeId,
-        target: String(targetIndex),
+        target: targetIndex.toString(),
       });
     });
   });
@@ -70,7 +70,7 @@ const transformJsonToNodesAndEdges = (json: StoryData) => {
 };
 
 const DialogViewer = () => {
-  const content = UseJsonDataStore(({ content }) => content);
+  const { content } = UseJsonDataStore((state) => state);
   const setSelectedNode = UseNodeStore(({ setNode }) => setNode);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -89,9 +89,7 @@ const DialogViewer = () => {
     setNodes([...layoutedNodes]);
     setEdges([...layoutedEdges]);
   }, [nodes, edges]);
-  useEffect(() => {
-    onLayout();
-  }, [content]);
+
   return (
     <div style={{ width: "500px", height: "750px", border: "1px solid #f6f6f6", borderRadius: 10 }}>
       <ReactFlow
