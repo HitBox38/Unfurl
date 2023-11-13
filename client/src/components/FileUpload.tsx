@@ -12,7 +12,10 @@ const FileUpload = () => {
     const selectFile = e.target.files ? e.target.files[0] : null;
     console.log(selectFile?.name);
 
-    if (selectFile && selectFile.name.split(".")[1] === "twee") {
+    if (
+      selectFile &&
+      selectFile.name.split(".")[selectFile.name.split(".").length - 1] === "twee"
+    ) {
       setFile(selectFile);
     } else {
       alert("Please upload a .twee file");

@@ -34,10 +34,7 @@ export const converter = async (file: File) => {
           }
 
           const declaration: string = line.slice(2).trim();
-          const [declareName, rest] = declaration.split("[");
-          const tags: string[] = rest ? rest.slice(0, -1).split(" ") : [];
-
-          console.log(tags);
+          const declareName = declaration.split("[")[0];
 
           const name: string = declareName.split("{")[0].trim();
 
@@ -48,10 +45,12 @@ export const converter = async (file: File) => {
 
           currentNode = {
             name,
-            affectionToAdd,
-            affectionRequired,
-            giveBlessing,
-            giveHead,
+            metadata: {
+              affectionToAdd,
+              affectionRequired,
+              giveBlessing,
+              giveHead,
+            },
             choices: [],
             content: [],
           };
@@ -68,14 +67,14 @@ export const converter = async (file: File) => {
             }
           } else if (line.match(/#@/)) {
             const varValue: number = Number(line.split("#@")[1].slice(0, 2).trim());
-            currentNode.affectionToAdd = varValue;
+            currentNode.metadata.affectionToAdd = varValue;
           } else if (line.match(/#\?/)) {
             const varValue: number = Number(line.split("#?")[1].slice(0, 1).trim());
-            currentNode.affectionRequired = varValue;
+            currentNode.metadata.affectionRequired = varValue;
           } else if (line.match(/#%#%/)) {
-            currentNode.giveBlessing = true;
+            currentNode.metadata.giveBlessing = true;
           } else if (line.match(/#\*#\*/)) {
-            currentNode.giveHead = true;
+            currentNode.metadata.giveHead = true;
           } else if (line !== "") {
             currentNode.content.push(line);
           }
@@ -90,7 +89,7 @@ export const converter = async (file: File) => {
 
       return data;
     } else {
-      console.log("Error");
+      console.log("Error", value);
     }
   });
 };

@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@mui/material/styles";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
@@ -14,11 +14,8 @@ import { CircularProgress } from "@mui/material";
 
 function App() {
   const [count, setCount] = useState(0);
-  const { name, isLoading, content } = UseJsonDataStore((state) => state);
+  const { name, isLoading } = UseJsonDataStore((state) => state);
   const { node } = UseNodeStore((state) => state);
-  useEffect(() => {
-    console.log(content);
-  }, [content]);
 
   return (
     <ThemeProvider theme={darkTheme}>
