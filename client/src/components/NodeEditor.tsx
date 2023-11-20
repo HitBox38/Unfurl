@@ -1,9 +1,11 @@
 import { TextField, Typography, Box, Button } from "@mui/material";
-import { UseNodeStore } from "../Store/Node";
+import { UseNodeStore } from "../stores/Node";
 import { useForm, useFieldArray, FormProvider, SubmitHandler } from "react-hook-form";
-import { UseJsonDataStore } from "../Store/JsonData";
+import { UseJsonDataStore } from "../stores/JsonData";
 import { NodeMetadataEditor } from "./NodeMetadataEditor";
 import { StoryNode } from "../interfaces/Node";
+import { ArrowRightAlt } from "@mui/icons-material";
+import { useEffect } from "react";
 interface StoryNodeForm extends Omit<StoryNode, "content"> {
   content: string;
 }
@@ -29,13 +31,41 @@ const NodeEditor = () => {
   });
 
   const submitNode: SubmitHandler<StoryNodeForm> = (data) => {
-    if (node && data.choices && data.content) {
-      setNode({ ...node, content: data.content.split("\n"), choices: data.choices });
-      jsonData.setNode(node, jsonData);
+    if (node && data.choices && data.content && data.metadata) {
+      const newNode = {
+        // ...node,
+        name: node.name,
+        content: data.content.split("\n"),
+        choices: data.choices,
+        metadata: {
+          // ...data.metadata,
+          giveBlessing: data.metadata.giveBlessing,
+          giveHead: data.metadata.giveHead,
+          affectionRequired: Number(data.metadata.affectionRequired),
+          affectionToAdd: Number(data.metadata.affectionToAdd),
+        },
+      };
+      setNode(newNode);
+      jsonData.setNode(newNode, jsonData);
     } else {
       console.log("node is empty!");
     }
   };
+
+  useEffect(() => {
+    if (node) {
+      methods.reset({
+        content: node?.content.join("\n"),
+        choices: node?.choices,
+        metadata: {
+          affectionRequired: node?.metadata.affectionRequired,
+          affectionToAdd: node?.metadata.affectionToAdd,
+          giveBlessing: node?.metadata.giveBlessing,
+          giveHead: node?.metadata.giveHead,
+        },
+      });
+    }
+  }, [node]);
 
   return (
     <FormProvider {...methods}>
@@ -51,14 +81,9 @@ const NodeEditor = () => {
         <TextField
           {...methods.register("content")}
           defaultValue={node?.content.join("\n")}
-          onChange={(e) => {
-            if (node) {
-              setNode({ ...node, content: e.target.value.split("\n") });
-            }
-          }}
           multiline
           minRows={5}
-          style={{ minWidth: "350px" }}
+          style={{ minWidth: "400px", maxWidth: "500px" }}
         />
         {fields.map((field, index) => (
           <Box
@@ -75,7 +100,7 @@ const NodeEditor = () => {
               defaultValue={field.text}
               multiline
             />
-            <Typography variant="h4"> ➡ </Typography>
+            <ArrowRightAlt sx={{ fontSize: "50px" }} />
             <Typography variant="h5">{field.destination}</Typography>
           </Box>
         ))}

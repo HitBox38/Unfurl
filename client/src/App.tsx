@@ -4,13 +4,16 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
-import { UseJsonDataStore } from "./Store/JsonData";
+import { UseJsonDataStore } from "./stores/JsonData";
 import DownloadButton from "./components/DownloadButton";
 import DialogViewer from "./components/DialogViewer";
-import { UseNodeStore } from "./Store/Node";
+import { UseNodeStore } from "./stores/Node";
 import NodeEditor from "./components/NodeEditor";
 import { darkTheme } from "./theme";
-import { CircularProgress } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
+import { ArrowRightAlt } from "@mui/icons-material";
+import { MetadataConfig } from "./components/MetadataConfig";
+import { EveryWhereDialog } from "./components/EverywhereDialog";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -27,7 +30,9 @@ function App() {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Twee ➡ JSON</h1>
+      <h1>
+        Twee <ArrowRightAlt sx={{ fontSize: 75, marginBottom: "-25px" }} /> JSON
+      </h1>
       {name === "" ? (
         <FileUpload />
       ) : (
@@ -50,13 +55,8 @@ function App() {
           isLoading && <CircularProgress />
         )}
       </div>
-      {name !== "" && <DownloadButton />}
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
+      {name !== "" ? <DownloadButton /> : <MetadataConfig />}
+      <EveryWhereDialog />
     </ThemeProvider>
   );
 }

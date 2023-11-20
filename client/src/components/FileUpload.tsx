@@ -1,6 +1,6 @@
 import { ChangeEvent, useState } from "react";
 import { Button } from "@mui/material";
-import { UseJsonDataStore } from "../Store/JsonData";
+import { UseJsonDataStore } from "../stores/JsonData";
 import { converter } from "../functions/converter";
 
 const FileUpload = () => {
@@ -10,7 +10,6 @@ const FileUpload = () => {
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectFile = e.target.files ? e.target.files[0] : null;
-    console.log(selectFile?.name);
 
     if (
       selectFile &&

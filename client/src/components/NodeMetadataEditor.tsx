@@ -11,11 +11,13 @@ export const NodeMetadataEditor = () => {
           sx={{ width: "150px" }}
           label="Affection to add"
           {...register("metadata.affectionToAdd")}
+          type="number"
         />
         <TextField
           sx={{ width: "150px" }}
           label="Affection required"
           {...register("metadata.affectionRequired")}
+          type="number"
         />
       </Box>
       <div>
