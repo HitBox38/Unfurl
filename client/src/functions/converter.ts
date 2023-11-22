@@ -4,7 +4,6 @@ import { StoryData } from "../interfaces/StoryData";
 
 export const converter = (file: File) => {
   const config = JSON.parse(window.localStorage.getItem("metadataConfig") || "").config;
-  console.log(config);
 
   return file?.text().then((value) => {
     if (value) {
@@ -95,8 +94,6 @@ export const converter = (file: File) => {
       }
 
       const data: StoryData = { title, start, nodes };
-      console.log(data);
-
       return data;
     } else {
       console.log("Error", value);

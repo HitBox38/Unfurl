@@ -1,23 +1,21 @@
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { useDialogStore } from "../stores/DialogStore";
 import { useForm, FormProvider } from "react-hook-form";
-import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
 
 export const EveryWhereDialog = () => {
   const { content, isOpen, setOpen, submitFunction, title, formName, functions, isForm, style } =
     useDialogStore((state) => state);
 
-  const methods = useForm<MetadataConfigTemplate>();
+  const methods = useForm();
 
   return (
-    <Dialog open={isOpen} onClose={() => setOpen()} maxWidth="lg">
+    <Dialog open={isOpen} onClose={() => setOpen()} maxWidth="lg" sx={style?.dialog}>
       {isForm ? (
         <FormProvider {...methods}>
           <Box
             id={formName}
             component={"form"}
-            onSubmit={submitFunction && methods.handleSubmit(submitFunction)}
-            sx={{ width: "1000px" }}>
+            onSubmit={submitFunction && methods.handleSubmit(submitFunction)}>
             {title && <DialogTitle sx={style?.dialogTitle}>{title}</DialogTitle>}
             <DialogContent sx={style?.dialogContent}>{content}</DialogContent>
             {functions && functions?.length > 0 && (

@@ -23,7 +23,12 @@ export const MetadataConfigForm = () => {
   }, [config]);
 
   return (
-    <Box display="flex" flexDirection="column" justifyContent="space-evenly" alignItems="center">
+    <Box
+      paddingTop={"10px"}
+      display="flex"
+      flexDirection="column"
+      justifyContent="space-evenly"
+      alignItems="center">
       {fields.map((line, index) => (
         <Box
           key={line.id}

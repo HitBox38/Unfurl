@@ -11,11 +11,7 @@ export const MetadataConfig = () => {
   });
   const { setContent } = useDialogStore((state) => state);
 
-  const submitConfig: SubmitHandler<MetadataConfigTemplate> = (data) => {
-    console.log(data);
-
-    setConfig(data);
-  };
+  const submitConfig: SubmitHandler<MetadataConfigTemplate> = (data) => setConfig(data);
 
   return (
     <Button
@@ -38,7 +34,13 @@ export const MetadataConfig = () => {
           submitFunction: submitConfig,
           style: {
             dialog: {
-              // width: "3500px",
+              ["& .MuiDialog-paper"]: {
+                overflowY: "hidden",
+              },
+            },
+            dialogContent: {
+              overflowY: "scroll",
+              maxHeight: "70vh",
             },
           },
         })

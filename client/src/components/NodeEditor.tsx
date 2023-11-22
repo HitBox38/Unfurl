@@ -60,7 +60,7 @@ const NodeEditor = () => {
   return (
     <FormProvider {...methods}>
       <Box
-        sx={{ border: "1px solid #f6f6f6", borderRadius: 10, minWidth: "350px" }}
+        sx={{ border: "1px solid #f6f6f6", borderRadius: 10, minWidth: "350px", padding: "10px" }}
         component="form"
         onSubmit={methods.handleSubmit(submitNode)}
         display="flex"
