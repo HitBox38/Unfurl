@@ -3,5 +3,6 @@ export interface MetadataConfigTemplate {
     name: string;
     sign: string;
     type: "number" | "boolean";
+    label?: string;
   }[];
 }

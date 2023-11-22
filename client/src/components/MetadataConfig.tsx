@@ -12,6 +12,8 @@ export const MetadataConfig = () => {
   const { setContent } = useDialogStore((state) => state);
 
   const submitConfig: SubmitHandler<MetadataConfigTemplate> = (data) => {
+    console.log(data);
+
     setConfig(data);
   };
 

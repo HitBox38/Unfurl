@@ -2,14 +2,15 @@ import { Choice } from "../interfaces/Choice";
 import { StoryNode } from "../interfaces/Node";
 import { StoryData } from "../interfaces/StoryData";
 
-export const converter = async (file: File) => {
+export const converter = (file: File) => {
+  const config = JSON.parse(window.localStorage.getItem("metadataConfig") || "").config;
+  console.log(config);
+
   return file?.text().then((value) => {
     if (value) {
       const lines: string[] = value.split("\n");
-
       const nodes: StoryNode[] = [];
       let currentNode: StoryNode | null = null;
-
       let start: string | null = null;
       let title: string | null = null;
 
@@ -35,22 +36,21 @@ export const converter = async (file: File) => {
 
           const declaration: string = line.slice(2).trim();
           const declareName = declaration.split("[")[0];
-
           const name: string = declareName.split("{")[0].trim();
+          const metadata: any = {};
 
-          const affectionToAdd: number = 0;
-          const affectionRequired: number = 0;
-          const giveBlessing: boolean = false;
-          const giveHead: boolean = false;
+          // Initialize metadata with default values based on config
+          for (const configItem of config) {
+            if (configItem.type === "number") {
+              metadata[configItem.name] = 0;
+            } else if (configItem.type === "boolean") {
+              metadata[configItem.name] = false;
+            }
+          }
 
           currentNode = {
             name,
-            metadata: {
-              affectionToAdd,
-              affectionRequired,
-              giveBlessing,
-              giveHead,
-            },
+            metadata,
             choices: [],
             content: [],
           };
@@ -65,18 +65,27 @@ export const converter = async (file: File) => {
               };
               currentNode.choices.push(choiceObject);
             }
-          } else if (line.match(/#@/)) {
-            const varValue: number = Number(line.split("#@")[1].slice(0, 2).trim());
-            currentNode.metadata.affectionToAdd = varValue;
-          } else if (line.match(/#\?/)) {
-            const varValue: number = Number(line.split("#?")[1].slice(0, 1).trim());
-            currentNode.metadata.affectionRequired = varValue;
-          } else if (line.match(/#%#%/)) {
-            currentNode.metadata.giveBlessing = true;
-          } else if (line.match(/#\*#\*/)) {
-            currentNode.metadata.giveHead = true;
-          } else if (line !== "") {
-            currentNode.content.push(line);
+          } else {
+            // Check if line matches any sign in config
+            let matchFound = false;
+            for (const configItem of config) {
+              if (line.startsWith(configItem.sign)) {
+                const value = line.split(configItem.sign)[1].trim();
+
+                // Convert value based on type in config
+                if (configItem.type === "number") {
+                  currentNode.metadata[configItem.name] = Number(value);
+                } else if (configItem.type === "boolean") {
+                  currentNode.metadata[configItem.name] = true;
+                }
+                matchFound = true;
+                break;
+              }
+            }
+            // If the line does not match any sign, it belongs to content
+            if (!matchFound && line !== "") {
+              currentNode.content.push(line);
+            }
           }
         }
       }
@@ -86,6 +95,7 @@ export const converter = async (file: File) => {
       }
 
       const data: StoryData = { title, start, nodes };
+      console.log(data);
 
       return data;
     } else {

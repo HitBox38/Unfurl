@@ -17,10 +17,7 @@ const NodeEditor = () => {
       content: node?.content.join("\n"),
       choices: node?.choices,
       metadata: {
-        affectionRequired: node?.metadata.affectionRequired,
-        affectionToAdd: node?.metadata.affectionToAdd,
-        giveBlessing: node?.metadata.giveBlessing,
-        giveHead: node?.metadata.giveHead,
+        ...node?.metadata,
       },
     },
   });
@@ -38,11 +35,7 @@ const NodeEditor = () => {
         content: data.content.split("\n"),
         choices: data.choices,
         metadata: {
-          // ...data.metadata,
-          giveBlessing: data.metadata.giveBlessing,
-          giveHead: data.metadata.giveHead,
-          affectionRequired: Number(data.metadata.affectionRequired),
-          affectionToAdd: Number(data.metadata.affectionToAdd),
+          ...data.metadata,
         },
       };
       setNode(newNode);
@@ -58,10 +51,7 @@ const NodeEditor = () => {
         content: node?.content.join("\n"),
         choices: node?.choices,
         metadata: {
-          affectionRequired: node?.metadata.affectionRequired,
-          affectionToAdd: node?.metadata.affectionToAdd,
-          giveBlessing: node?.metadata.giveBlessing,
-          giveHead: node?.metadata.giveHead,
+          ...node?.metadata,
         },
       });
     }
