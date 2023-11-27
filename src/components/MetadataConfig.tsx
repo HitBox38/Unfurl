@@ -6,7 +6,7 @@ import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
 import { SubmitHandler } from "react-hook-form";
 
 export const MetadataConfig = () => {
-  const [config, setConfig] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
+  const [, setConfig] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
     config: [],
   });
   const { setContent } = useDialogStore((state) => state);

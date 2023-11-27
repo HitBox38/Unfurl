@@ -45,6 +45,7 @@ export const MetadataConfigForm = () => {
           />
           <TextField
             {...register(`config.${index}.sign`, { required: true })}
+            label="Sign"
             helperText="Use a set of symbols that won't repeat in the dialog"
             sx={{ width: "200px" }}
           />

@@ -98,7 +98,7 @@ const DialogViewer = () => {
         onEdgesChange={onEdgesChange}
         nodes={nodes}
         edges={edges}
-        onNodeClick={(e, node) => setSelectedNode(node.data.metadata)}
+        onNodeClick={(_e, node) => setSelectedNode(node.data.metadata)}
         connectionLineType={ConnectionLineType.Step}
         onLoadedData={() => onLayout()}
       />

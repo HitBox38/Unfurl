@@ -3,7 +3,13 @@ import { StoryNode } from "../interfaces/Node";
 import { StoryData } from "../interfaces/StoryData";
 
 export const converter = (file: File) => {
-  const config = JSON.parse(window.localStorage.getItem("metadataConfig") || "").config;
+  let config: any = {};
+  const ls = window.localStorage.getItem("metadataConfig");
+  if (ls !== null) {
+    config = JSON.parse(ls).config;
+  } else {
+    config = null;
+  }
 
   return file?.text().then((value) => {
     if (value) {
@@ -39,11 +45,13 @@ export const converter = (file: File) => {
           const metadata: any = {};
 
           // Initialize metadata with default values based on config
-          for (const configItem of config) {
-            if (configItem.type === "number") {
-              metadata[configItem.name] = 0;
-            } else if (configItem.type === "boolean") {
-              metadata[configItem.name] = false;
+          if (config !== null) {
+            for (const configItem of config) {
+              if (configItem.type === "number") {
+                metadata[configItem.name] = 0;
+              } else if (configItem.type === "boolean") {
+                metadata[configItem.name] = false;
+              }
             }
           }
 
@@ -67,20 +75,23 @@ export const converter = (file: File) => {
           } else {
             // Check if line matches any sign in config
             let matchFound = false;
-            for (const configItem of config) {
-              if (line.startsWith(configItem.sign)) {
-                const value = line.split(configItem.sign)[1].trim();
+            if (config !== null) {
+              for (const configItem of config) {
+                if (line.startsWith(configItem.sign)) {
+                  const value = line.split(configItem.sign)[1].trim();
 
-                // Convert value based on type in config
-                if (configItem.type === "number") {
-                  currentNode.metadata[configItem.name] = Number(value);
-                } else if (configItem.type === "boolean") {
-                  currentNode.metadata[configItem.name] = true;
+                  // Convert value based on type in config
+                  if (configItem.type === "number") {
+                    currentNode.metadata[configItem.name] = Number(value);
+                  } else if (configItem.type === "boolean") {
+                    currentNode.metadata[configItem.name] = true;
+                  }
+                  matchFound = true;
+                  break;
                 }
-                matchFound = true;
-                break;
               }
             }
+
             // If the line does not match any sign, it belongs to content
             if (!matchFound && line !== "") {
               currentNode.content.push(line);
