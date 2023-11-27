@@ -10,7 +10,6 @@ import { UseNodeStore } from "./stores/Node";
 import NodeEditor from "./components/NodeEditor";
 import { darkTheme } from "./theme";
 import { AppBar, CircularProgress, Toolbar, Typography } from "@mui/material";
-import { ArrowRightAlt } from "@mui/icons-material";
 import { MetadataConfig } from "./components/MetadataConfig";
 import { EveryWhereDialog } from "./components/EverywhereDialog";
 
@@ -20,11 +19,9 @@ const App = () => {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <AppBar sx={{ "-webkit-app-region": "drag", zIndex: "-999" }}>
+      <AppBar sx={{ "-webkit-app-region": "drag", zIndex: "999" }}>
         <Toolbar variant="dense" sx={{ backgroundColor: "#3d3d3d" }}>
-          <Typography variant="caption">
-            Twee <ArrowRightAlt sx={{ fontSize: 15, marginBottom: "-4px" }} /> JSON
-          </Typography>
+          <Typography variant="h6">Unfurl</Typography>
         </Toolbar>
       </AppBar>
       <div>
@@ -35,9 +32,10 @@ const App = () => {
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>
-        Twee <ArrowRightAlt sx={{ fontSize: 75, marginBottom: "-25px" }} /> JSON
-      </h1>
+      <Typography variant="h3" fontWeight={"bold"}>
+        Unfurl
+      </Typography>
+      <Typography variant="h5">Twee to JSON Convertor & Editor</Typography>
       {name === "" ? (
         <FileUpload />
       ) : (

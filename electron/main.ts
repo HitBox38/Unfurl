@@ -26,7 +26,7 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
       spellcheck: true,
     },
-    title: "Twee ➡ JSON",
+    title: "Unfurl",
     titleBarStyle: "hidden",
     titleBarOverlay: {
       color: "#3d3d3d",
