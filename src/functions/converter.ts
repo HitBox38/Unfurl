@@ -1,12 +1,13 @@
 import { Choice } from "../interfaces/Choice";
+import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
 import { StoryNode } from "../interfaces/Node";
 import { StoryData } from "../interfaces/StoryData";
 
 export const converter = (file: File) => {
-  let config: any = {};
+  let config: MetadataConfigTemplate | null;
   const ls = window.localStorage.getItem("metadataConfig");
   if (ls !== null) {
-    config = JSON.parse(ls).config;
+    config = JSON.parse(ls);
   } else {
     config = null;
   }
@@ -42,11 +43,13 @@ export const converter = (file: File) => {
           const declaration: string = line.slice(2).trim();
           const declareName = declaration.split("[")[0];
           const name: string = declareName.split("{")[0].trim();
-          const metadata: any = {};
+          const metadata: {
+            [name: string]: number | boolean;
+          } = {};
 
           // Initialize metadata with default values based on config
           if (config !== null) {
-            for (const configItem of config) {
+            for (const configItem of config.config) {
               if (configItem.type === "number") {
                 metadata[configItem.name] = 0;
               } else if (configItem.type === "boolean") {
@@ -76,7 +79,7 @@ export const converter = (file: File) => {
             // Check if line matches any sign in config
             let matchFound = false;
             if (config !== null) {
-              for (const configItem of config) {
+              for (const configItem of config.config) {
                 if (line.startsWith(configItem.sign)) {
                   const value = line.split(configItem.sign)[1].trim();
 
