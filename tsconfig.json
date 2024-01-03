@@ -5,7 +5,6 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "types": ["vite-plugin-svgr/client"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -21,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "electron"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -1,11 +1,11 @@
 import ReactFlow, { useNodesState, useEdgesState, Node, Edge, ConnectionLineType } from "reactflow";
 import "reactflow/dist/style.css";
-import { UseJsonDataStore } from "../Store/JsonData";
+import { UseJsonDataStore } from "../stores/JsonData";
 import { StoryData } from "../interfaces/StoryData";
 import { useCallback } from "react";
 import { StoryNode } from "../interfaces/Node";
 import dagre from "dagre";
-import { UseNodeStore } from "../Store/Node";
+import { UseNodeStore } from "../stores/Node";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -98,7 +98,7 @@ const DialogViewer = () => {
         onEdgesChange={onEdgesChange}
         nodes={nodes}
         edges={edges}
-        onNodeClick={(e, node) => setSelectedNode(node.data.metadata)}
+        onNodeClick={(_e, node) => setSelectedNode(node.data.metadata)}
         connectionLineType={ConnectionLineType.Step}
         onLoadedData={() => onLayout()}
       />

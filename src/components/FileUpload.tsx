@@ -1,21 +1,27 @@
 import { ChangeEvent, useState } from "react";
-import { Button } from "@mui/material";
-import { UseJsonDataStore } from "../Store/JsonData";
+import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { UseJsonDataStore } from "../stores/JsonData";
 import { converter } from "../functions/converter";
 
 const FileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { name, setJson: setJsonData } = UseJsonDataStore((state) => state);
+  const [fileType, setFileType] = useState<"twee" | "json">("twee");
+
+  const handleTypeChange = (event: SelectChangeEvent) =>
+    setFileType(event.target.value as "twee" | "json");
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const selectFile = e.target.files ? e.target.files[0] : null;
-    console.log(selectFile?.name);
 
-    if (selectFile && selectFile.name.split(".")[1] === "twee") {
+    if (
+      selectFile &&
+      selectFile.name.split(".")[selectFile.name.split(".").length - 1] === fileType
+    ) {
       setFile(selectFile);
     } else {
-      alert("Please upload a .twee file");
+      alert(`Please upload a .${fileType} file`);
     }
   };
 
@@ -23,21 +29,35 @@ const FileUpload = () => {
     if (file) {
       setIsLoading(true);
 
-      converter(file).then((value) => {
-        if (name !== "") {
-          setJsonData({ nodes: [], start: null, title: null }, "");
-        }
-        if (value) {
-          setJsonData(value, file.name.split(".")[0]);
-        }
-        setIsLoading(false);
-      });
+      if (fileType === "twee") {
+        converter(file).then((value) => {
+          console.log(value);
+
+          if (name !== "") {
+            setJsonData({ nodes: [], start: null, title: null }, "");
+          }
+          if (value) {
+            setJsonData(value, file.name.split(".")[0]);
+          }
+          setIsLoading(false);
+        });
+      } else if (fileType === "json") {
+        file.text().then((value) => {
+          console.log(JSON.parse(value));
+
+          setJsonData(JSON.parse(value), file.name.split(".")[0]);
+        });
+      }
     }
   };
 
   return (
     <div>
-      <input type="file" onChange={onFileChange} accept=".twee" />
+      <Select value={fileType} onChange={handleTypeChange}>
+        <MenuItem value="twee">Twee</MenuItem>
+        <MenuItem value="json">JSON</MenuItem>
+      </Select>
+      <input type="file" onChange={onFileChange} accept={`.${fileType}`} />
       <Button variant="contained" disabled={isLoading} onClick={onFileUpload}>
         {isLoading ? (
           <svg

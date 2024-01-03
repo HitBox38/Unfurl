@@ -1,0 +1,46 @@
+name: Build and upload to itch.io
+
+env:
+  itchio_project: hit-box38/unfurl
+  itchio_channel: windows
+  itch_api_key: ${{ secrets.ITCHIO_API_KEY }}
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  itchio-deploy:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js, NPM
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+
+      - name: Get version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+
+      - name: displaying version
+        run: echo ${{ steps.package-version.outputs.current-version }}
+
+      - name: Install libraries
+        run: npm i
+
+      - name: Build app
+        run: npm run build:windows
+
+      - name: Deploy
+        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCHIO_API_KEY }}
+          CHANNEL: windows
+          ITCH_GAME: unfurl
+          ITCH_USER: hit-box38
+          PACKAGE: release/${{ steps.package-version.outputs.current-version }}/Unfurl-Windows-${{ steps.package-version.outputs.current-version }}-Setup.exe

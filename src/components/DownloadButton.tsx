@@ -1,4 +1,4 @@
-import { UseJsonDataStore } from "../Store/JsonData";
+import { UseJsonDataStore } from "../stores/JsonData";
 import { Button } from "@mui/material";
 
 const DownloadButton = () => {
@@ -10,7 +10,7 @@ const DownloadButton = () => {
       const downloadAnchorNode = document.createElement("a");
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", `${name}.json`);
-      document.body.appendChild(downloadAnchorNode); // required for firefox
+      document.body.appendChild(downloadAnchorNode);
       downloadAnchorNode.click();
       downloadAnchorNode.remove();
     }
@@ -18,7 +18,7 @@ const DownloadButton = () => {
 
   return (
     <Button variant="contained" onClick={handleDownload}>
-      DownloadButton
+      Download
     </Button>
   );
 };

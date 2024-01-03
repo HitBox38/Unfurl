@@ -3,7 +3,7 @@ import { StoryNode } from "../interfaces/Node";
 
 interface NodeStore {
   node: StoryNode | null;
-  setNode: (newNode: StoryNode) => void;
+  setNode: (newNode: StoryNode | null) => void;
 }
 
 export const UseNodeStore = create<NodeStore>((set) => ({
