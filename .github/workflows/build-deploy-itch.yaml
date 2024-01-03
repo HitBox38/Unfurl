@@ -1,10 +1,5 @@
 name: Build and upload to itch.io
 
-env:
-  itchio_project: hit-box38/unfurl
-  itchio_channel: windows
-  itch_api_key: ${{ secrets.ITCHIO_API_KEY }}
-
 on:
   push:
     branches:
@@ -39,7 +34,7 @@ jobs:
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCHIO_API_KEY }}
+          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
           CHANNEL: windows
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
