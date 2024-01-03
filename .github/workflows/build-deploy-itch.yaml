@@ -7,7 +7,7 @@ on:
 
 jobs:
   itchio-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu@20.04
 
     steps:
       - name: Check out Git repository
@@ -17,6 +17,16 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: "16.x"
+
+      - name: Install WineHQ
+        run: sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/focal/winehq-focal.sources
+
+      - name: Install Mono
+        run: |
+          sudo apt install ca-certificates gnupg
+          sudo gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/mono-official-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+          echo "deb [signed-by=/usr/share/keyrings/mono-official-archive-keyring.gpg] https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
+          sudo apt update
 
       - name: Get version
         id: package-version
