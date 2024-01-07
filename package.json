@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build:windows": "tsc && vite build && electron-builder -w",
-    "build:mac": "tsc && vite build && electron-builder -o",
-    "build:linux": "tsc && vite build && electron-builder -l",
+    "build:windows": "tsc && vite build && electron-builder -w --publish never",
+    "build:mac": "tsc && vite build && electron-builder -o --publish never",
+    "build:linux": "tsc && vite build && electron-builder -l --publish never",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
