@@ -1,13 +1,15 @@
 # Use a base image with Wine preinstalled
 FROM electronuserland/builder:wine
 
+# Accept a build argument for the package version
+ARG PACKAGE_VERSION
+
 # Set environment variables for Wine
 ENV WINEDEBUG -all,err+all
 ENV WINEARCH win64
 ENV WINEPREFIX /root/.wine64
-
-# Accept a build argument for the package version
-ARG PACKAGE_VERSION
+ENV VERSION_MESSAGE "Building version ${PACKAGE_VERSION} of the application..."
+ENV PATH "./release/${PACKAGE_VERSION}/Unfurl-Windows-${PACKAGE_VERSION}-Setup.exe"
 
 # Set the working directory in the Docker image
 WORKDIR /app
@@ -29,10 +31,10 @@ RUN npm install
 COPY . .
 
 # Use the PACKAGE_VERSION build argument in a string, for example, to tag an image
-RUN echo "Building version ${PACKAGE_VERSION} of the application..."
+RUN echo VERSION_MESSAGE
 
 # Build the Electron app for Windows using Wine
 RUN npm run build:windows
 
 # The command to run when this image is used to start a container
-CMD ["wine", "./release/${PACKAGE_VERSION}/Unfurl-Windows-${PACKAGE_VERSION}-Setup.exe"]
+CMD ["wine", ${PATH}]
