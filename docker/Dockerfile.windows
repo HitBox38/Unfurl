@@ -1,0 +1,31 @@
+# Use a base image with Wine preinstalled
+FROM electronuserland/builder:wine
+
+# Set environment variables for Wine
+ENV WINEDEBUG -all,err+all
+ENV WINEARCH win64
+
+# Set the working directory in the Docker image
+WORKDIR /app
+
+# Install Node.js and other dependencies
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy package.json and package-lock.json (if available)
+COPY package*.json ./
+
+# Install npm dependencies including Electron
+RUN npm install
+
+# Copy the rest of the application source code
+COPY . .
+
+# Build the Electron app for Windows using Wine
+RUN npm run build:windows
+
+# The command to run when this image is used to start a container
+CMD ["wine", "./release/unfurl-setup.exe"]

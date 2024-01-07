@@ -18,17 +18,6 @@ jobs:
         with:
           node-version: "16.x"
 
-      - name: Install WineHQ
-        run: sudo wget -NP /etc/apt/sources.list.d/ https://dl.winehq.org/wine-builds/ubuntu/dists/focal/winehq-focal.sources
-
-      - name: Install Mono
-        run: |
-          sudo apt install ca-certificates gnupg
-          sudo gpg --homedir /tmp --no-default-keyring --keyring /usr/share/keyrings/mono-official-archive-keyring.gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-          echo "deb [signed-by=/usr/share/keyrings/mono-official-archive-keyring.gpg] https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official-stable.list
-          sudo apt update
-          sudo apt install mono-devel
-
       - name: Get version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@v1.3.1
@@ -36,11 +25,14 @@ jobs:
       - name: displaying version
         run: echo ${{ steps.package-version.outputs.current-version }}
 
-      - name: Install libraries
-        run: npm i
+      - name: Build the Docker image
+        run: docker build -t unfurl:win -f Dockerfile.windows .
 
-      - name: Build app
-        run: npm run build:windows
+      - name: Run the Docker container to build the app
+        run: docker run --name unfurl_container unfurl:win
+
+      - name: Copy artifact from Docker container
+        run: docker cp unfurl_container:/release/ .
 
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
@@ -49,4 +41,4 @@ jobs:
           CHANNEL: windows
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
-          PACKAGE: release/${{ steps.package-version.outputs.current-version }}/Unfurl-Windows-${{ steps.package-version.outputs.current-version }}-Setup.exe
+          PACKAGE: release/unfurl-setup.exe
