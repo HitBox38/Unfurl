@@ -18,15 +18,8 @@ jobs:
         with:
           node-version: "16.x"
 
-      - name: Get version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-
-      - name: displaying version
-        run: echo ${{ steps.package-version.outputs.current-version }}
-
       - name: Build the Docker image
-        run: docker build -t unfurl:win --build-arg PACKAGE_VERSION=${{ steps.package-version.outputs.current-version }} -f docker/Dockerfile.windows .
+        run: docker build -t unfurl:win -f docker/Dockerfile.windows .
 
       - name: Run the Docker container to build the app
         run: docker run --name unfurl_container unfurl:win

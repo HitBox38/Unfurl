@@ -7,12 +7,12 @@
   asar: true,
   productName: "Unfurl",
   directories: {
-    output: "release/${version}",
+    output: "release/",
   },
   files: ["dist", "dist-electron"],
   mac: {
     target: ["dmg"],
-    artifactName: "${productName}-Mac-${version}-Installer.${ext}",
+    artifactName: "${productName}-Mac-Installer.${ext}",
   },
   win: {
     target: [
@@ -21,7 +21,7 @@
         arch: ["x64"],
       },
     ],
-    artifactName: "${productName}-Windows-${version}-Setup.${ext}",
+    artifactName: "${productName}-Windows-Setup.${ext}",
   },
   nsis: {
     oneClick: false,
@@ -31,6 +31,6 @@
   },
   linux: {
     target: ["AppImage"],
-    artifactName: "${productName}-Linux-${version}.${ext}",
+    artifactName: "${productName}-Linux.${ext}",
   },
 }
