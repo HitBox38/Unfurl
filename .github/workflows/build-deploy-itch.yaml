@@ -33,6 +33,12 @@ jobs:
       - name: Build app
         run: npm run build:linux
 
+      - name: Files
+        run: ls
+
+      - name: Files in releases
+        run: cd release && ls
+
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         env:
