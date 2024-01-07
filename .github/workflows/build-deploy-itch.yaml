@@ -22,7 +22,7 @@ jobs:
         run: docker build -t unfurl:win -f docker/Dockerfile.windows .
 
       - name: Run the Docker container to build the app
-        run: docker run -e DEBUG=electron-builder -it --name unfurl_container unfurl:win
+        run: docker run --name unfurl_container unfurl:win
 
       - name: Copy artifact from Docker container
         run: docker cp unfurl_container:/release/ .
