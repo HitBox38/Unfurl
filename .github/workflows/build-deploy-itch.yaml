@@ -21,9 +21,6 @@ jobs:
       - name: Build the Docker image
         run: docker build -t unfurl:win -f docker/Dockerfile.windows .
 
-      - name: Run the Docker container to build the app
-        run: docker run --name unfurl_container unfurl:win
-
       - name: Copy artifact from Docker container
         run: docker cp unfurl_container:/release/ .
 
