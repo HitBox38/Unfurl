@@ -4,6 +4,7 @@ FROM electronuserland/builder:wine
 # Set environment variables for Wine
 ENV WINEDEBUG -all,err+all
 ENV WINEARCH win64
+ENV WINEPREFIX /root/.wine64
 
 # Set the working directory in the Docker image
 WORKDIR /app
