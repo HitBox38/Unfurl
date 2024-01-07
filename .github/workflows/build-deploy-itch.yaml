@@ -33,12 +33,6 @@ jobs:
       - name: Build app
         run: npm run build:linux
 
-      - name: Files
-        run: ls
-
-      - name: Files in releases
-        run: cd release && ls
-
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         env:
@@ -46,4 +40,4 @@ jobs:
           CHANNEL: linux
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
-          PACKAGE: release/unfurl-Linux.AppImage
+          PACKAGE: release/Unfurl-Linux.AppImage
