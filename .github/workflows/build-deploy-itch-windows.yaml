@@ -18,26 +18,20 @@ jobs:
         with:
           node-version: "16.x"
 
-      # - name: Build the Docker image
-      #   run: docker build -t unfurl:win -f docker/Dockerfile.windows .
+      - name: Build the Docker image
+        run: docker build -t unfurl:win -f docker/Dockerfile.windows .
 
-      # - name: Run the Docker container to build the app
-      #   run: docker run --name unfurl_container unfurl:win
+      - name: Run the Docker container to build the app
+        run: docker run --name unfurl_container unfurl:win
 
-      # - name: Copy artifact from Docker container
-      #   run: docker cp unfurl_container:/release/ .
-
-      - name: Install libraries
-        run: npm i
-
-      - name: Build app
-        run: npm run build:linux
+      - name: Copy artifact from Docker container
+        run: docker cp unfurl_container:/release/ .
 
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
-          CHANNEL: linux
+          CHANNEL: windows
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
-          PACKAGE: release/Unfurl-Linux.AppImage
+          PACKAGE: release/Unfurl-Windows-Setup.exe
