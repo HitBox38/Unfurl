@@ -6,6 +6,9 @@ ENV WINEDEBUG -all,err+all
 ENV WINEARCH win64
 ENV WINEPREFIX /root/.wine64
 
+# Accept a build argument for the package version
+ARG PACKAGE_VERSION
+
 # Set the working directory in the Docker image
 WORKDIR /app
 
@@ -29,4 +32,4 @@ COPY . .
 RUN npm run build:windows
 
 # The command to run when this image is used to start a container
-CMD ["wine", "./release/unfurl-setup.exe"]
+CMD ["wine", "./release/${PACKAGE_VERSION}/Unfurl-Windows-${PACKAGE_VERSION}-Setup.exe"]
