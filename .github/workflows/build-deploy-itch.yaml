@@ -7,7 +7,7 @@ on:
 
 jobs:
   itchio-deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out Git repository
@@ -31,13 +31,13 @@ jobs:
         run: npm i
 
       - name: Build app
-        run: npm run build:windows
+        run: npm run build:linux
 
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
-          CHANNEL: windows
+          CHANNEL: linux
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
-          PACKAGE: release/unfurl-setup.exe
+          PACKAGE: release/unfurl-Linux.AppImage
