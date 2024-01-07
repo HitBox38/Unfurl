@@ -28,6 +28,9 @@ RUN npm install
 # Copy the rest of the application source code
 COPY . .
 
+# Use the PACKAGE_VERSION build argument in a string, for example, to tag an image
+RUN echo "Building version ${PACKAGE_VERSION} of the application..."
+
 # Build the Electron app for Windows using Wine
 RUN npm run build:windows
 
