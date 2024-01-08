@@ -19,9 +19,6 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Xvfb in case you need to run anything that requires a display
-RUN apt-get update && apt-get install -y xvfb
-
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
 
@@ -32,8 +29,7 @@ RUN npm install
 COPY . .
 
 # Build the Electron app for Windows using Wine
-# If you need to run commands that require a display, you can prefix them with `xvfb-run`
-RUN xvfb-run --auto-servernum --server-args='-screen 0 1024x768x24' npm run build:windows
+RUN npm run build:windows
 
 # The command to run when this image is used to start a container
-CMD ["wine", "./release/Unfurl-Windows-Setup.exe"]
+CMD ["echo", "Build complete."]

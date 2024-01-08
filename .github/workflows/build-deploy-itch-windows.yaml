@@ -25,7 +25,7 @@ jobs:
         run: docker run --name unfurl_container unfurl:win
 
       - name: Copy artifact from Docker container
-        run: docker cp unfurl_container:/release/ .
+        run: docker cp unfurl_container:/app/release/ .
 
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
