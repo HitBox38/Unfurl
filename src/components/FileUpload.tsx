@@ -1,13 +1,20 @@
 import { ChangeEvent, useState } from "react";
-import { Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Box, Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import { UseJsonDataStore } from "../stores/JsonData";
 import { converter } from "../functions/converter";
+import { StoryData } from "../interfaces/StoryData";
+import useLocalStorage from "../hooks/useLocalStorage";
+import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
 
 const FileUpload = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { name, setJson: setJsonData } = UseJsonDataStore((state) => state);
   const [fileType, setFileType] = useState<"twee" | "json">("twee");
+
+  const [{ config }] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
+    config: [],
+  });
 
   const handleTypeChange = (event: SelectChangeEvent) =>
     setFileType(event.target.value as "twee" | "json");
@@ -43,16 +50,38 @@ const FileUpload = () => {
         });
       } else if (fileType === "json") {
         file.text().then((value) => {
-          console.log(JSON.parse(value));
+          const json = JSON.parse(value) as StoryData;
+          json.nodes = json.nodes.map((node) => {
+            const keys = Object.keys(node.metadata);
+            let completeMetadata = {};
+            config.forEach((configItem) => {
+              if (keys.findIndex((key) => configItem.name === key) === -1) {
+                console.log(configItem.name, "In");
 
-          setJsonData(JSON.parse(value), file.name.split(".")[0]);
+                completeMetadata = {
+                  ...completeMetadata,
+                  [configItem.name]: configItem.type === "boolean" ? false : 0,
+                };
+              }
+            });
+            return {
+              ...node,
+              metadata: {
+                ...node.metadata,
+                ...completeMetadata,
+              },
+            };
+          });
+          console.log(json);
+
+          setJsonData(json, file.name.split(".")[0]);
         });
       }
     }
   };
 
   return (
-    <div>
+    <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
       <Select value={fileType} onChange={handleTypeChange}>
         <MenuItem value="twee">Twee</MenuItem>
         <MenuItem value="json">JSON</MenuItem>
@@ -75,7 +104,7 @@ const FileUpload = () => {
           "Upload"
         )}
       </Button>
-    </div>
+    </Box>
   );
 };
 
