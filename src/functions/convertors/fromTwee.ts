@@ -1,9 +1,8 @@
-import { Choice } from "../interfaces/Choice";
-import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
-import { StoryNode } from "../interfaces/Node";
-import { StoryData } from "../interfaces/StoryData";
+import { Choice } from "../../interfaces/Choice";
+import { MetadataConfigTemplate } from "../../interfaces/MetadataConfigTemplate";
+import { StoryNode } from "../../interfaces/Node";
 
-export const converter = (file: File) => {
+export const fromTwee = (file: File) => {
   let config: MetadataConfigTemplate | null;
   const ls = window.localStorage.getItem("metadataConfig");
   if (ls !== null) {
@@ -107,8 +106,7 @@ export const converter = (file: File) => {
         nodes.push(currentNode);
       }
 
-      const data: StoryData = { title, start, nodes };
-      return data;
+      return { title, start, nodes };
     } else {
       console.log("Error", value);
     }

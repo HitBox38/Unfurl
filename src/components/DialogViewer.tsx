@@ -71,6 +71,8 @@ const transformJsonToNodesAndEdges = (json: StoryData) => {
 
 const DialogViewer = () => {
   const { content } = UseJsonDataStore((state) => state);
+  console.log(content);
+
   const setSelectedNode = UseNodeStore(({ setNode }) => setNode);
 
   const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
@@ -88,7 +90,7 @@ const DialogViewer = () => {
     );
     setNodes([...layoutedNodes]);
     setEdges([...layoutedEdges]);
-  }, [nodes, edges]);
+  }, [content, setNodes, setEdges]);
 
   return (
     <div style={{ width: "500px", height: "750px", border: "1px solid #f6f6f6", borderRadius: 10 }}>

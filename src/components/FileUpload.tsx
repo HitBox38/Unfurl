@@ -1,109 +1,163 @@
 import { ChangeEvent, useState } from "react";
-import { Box, Button, MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import { Box, Button, Chip, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { UseJsonDataStore } from "../stores/JsonData";
-import { converter } from "../functions/converter";
+import { fromTwee } from "../functions/convertors/fromTwee";
 import { StoryData } from "../interfaces/StoryData";
 import useLocalStorage from "../hooks/useLocalStorage";
 import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
+import { SupportedFileTypes } from "../interfaces/SupportedFileTypes";
+import { fromMd } from "../functions/convertors/fromMd";
+import DescriptionIcon from "@mui/icons-material/Description";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const FileUpload = () => {
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { name, setJson: setJsonData } = UseJsonDataStore((state) => state);
-  const [fileType, setFileType] = useState<"twee" | "json">("twee");
+  const [fileType, setFileType] = useState<SupportedFileTypes>("twee");
 
   const [{ config }] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
     config: [],
   });
 
   const handleTypeChange = (event: SelectChangeEvent) =>
-    setFileType(event.target.value as "twee" | "json");
+    setFileType(event.target.value as SupportedFileTypes);
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const selectFile = e.target.files ? e.target.files[0] : null;
+    const selectFiles = e.target.files ? Array.from(e.target.files) : null;
 
     if (
-      selectFile &&
-      selectFile.name.split(".")[selectFile.name.split(".").length - 1] === fileType
+      selectFiles &&
+      selectFiles.every(
+        (selectedFile) =>
+          selectedFile.name.split(".")[selectedFile.name.split(".").length - 1] === fileType
+      )
     ) {
-      setFile(selectFile);
+      if (fileType === "md") {
+        setFiles((prev) => [...prev, ...selectFiles]);
+      } else {
+        setFiles([selectFiles[0]]);
+      }
     } else {
       alert(`Please upload a .${fileType} file`);
     }
   };
 
   const onFileUpload = () => {
-    if (file) {
+    if (files) {
       setIsLoading(true);
-
-      if (fileType === "twee") {
-        converter(file).then((value) => {
-          console.log(value);
-
-          if (name !== "") {
-            setJsonData({ nodes: [], start: null, title: null }, "");
-          }
-          if (value) {
-            setJsonData(value, file.name.split(".")[0]);
-          }
-          setIsLoading(false);
-        });
-      } else if (fileType === "json") {
-        file.text().then((value) => {
-          const json = JSON.parse(value) as StoryData;
-          json.nodes = json.nodes.map((node) => {
-            const keys = Object.keys(node.metadata);
-            let completeMetadata = {};
-            config.forEach((configItem) => {
-              if (keys.findIndex((key) => configItem.name === key) === -1) {
-                console.log(configItem.name, "In");
-
-                completeMetadata = {
-                  ...completeMetadata,
-                  [configItem.name]: configItem.type === "boolean" ? false : 0,
-                };
-              }
-            });
-            return {
-              ...node,
-              metadata: {
-                ...node.metadata,
-                ...completeMetadata,
-              },
-            };
+      switch (fileType) {
+        case "twee":
+          fromTwee(files[0]).then((value) => {
+            if (name !== "") {
+              setJsonData({ nodes: [], start: null, title: null }, "");
+            }
+            if (value) {
+              setJsonData(value, files[0].name.split(".")[0]);
+            }
+            setIsLoading(false);
           });
-          console.log(json);
+          break;
 
-          setJsonData(json, file.name.split(".")[0]);
-        });
+        case "md":
+          fromMd(files, title).then((storyData) => {
+            if (name !== "") {
+              setJsonData({ nodes: [], start: null, title: null }, "");
+            }
+            if (storyData) {
+              setJsonData(storyData, title);
+            }
+          });
+          break;
+
+        case "json":
+          files[0].text().then((value) => {
+            const json = JSON.parse(value) as StoryData;
+            json.nodes = json.nodes.map((node) => {
+              const keys = Object.keys(node.metadata);
+              let completeMetadata = {};
+              config.forEach((configItem) => {
+                if (keys.findIndex((key) => configItem.name === key) === -1) {
+                  completeMetadata = {
+                    ...completeMetadata,
+                    [configItem.name]: configItem.type === "boolean" ? false : 0,
+                  };
+                }
+              });
+              return {
+                ...node,
+                metadata: {
+                  ...node.metadata,
+                  ...completeMetadata,
+                },
+              };
+            });
+            setJsonData(json, files[0].name.split(".")[0]);
+          });
+          break;
       }
     }
   };
 
   return (
-    <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
-      <Select value={fileType} onChange={handleTypeChange}>
-        <MenuItem value="twee">Twee</MenuItem>
-        <MenuItem value="json">JSON</MenuItem>
-      </Select>
-      <input type="file" onChange={onFileChange} accept={`.${fileType}`} />
-      <Button variant="contained" disabled={isLoading} onClick={onFileUpload}>
-        {isLoading ? (
-          <svg
-            width="13"
-            height="14"
-            viewBox="0 0 13 14"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M4.38798 12.616C3.36313 12.2306 2.46328 11.5721 1.78592 10.7118C1.10856 9.85153 0.679515 8.82231 0.545268 7.73564C0.411022 6.64897 0.576691 5.54628 1.02433 4.54704C1.47197 3.54779 2.1845 2.69009 3.08475 2.06684C3.98499 1.4436 5.03862 1.07858 6.13148 1.01133C7.22435 0.944078 8.31478 1.17716 9.28464 1.68533C10.2545 2.19349 11.0668 2.95736 11.6336 3.89419C12.2004 4.83101 12.5 5.90507 12.5 7"
-              stroke="white"
+    <Box
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      alignItems="center"
+      rowGap="8px">
+      <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
+        <Select value={fileType} onChange={handleTypeChange}>
+          <MenuItem value="twee">Twee</MenuItem>
+          <MenuItem value="json">JSON</MenuItem>
+          <MenuItem value="md">md</MenuItem>
+        </Select>
+        <input
+          type="file"
+          onChange={onFileChange}
+          multiple={fileType === "md"}
+          accept={`.${fileType}`}
+        />
+        <Button variant="contained" disabled={isLoading} onClick={onFileUpload}>
+          {isLoading ? (
+            <svg
+              width="13"
+              height="14"
+              viewBox="0 0 13 14"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M4.38798 12.616C3.36313 12.2306 2.46328 11.5721 1.78592 10.7118C1.10856 9.85153 0.679515 8.82231 0.545268 7.73564C0.411022 6.64897 0.576691 5.54628 1.02433 4.54704C1.47197 3.54779 2.1845 2.69009 3.08475 2.06684C3.98499 1.4436 5.03862 1.07858 6.13148 1.01133C7.22435 0.944078 8.31478 1.17716 9.28464 1.68533C10.2545 2.19349 11.0668 2.95736 11.6336 3.89419C12.2004 4.83101 12.5 5.90507 12.5 7"
+                stroke="white"
+              />
+            </svg>
+          ) : (
+            "Upload"
+          )}
+        </Button>
+      </Box>
+      {fileType === "md" && (
+        <TextField
+          placeholder="What is the title of this dialog?"
+          sx={{ width: "350px" }}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      )}
+      <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
+        {files.length > 0 &&
+          files.map((f, index) => (
+            <Chip
+              icon={<DescriptionIcon />}
+              variant="filled"
+              label={f.name}
+              onDelete={() => setFiles((prev) => prev.filter((_file, i) => i !== index))}
+              deleteIcon={<DeleteIcon />}
+              key={f.lastModified}
             />
-          </svg>
-        ) : (
-          "Upload"
-        )}
-      </Button>
+          ))}
+      </Box>
     </Box>
   );
 };

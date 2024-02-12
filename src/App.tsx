@@ -12,6 +12,7 @@ import { darkTheme } from "./theme";
 import { AppBar, CircularProgress, Toolbar, Typography } from "@mui/material";
 import { MetadataConfig } from "./components/MetadataConfig";
 import { EveryWhereDialog } from "./components/EverywhereDialog";
+import styled, { keyframes } from "styled-components";
 
 const App = () => {
   const { name, isLoading } = UseJsonDataStore((state) => state);
@@ -35,7 +36,16 @@ const App = () => {
       <Typography variant="h3" fontWeight={"bold"}>
         Unfurl
       </Typography>
-      <Typography variant="h5">Twee to JSON Convertor & Editor</Typography>
+      <StyledRotatorWrapper variant="h5" display="flex" flexDirection="row" justifyContent="center">
+        <StyledSpan>
+          <span>Twee</span>
+          <span>Obsidian</span>
+          <span>md</span>
+          <span>JSON</span>
+          <span>Twee</span>
+        </StyledSpan>
+        Convertor & Editor
+      </StyledRotatorWrapper>
       {name === "" ? (
         <FileUpload />
       ) : (
@@ -63,5 +73,48 @@ const App = () => {
     </ThemeProvider>
   );
 };
+
+const rotateWords = keyframes`
+    10% {
+      transform: translateY(-112%);
+    }
+    25% {
+      transform: translateY(-100%);
+    }
+    35% {
+      transform: translateY(-212%);
+    }
+    50% {
+      transform: translateY(-200%);
+    }
+    60% {
+      transform: translateY(-312%);
+    }
+    75% {
+      transform: translateY(-300%);
+    }
+    85% {
+      transform: translateY(-412%);
+    }
+    100% {
+      transform: translateY(-400%);
+    }
+`;
+
+const StyledRotatorWrapper = styled(Typography)`
+  box-sizing: content-box;
+  height: 27px;
+
+  & span {
+    display: block;
+    height: 100%;
+    padding-right: 10px;
+    animation: ${rotateWords} 6s infinite;
+  }
+`;
+
+const StyledSpan = styled.div`
+  overflow: hidden;
+`;
 
 export default App;
