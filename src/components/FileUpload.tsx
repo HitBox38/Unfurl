@@ -108,10 +108,15 @@ const FileUpload = () => {
       alignItems="center"
       rowGap="8px">
       <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
-        <Select value={fileType} onChange={handleTypeChange}>
+        <Select
+          value={fileType}
+          onChange={handleTypeChange}
+          size="medium"
+          sx={{ textAlign: "left", width: "150px" }}
+          label="File Type">
           <MenuItem value="twee">Twee</MenuItem>
           <MenuItem value="json">JSON</MenuItem>
-          <MenuItem value="md">md</MenuItem>
+          <MenuItem value="md">Obsidian (md)</MenuItem>
         </Select>
         <input
           type="file"
