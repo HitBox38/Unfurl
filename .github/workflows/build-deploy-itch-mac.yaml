@@ -1,0 +1,34 @@
+name: Build and upload to itch.io Linux
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  itchio-deploy:
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js, NPM
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16.x"
+
+      - name: Install libraries
+        run: npm i
+
+      - name: Build app
+        run: npm run build:mac
+
+      - name: Deploy
+        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
+          CHANNEL: mac
+          ITCH_GAME: unfurl
+          ITCH_USER: hit-box38
+          PACKAGE: release/Unfurl-Mac.dmg
