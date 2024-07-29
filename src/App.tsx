@@ -5,17 +5,19 @@ import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { UseJsonDataStore } from "./stores/JsonData";
 import DownloadButton from "./components/DownloadButton";
-import DialogViewer from "./components/DialogViewer";
 import { UseNodeStore } from "./stores/Node";
-import NodeEditor from "./components/NodeEditor";
 import { darkTheme } from "./theme";
 import { AppBar, CircularProgress, Toolbar, Typography } from "@mui/material";
 import { MetadataConfig } from "./components/MetadataConfig";
-import { EveryWhereDialog } from "./components/EverywhereDialog";
 import styled, { keyframes } from "styled-components";
 import { useDialogStore } from "./stores/DialogStore";
 import useKeyboardShortcut from "./hooks/useKeyboardShortcut";
 import { useMetadataConfigFormModal } from "./modals/MetadataConfigFormModal";
+import { lazy } from "react";
+import NodeEditor from "./components/NodeEditor";
+import { EveryWhereDialog } from "./components/EverywhereDialog";
+
+const DialogViewer = lazy(() => import("./components/DialogViewer"));
 
 const App = () => {
   const { name, isLoading } = UseJsonDataStore((state) => state);
@@ -27,7 +29,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <AppBar sx={{ "-webkit-app-region": "drag", zIndex: "999" }}>
+      <AppBar sx={{ WebkitAppRegion: "drag", zIndex: "999" }}>
         <Toolbar variant="dense" sx={{ backgroundColor: "#3d3d3d" }}>
           <Typography variant="h6">Unfurl</Typography>
         </Toolbar>

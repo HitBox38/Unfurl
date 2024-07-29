@@ -20,6 +20,8 @@ let win: BrowserWindow | null;
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
 function createWindow() {
+  console.log(process.env.VITE_PUBLIC);
+
   win = new BrowserWindow({
     icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
     webPreferences: {
@@ -28,13 +30,13 @@ function createWindow() {
     },
     title: "Unfurl",
     titleBarStyle: "hidden",
+    minHeight: 500,
+    minWidth: 800,
     titleBarOverlay: {
       color: "#3d3d3d",
       symbolColor: "#fff",
       height: 48,
     },
-    // frame: false,
-    // autoHideMenuBar: true,
   });
 
   // Test active push message to Renderer-process.
