@@ -1,9 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { ReactNode } from "react";
 import { SubmitHandler } from "react-hook-form";
 import { SxProps } from "@mui/material";
 
-interface DialogStore {
+export interface DialogStore {
   title: string;
   isOpen: boolean;
   content: ReactNode;

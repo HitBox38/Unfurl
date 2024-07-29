@@ -13,10 +13,17 @@ import { AppBar, CircularProgress, Toolbar, Typography } from "@mui/material";
 import { MetadataConfig } from "./components/MetadataConfig";
 import { EveryWhereDialog } from "./components/EverywhereDialog";
 import styled, { keyframes } from "styled-components";
+import { useDialogStore } from "./stores/DialogStore";
+import useKeyboardShortcut from "./hooks/useKeyboardShortcut";
+import { useMetadataConfigFormModal } from "./modals/MetadataConfigFormModal";
 
 const App = () => {
   const { name, isLoading } = UseJsonDataStore((state) => state);
   const { node } = UseNodeStore((state) => state);
+  const { setContent } = useDialogStore((state) => state);
+  const content = useMetadataConfigFormModal();
+
+  useKeyboardShortcut(() => setContent(content), { codes: ["KeyC", "KeyF"], ctrlKey: true });
 
   return (
     <ThemeProvider theme={darkTheme}>
