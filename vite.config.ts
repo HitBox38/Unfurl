@@ -10,6 +10,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           reactflow: ["reactflow"],
+          materialUI: ["@mui/material"],
         },
       },
     },
