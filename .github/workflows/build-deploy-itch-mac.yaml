@@ -30,7 +30,7 @@ jobs:
           version: latest
 
       - name: Push to itch.io
-        run: sh entrypoint
+        run: sh entrypoint.sh
         env:
           BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
           CHANNEL: osx
