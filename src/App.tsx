@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@mui/material/styles";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/electron-vite.animate.svg";
+import UnfurlLogo from "./assets/UnfurlLogo.png";
 import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { UseJsonDataStore } from "./stores/JsonData";
@@ -35,12 +34,7 @@ const App = () => {
         </Toolbar>
       </AppBar>
       <div>
-        <a href="https://electron-vite.github.io" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+        <img src={UnfurlLogo} className="logo" alt="Unfurl logo" aria-label="logo" />
       </div>
       <Typography variant="h3" fontWeight={"bold"}>
         Unfurl

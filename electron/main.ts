@@ -23,7 +23,7 @@ function createWindow() {
   console.log(process.env.VITE_PUBLIC);
 
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "electron-vite.svg"),
+    icon: path.join(process.env.VITE_PUBLIC, "UnfurlLogo.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       spellcheck: true,
