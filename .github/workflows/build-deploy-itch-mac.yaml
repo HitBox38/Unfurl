@@ -28,8 +28,6 @@ jobs:
         uses: jdno/setup-butler@v1
         with:
           version: latest
-      - name: login to butler
-        run: butler login
 
       - name: Push to itch.io
         run: sh entrypoint
