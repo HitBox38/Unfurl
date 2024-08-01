@@ -30,4 +30,4 @@ jobs:
           version: latest
 
       - name: Push to itch.io
-        run: arch -x86_64 butler push release/Unfurl-Mac-Installer.dmg hit-box38/unfurl:mac --token ${{ secrets.ITCH_API_KEY }}
+        run: butler push release/Unfurl-Mac-Installer.dmg hit-box38/unfurl:mac
