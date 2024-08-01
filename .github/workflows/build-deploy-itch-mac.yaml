@@ -28,6 +28,14 @@ jobs:
         uses: jdno/setup-butler@v1
         with:
           version: latest
+      - name: login to butler
+        run: butler login
 
       - name: Push to itch.io
-        run: butler push release/Unfurl-Mac-Installer.dmg hit-box38/unfurl:mac
+        run: sh entrypoint
+        env:
+          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
+          CHANNEL: osx
+          ITCH_GAME: unfurl
+          ITCH_USER: hit-box38
+          PACKAGE: release/Unfurl-Mac-Installer.dmg
