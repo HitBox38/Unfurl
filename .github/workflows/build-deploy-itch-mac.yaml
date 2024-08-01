@@ -1,4 +1,4 @@
-name: Build and upload to itch.io Linux
+name: Build and upload to itch.io Mac
 
 on:
   push:
@@ -24,11 +24,10 @@ jobs:
       - name: Build app
         run: npm run build:mac
 
-      - name: Deploy
-        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
-        env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
-          CHANNEL: mac
-          ITCH_GAME: unfurl
-          ITCH_USER: hit-box38
-          PACKAGE: release/Unfurl-Mac.dmg
+      - name: Set up butler
+        uses: jdno/setup-butler@v1
+        with:
+          version: latest
+
+      - name: Push to itch.io
+        run: butler push release/Unfurl-Mac.dmg hit-box38/unfurl:mac --token ${{ secrets.ITCH_API_KEY }}
