@@ -3,7 +3,7 @@ import { StoryNode } from "../../interfaces/Node";
 
 export const fromMd = (files: File[], title: string) => {
   let config: MetadataConfigTemplate | null;
-  const ls = window.localStorage.getItem("metadataConfig");
+  const ls = localStorage.getItem("metadataConfig");
   if (ls !== null) {
     config = JSON.parse(ls);
   } else {

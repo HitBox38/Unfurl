@@ -4,7 +4,7 @@ import { StoryNode } from "../../interfaces/Node";
 
 export const fromTwee = (file: File) => {
   let config: MetadataConfigTemplate | null;
-  const ls = window.localStorage.getItem("metadataConfig");
+  const ls = localStorage.getItem("metadataConfig");
   if (ls !== null) {
     config = JSON.parse(ls);
   } else {
@@ -70,7 +70,7 @@ export const fromTwee = (file: File) => {
               const choiceText: string[] = choice.slice(2, -2).split("->");
               const choiceObject: Choice = {
                 text: choiceText[0].trim(),
-                destination: choiceText[1].trim(),
+                destination: (choiceText[1] ? choiceText[1] : choiceText[0]).trim(),
               };
               currentNode.choices.push(choiceObject);
             }

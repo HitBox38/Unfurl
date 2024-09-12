@@ -52,7 +52,7 @@ const App = () => {
       {name === "" ? (
         <FileUpload />
       ) : (
-        <button onClick={() => window.location.reload()}>Upload another file</button>
+        <button onClick={() => location.reload()}>Upload another file</button>
       )}
       <div
         style={{
