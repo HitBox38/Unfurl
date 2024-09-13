@@ -6,7 +6,8 @@ const DownloadButton = () => {
 
   const handleDownload = () => {
     if (content) {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content));
+      const dataStr =
+        "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(content, null, 2));
       const downloadAnchorNode = document.createElement("a");
       downloadAnchorNode.setAttribute("href", dataStr);
       downloadAnchorNode.setAttribute("download", `${name}.json`);
