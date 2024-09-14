@@ -40,13 +40,13 @@ const App = () => {
         Unfurl
       </Typography>
       <StyledRotatorWrapper variant="h5" display="flex" flexDirection="row" justifyContent="center">
-        <StyledSpan>
+        <StyledSpanWrapper>
           <span>Twee</span>
           <span>Obsidian</span>
           <span>md</span>
           <span>JSON</span>
           <span>Twee</span>
-        </StyledSpan>
+        </StyledSpanWrapper>
         Convertor & Editor
       </StyledRotatorWrapper>
       {name === "" ? (
@@ -107,17 +107,18 @@ const rotateWords = keyframes`
 const StyledRotatorWrapper = styled(Typography)`
   box-sizing: content-box;
   height: 27px;
+`;
 
-  & span {
+const StyledSpanWrapper = styled.div`
+  overflow: hidden;
+
+  & > span {
     display: block;
     height: 100%;
     padding-right: 10px;
+    text-align: right;
     animation: ${rotateWords} 6s infinite;
   }
-`;
-
-const StyledSpan = styled.div`
-  overflow: hidden;
 `;
 
 export default App;

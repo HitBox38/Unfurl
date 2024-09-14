@@ -1,5 +1,14 @@
 import { ChangeEvent, useState } from "react";
-import { Box, Button, Chip, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Chip,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { UseJsonDataStore } from "../stores/JsonData";
 import { fromTwee } from "../functions/convertors/fromTwee";
 import { StoryData } from "../interfaces/StoryData";
@@ -16,6 +25,7 @@ const FileUpload = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { name, setJson: setJsonData } = UseJsonDataStore((state) => state);
   const [fileType, setFileType] = useState<SupportedFileTypes>("twee");
+  const [caughtError, setCaughtError] = useState<string | null>(null);
 
   const [{ config }] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
     config: [],
@@ -25,6 +35,7 @@ const FileUpload = () => {
     setFileType(event.target.value as SupportedFileTypes);
 
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCaughtError(null);
     const selectFiles = e.target.files ? Array.from(e.target.files) : null;
 
     if (
@@ -46,55 +57,76 @@ const FileUpload = () => {
 
   const onFileUpload = () => {
     if (files) {
+      setCaughtError(null);
       setIsLoading(true);
       switch (fileType) {
         case "twee":
-          fromTwee(files[0]).then((value) => {
-            if (name !== "") {
-              setJsonData({ nodes: [], start: null, title: null }, "");
-            }
-            if (value) {
+          fromTwee(files[0])
+            .then((value) => {
+              if (name !== "") {
+                setJsonData({ nodes: [], start: null, title: null }, "");
+              }
+
               setJsonData(value, files[0].name.split(".")[0]);
-            }
-            setIsLoading(false);
-          });
+
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              setCaughtError(error.message);
+              setIsLoading(false);
+            });
           break;
 
         case "md":
-          fromMd(files, title).then((storyData) => {
-            if (name !== "") {
-              setJsonData({ nodes: [], start: null, title: null }, "");
-            }
-            if (storyData) {
+          fromMd(files, title)
+            .then((storyData) => {
+              if (name !== "") {
+                setJsonData({ nodes: [], start: null, title: null }, "");
+              }
+
               setJsonData(storyData, title);
-            }
-          });
+
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              setCaughtError(error.message);
+              setIsLoading(false);
+            });
           break;
 
         case "json":
-          files[0].text().then((value) => {
-            const json = JSON.parse(value) as StoryData;
-            json.nodes = json.nodes.map((node) => {
-              const keys = Object.keys(node.metadata);
-              let completeMetadata = {};
-              config.forEach((configItem) => {
-                if (keys.findIndex((key) => configItem.name === key) === -1) {
-                  completeMetadata = {
+          files[0]
+            .text()
+            .then((value) => {
+              const json = JSON.parse(value) as StoryData;
+              json.nodes = json.nodes.map((node) => {
+                const keys = Object.keys(node.metadata);
+                let completeMetadata = {};
+                config.forEach((configItem) => {
+                  if (keys.findIndex((key) => configItem.name === key) === -1) {
+                    completeMetadata = {
+                      ...completeMetadata,
+                      [configItem.name]: configItem.type === "boolean" ? false : 0,
+                    };
+                  }
+                });
+                return {
+                  ...node,
+                  metadata: {
+                    ...node.metadata,
                     ...completeMetadata,
-                    [configItem.name]: configItem.type === "boolean" ? false : 0,
-                  };
-                }
+                  },
+                };
               });
-              return {
-                ...node,
-                metadata: {
-                  ...node.metadata,
-                  ...completeMetadata,
-                },
-              };
+
+              setJsonData(json, files[0].name.split(".")[0]);
+
+              setIsLoading(false);
+            })
+            .catch((error) => {
+              setCaughtError(error.message);
+              setIsLoading(false);
             });
-            setJsonData(json, files[0].name.split(".")[0]);
-          });
           break;
       }
     }
@@ -118,13 +150,23 @@ const FileUpload = () => {
           <MenuItem value="json">JSON</MenuItem>
           <MenuItem value="md">Obsidian (md)</MenuItem>
         </Select>
-        <input
-          type="file"
-          onChange={onFileChange}
-          multiple={fileType === "md"}
-          accept={`.${fileType}`}
-        />
-        <Button variant="contained" disabled={isLoading} onClick={onFileUpload}>
+        <Button>
+          <input
+            type="file"
+            onChange={onFileChange}
+            multiple={fileType === "md"}
+            accept={`.${fileType}`}
+          />
+        </Button>
+        <Button
+          variant="contained"
+          disabled={
+            isLoading ||
+            files.every(
+              (file) => file.name.split(".")[file.name.split(".").length - 1] !== fileType
+            )
+          }
+          onClick={onFileUpload}>
           {isLoading ? (
             <svg
               width="13"
@@ -163,6 +205,20 @@ const FileUpload = () => {
             />
           ))}
       </Box>
+      {caughtError ? (
+        <Typography
+          variant="caption"
+          sx={{
+            color: ({ palette }) => palette.error.main,
+            background: ({ palette }) => palette.warning.light,
+            fontWeight: ({ typography }) => typography.fontWeightBold,
+            padding: ({ spacing }) => spacing(1),
+            borderRadius: "10px",
+            maxWidth: "350px",
+          }}>
+          {caughtError}
+        </Typography>
+      ) : null}
     </Box>
   );
 };
