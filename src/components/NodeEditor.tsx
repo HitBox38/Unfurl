@@ -1,4 +1,13 @@
-import { TextField, Typography, Box, Button } from "@mui/material";
+import {
+  TextField,
+  Typography,
+  Box,
+  Button,
+  Card,
+  CardHeader,
+  CardContent,
+  CardActions,
+} from "@mui/material";
 import { UseNodeStore } from "../stores/Node";
 import { useForm, useFieldArray, FormProvider, SubmitHandler } from "react-hook-form";
 import { UseJsonDataStore } from "../stores/JsonData";
@@ -6,6 +15,7 @@ import { NodeMetadataEditor } from "./NodeMetadataEditor";
 import { StoryNode } from "../interfaces/Node";
 import { ArrowRightAlt } from "@mui/icons-material";
 import { useEffect } from "react";
+import styled from "styled-components";
 interface StoryNodeForm extends Omit<StoryNode, "content"> {
   content: string;
 }
@@ -59,53 +69,77 @@ const NodeEditor = () => {
 
   return (
     <FormProvider {...methods}>
-      <Box
-        sx={{ border: "1px solid #f6f6f6", borderRadius: 10, minWidth: "350px", padding: "10px" }}
-        component="form"
-        onSubmit={methods.handleSubmit(submitNode)}
-        display="flex"
-        flexDirection="column"
-        justifyContent="space-evenly"
-        alignItems="center">
-        <Typography variant="h3">{node?.name}</Typography>
-        <TextField
-          {...methods.register("content")}
-          defaultValue={node?.content.join("\n")}
-          multiline
-          minRows={5}
-          style={{ minWidth: "400px", maxWidth: "500px" }}
-        />
-        {fields.map((field, index) => (
-          <Box
-            key={field.id}
-            display="flex"
-            flexDirection="row"
-            justifyContent="center"
-            alignItems="center"
-            flexWrap="nowrap"
-            paddingX="10px">
-            <TextField
-              sx={{ width: "350px" }}
-              {...methods.register(`choices.${index}.text`)}
-              defaultValue={field.text}
+      <NodeEditorWrapper>
+        <FormHeader title={node?.name} />
+        <form onSubmit={methods.handleSubmit(submitNode)}>
+          <NodeEditorForm>
+            <TextArea
+              {...methods.register("content")}
+              defaultValue={node?.content.join("\n")}
               multiline
+              minRows={5}
+              maxRows={15}
             />
-            <ArrowRightAlt sx={{ fontSize: "50px" }} />
-            <Typography variant="h5">{field.destination}</Typography>
-          </Box>
-        ))}
-        <NodeMetadataEditor />
-        <Box display="flex" justifyContent="space-between" width={"250px"}>
-          <Button variant="contained" color="warning" onClick={() => setNode(null)}>
-            Cancel
-          </Button>
-          <Button variant="contained" type="submit">
-            Update Node
-          </Button>
-        </Box>
-      </Box>
+            {fields.map((field, index) => (
+              <ChoiceWrapper key={field.id}>
+                <ChoiceTextField
+                  {...methods.register(`choices.${index}.text`)}
+                  defaultValue={field.text}
+                  multiline
+                />
+                <ArrowRightAlt sx={{ fontSize: "50px" }} />
+                <Typography variant="h5">{field.destination}</Typography>
+              </ChoiceWrapper>
+            ))}
+            <NodeMetadataEditor />
+          </NodeEditorForm>
+
+          <CardActions>
+            <Button variant="contained" color="warning" onClick={() => setNode(null)}>
+              Cancel
+            </Button>
+            <Button variant="contained" type="submit">
+              Update Node
+            </Button>
+          </CardActions>
+        </form>
+      </NodeEditorWrapper>
     </FormProvider>
   );
 };
+
+const TextArea = styled(TextField)`
+  width: 100%;
+`;
+
+const ChoiceWrapper = styled(Box)`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: nowrap;
+`;
+
+const ChoiceTextField = styled(TextField)`
+  width: 350px;
+`;
+
+const NodeEditorForm = styled(CardContent)`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  align-items: start;
+  gap: 30px;
+`;
+
+const FormHeader = styled(CardHeader)`
+  text-align: start;
+`;
+
+const NodeEditorWrapper = styled(Card)`
+  margin: auto 0;
+  height: fit-content;
+  padding: 10px;
+`;
 
 export default NodeEditor;
