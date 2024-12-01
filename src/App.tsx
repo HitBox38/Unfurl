@@ -6,7 +6,7 @@ import { UseJsonDataStore } from "./stores/JsonData";
 import DownloadButton from "./components/DownloadButton";
 import { UseNodeStore } from "./stores/Node";
 import { darkTheme } from "./theme";
-import { AppBar, CircularProgress, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, CircularProgress, Toolbar, Typography } from "@mui/material";
 import { MetadataConfig } from "./components/MetadataConfig";
 import styled, { keyframes } from "styled-components";
 import { useDialogStore } from "./stores/DialogStore";
@@ -15,6 +15,7 @@ import { useMetadataConfigFormModal } from "./modals/MetadataConfigFormModal";
 import { lazy } from "react";
 import NodeEditor from "./components/NodeEditor";
 import { EveryWhereDialog } from "./components/EverywhereDialog";
+import ItchIoLogo from "./assets/itchio-logo.svg";
 
 const DialogViewer = lazy(() => import("./components/DialogViewer"));
 
@@ -37,45 +38,48 @@ const App = () => {
           </Toolbar>
         </AppBar>
       ) : null}
-      <div>
-        <img src={UnfurlLogo} className="logo" alt="Unfurl logo" aria-label="logo" />
-      </div>
-      <Typography variant="h3" fontWeight={"bold"}>
-        Unfurl{isOnline ? " Online" : ""}
-      </Typography>
-      <StyledRotatorWrapper variant="h5" display="flex" flexDirection="row" justifyContent="center">
-        <StyledSpanWrapper>
-          <span>Twee</span>
-          <span>Obsidian</span>
-          <span>md</span>
-          <span>JSON</span>
-          <span>Twee</span>
-        </StyledSpanWrapper>
-        Convertor & Editor
-      </StyledRotatorWrapper>
-      {name === "" ? (
-        <FileUpload />
-      ) : (
-        <button onClick={() => location.reload()}>Upload another file</button>
-      )}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          margin: "0 auto",
-          width: "80vw",
-          padding: "15px 0",
-        }}>
-        {name !== "" ? (
-          <>
-            <DialogViewer /> {node && <NodeEditor />}
-          </>
+      <img src={UnfurlLogo} className="logo" alt="Unfurl logo" aria-label="logo" />
+      <AppWrapper>
+        <Typography variant="h3" fontWeight={"bold"}>
+          Unfurl{isOnline ? " Online" : ""}
+        </Typography>
+        <StyledRotatorWrapper variant="h5">
+          <StyledSpanWrapper>
+            <span>Twee</span>
+            <span>Obsidian</span>
+            <span>md</span>
+            <span>JSON</span>
+            <span>Twee</span>
+          </StyledSpanWrapper>
+          Convertor & Editor
+        </StyledRotatorWrapper>
+        {name === "" ? (
+          <FileUpload />
         ) : (
-          isLoading && <CircularProgress />
+          <button onClick={() => location.reload()}>Upload another file</button>
         )}
-      </div>
-      {name !== "" ? <DownloadButton /> : <MetadataConfig />}
+        <EditorsWrapper>
+          {name !== "" ? (
+            <>
+              <DialogViewer /> {node && <NodeEditor />}
+            </>
+          ) : (
+            isLoading && <CircularProgress />
+          )}
+        </EditorsWrapper>
+        <LowerButtons>
+          {name !== "" ? <DownloadButton /> : <MetadataConfig />}
+          {isOnline && (
+            <Button
+              startIcon={<ItchIoLogo />}
+              href="https://hit-box38.itch.io/unfurl"
+              variant="contained"
+              color="secondary">
+              Get the Desktop version
+            </Button>
+          )}
+        </LowerButtons>
+      </AppWrapper>
       <EveryWhereDialog />
     </ThemeProvider>
   );
@@ -111,6 +115,9 @@ const rotateWords = keyframes`
 const StyledRotatorWrapper = styled(Typography)`
   box-sizing: content-box;
   height: 27px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 `;
 
 const StyledSpanWrapper = styled.div`
@@ -123,6 +130,30 @@ const StyledSpanWrapper = styled.div`
     text-align: right;
     animation: ${rotateWords} 6s infinite;
   }
+`;
+
+const AppWrapper = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  row-gap: 15px;
+`;
+
+const EditorsWrapper = styled(Box)`
+  display: "flex";
+  flex-direction: "row";
+  justify-content: "space-evenly";
+  margin: "0 auto";
+  width: "80vw";
+  padding: "15px 0";
+`;
+
+const LowerButtons = styled(Box)`
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
 `;
 
 export default App;
