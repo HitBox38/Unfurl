@@ -23,7 +23,8 @@ const App = () => {
   const { node } = UseNodeStore((state) => state);
   const { setContent } = useDialogStore((state) => state);
   const content = useMetadataConfigFormModal();
-  const isOnline = location.hostname === "unfurl-online.vercel.app";
+  const isOnline =
+    location.hostname.includes(".vercel.app") && location.hostname.includes("unfurl");
 
   useKeyboardShortcut(() => setContent(content), { codes: ["KeyC", "KeyF"], ctrlKey: true });
 
