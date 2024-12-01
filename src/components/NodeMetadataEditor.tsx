@@ -9,9 +9,10 @@ export const NodeMetadataEditor = () => {
   });
 
   const { register, control } = useFormContext();
+
   return (
     <Box width={"350px"}>
-      <Typography variant="h4">Metadata</Typography>
+      {config.length ? <Typography variant="h4">Metadata</Typography> : null}
       {config.map((conLine, index) => {
         if (conLine.type === "number") {
           return (

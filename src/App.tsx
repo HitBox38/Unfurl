@@ -23,21 +23,24 @@ const App = () => {
   const { node } = UseNodeStore((state) => state);
   const { setContent } = useDialogStore((state) => state);
   const content = useMetadataConfigFormModal();
+  const isOnline = location.hostname === "unfurl-online.vercel.app";
 
   useKeyboardShortcut(() => setContent(content), { codes: ["KeyC", "KeyF"], ctrlKey: true });
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <AppBar sx={{ WebkitAppRegion: "drag", zIndex: "999" }}>
-        <Toolbar variant="dense" sx={{ backgroundColor: "#3d3d3d" }}>
-          <Typography variant="h6">Unfurl</Typography>
-        </Toolbar>
-      </AppBar>
+      {!isOnline ? (
+        <AppBar sx={{ WebkitAppRegion: "drag", zIndex: "999" }}>
+          <Toolbar variant="dense" sx={{ backgroundColor: "#3d3d3d" }}>
+            <Typography variant="h6">Unfurl</Typography>
+          </Toolbar>
+        </AppBar>
+      ) : null}
       <div>
         <img src={UnfurlLogo} className="logo" alt="Unfurl logo" aria-label="logo" />
       </div>
       <Typography variant="h3" fontWeight={"bold"}>
-        Unfurl
+        Unfurl{isOnline ? " Online" : ""}
       </Typography>
       <StyledRotatorWrapper variant="h5" display="flex" flexDirection="row" justifyContent="center">
         <StyledSpanWrapper>
