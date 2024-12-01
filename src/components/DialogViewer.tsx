@@ -6,6 +6,8 @@ import { lazy, useCallback } from "react";
 import { StoryNode } from "../interfaces/Node";
 import dagre from "dagre";
 import { UseNodeStore } from "../stores/Node";
+import styled from "styled-components";
+import { Box } from "@mui/material";
 
 const ReactFlow = lazy(() => import("reactflow"));
 
@@ -95,7 +97,7 @@ const DialogViewer = () => {
   }, [content, setNodes, setEdges]);
 
   return (
-    <div style={{ width: "500px", height: "750px", border: "1px solid #f6f6f6", borderRadius: 10 }}>
+    <FlowWrapper>
       <ReactFlow
         fitView
         onNodesChange={onNodesChange}
@@ -106,8 +108,18 @@ const DialogViewer = () => {
         connectionLineType={ConnectionLineType.Step}
         onLoadedData={() => onLayout()}
       />
-    </div>
+    </FlowWrapper>
   );
 };
+
+const FlowWrapper = styled(Box)`
+  width: ${location.hostname.includes(".vercel.app") && location.hostname.includes("unfurl")
+    ? "100%"
+    : "500px"};
+  margin-right: 25px;
+  height: 750px;
+  border: 1px solid #f6f6f6;
+  border-radius: 10px;
+`;
 
 export default DialogViewer;
