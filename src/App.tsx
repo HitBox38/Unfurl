@@ -141,12 +141,12 @@ const AppWrapper = styled(Box)`
 `;
 
 const EditorsWrapper = styled(Box)`
-  display: "flex";
-  flex-direction: "row";
-  justify-content: "space-evenly";
-  margin: "0 auto";
-  width: "80vw";
-  padding: "15px 0";
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  margin: 0 auto;
+  width: 80vw;
+  padding: 15px 0;
 `;
 
 const LowerButtons = styled(Box)`
