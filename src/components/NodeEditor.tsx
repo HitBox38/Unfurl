@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardContent,
   CardActions,
+  useTheme,
 } from "@mui/material";
 import { UseNodeStore } from "../stores/Node";
 import { useForm, useFieldArray, FormProvider, SubmitHandler } from "react-hook-form";
@@ -20,6 +21,7 @@ interface StoryNodeForm extends Omit<StoryNode, "content"> {
   content: string;
 }
 const NodeEditor = () => {
+  const { palette } = useTheme();
   const { node, setNode } = UseNodeStore((state) => state);
   const jsonData = UseJsonDataStore((state) => state);
   const methods = useForm<StoryNodeForm>({
@@ -98,9 +100,12 @@ const NodeEditor = () => {
             <Button variant="contained" color="warning" onClick={() => setNode(null)}>
               Cancel
             </Button>
-            <Button variant="contained" type="submit">
+            <Button variant="contained" type="submit" disabled={!methods.formState.isDirty}>
               Update Node
             </Button>
+            <WarningText variant="body2" warningColor={palette.warning.main}>
+              {methods.formState.isDirty ? "*Unsaved changes" : ""}
+            </WarningText>
           </CardActions>
         </form>
       </NodeEditorWrapper>
@@ -141,5 +146,12 @@ const NodeEditorWrapper = styled(Card)`
   height: fit-content;
   padding: 10px;
 `;
+
+const WarningText = styled(Typography)<{ warningColor: string }>(
+  ({ warningColor }) => `
+  padding: 0 5px;
+  color: ${warningColor};
+);`
+);
 
 export default NodeEditor;

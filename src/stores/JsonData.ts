@@ -24,10 +24,7 @@ export const UseJsonDataStore = create<JsonData>((set) => ({
         return node;
       }
     });
-    
-    set({ name: "", content: { nodes: [], start: null, title: null }, isLoading: true });
-    setTimeout(() => {
-      set({ ...oldJson });
-    }, 1000);
+
+    set({ ...oldJson });
   },
 }));
