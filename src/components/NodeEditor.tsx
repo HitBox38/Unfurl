@@ -144,6 +144,8 @@ const FormHeader = styled(CardHeader)`
 const NodeEditorWrapper = styled(Card)`
   margin: auto 0;
   height: fit-content;
+  width: 100%;
+  max-width: 650px;
   padding: 10px;
 `;
 
