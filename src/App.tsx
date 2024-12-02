@@ -1,6 +1,5 @@
 import { ThemeProvider } from "@mui/material/styles";
 import UnfurlLogo from "./assets/UnfurlLogo.png";
-import "./App.css";
 import FileUpload from "./components/FileUpload";
 import { UseJsonDataStore } from "./stores/JsonData";
 import DownloadButton from "./components/DownloadButton";
@@ -12,12 +11,11 @@ import styled, { keyframes } from "styled-components";
 import { useDialogStore } from "./stores/DialogStore";
 import useKeyboardShortcut from "./hooks/useKeyboardShortcut";
 import { useMetadataConfigFormModal } from "./modals/MetadataConfigFormModal";
-import { lazy } from "react";
 import NodeEditor from "./components/NodeEditor";
 import { EveryWhereDialog } from "./components/EverywhereDialog";
 import ItchIoLogo from "./assets/itchio-logo.svg";
-
-const DialogViewer = lazy(() => import("./components/DialogViewer"));
+import DialogViewer from "./components/DialogViewer";
+import "./App.css";
 
 const App = () => {
   const { name, isLoading } = UseJsonDataStore((state) => state);
@@ -56,7 +54,9 @@ const App = () => {
         {name === "" ? (
           <FileUpload />
         ) : (
-          <button onClick={() => location.reload()}>Upload another file</button>
+          <Button variant="contained" color="secondary" onClick={() => location.reload()}>
+            Upload another file
+          </Button>
         )}
         <EditorsWrapper>
           {name !== "" ? (

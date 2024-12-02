@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -18,6 +18,9 @@ import { SupportedFileTypes } from "../interfaces/SupportedFileTypes";
 import { fromMd } from "../functions/convertors/fromMd";
 import DescriptionIcon from "@mui/icons-material/Description";
 import DeleteIcon from "@mui/icons-material/Delete";
+import styled from "styled-components";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import Loader from "../assets/loader.svg";
 
 const FileUpload = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -132,6 +135,12 @@ const FileUpload = () => {
     }
   };
 
+  useEffect(() => {
+    if (fileType) {
+      setFiles([]);
+    }
+  }, [fileType]);
+
   return (
     <Box
       display="flex"
@@ -139,7 +148,7 @@ const FileUpload = () => {
       justifyContent="center"
       alignItems="center"
       rowGap="8px">
-      <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
+      <Box display="flex" justifyContent="center" alignItems="center" columnGap="24px">
         <Select
           value={fileType}
           onChange={handleTypeChange}
@@ -150,8 +159,13 @@ const FileUpload = () => {
           <MenuItem value="json">JSON</MenuItem>
           <MenuItem value="md">Obsidian (md)</MenuItem>
         </Select>
-        <Button>
-          <input
+        <Button
+          component="label"
+          role={undefined}
+          variant="contained"
+          startIcon={<FileUploadIcon />}>
+          Select {fileType !== "md" && "a"} .{fileType} file{fileType === "md" && "s"}
+          <VisuallyHiddenInput
             type="file"
             onChange={onFileChange}
             multiple={fileType === "md"}
@@ -160,6 +174,7 @@ const FileUpload = () => {
         </Button>
         <Button
           variant="contained"
+          color="secondary"
           disabled={
             isLoading ||
             files.every(
@@ -167,21 +182,7 @@ const FileUpload = () => {
             )
           }
           onClick={onFileUpload}>
-          {isLoading ? (
-            <svg
-              width="13"
-              height="14"
-              viewBox="0 0 13 14"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M4.38798 12.616C3.36313 12.2306 2.46328 11.5721 1.78592 10.7118C1.10856 9.85153 0.679515 8.82231 0.545268 7.73564C0.411022 6.64897 0.576691 5.54628 1.02433 4.54704C1.47197 3.54779 2.1845 2.69009 3.08475 2.06684C3.98499 1.4436 5.03862 1.07858 6.13148 1.01133C7.22435 0.944078 8.31478 1.17716 9.28464 1.68533C10.2545 2.19349 11.0668 2.95736 11.6336 3.89419C12.2004 4.83101 12.5 5.90507 12.5 7"
-                stroke="white"
-              />
-            </svg>
-          ) : (
-            "Upload"
-          )}
+          {isLoading ? <Loader /> : "Upload"}
         </Button>
       </Box>
       {fileType === "md" && (
@@ -222,5 +223,17 @@ const FileUpload = () => {
     </Box>
   );
 };
+
+const VisuallyHiddenInput = styled.input`
+  position: absolute;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+  bottom: 0;
+  left: 0;
+`;
 
 export default FileUpload;
