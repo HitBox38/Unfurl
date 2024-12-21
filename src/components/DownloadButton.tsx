@@ -1,8 +1,8 @@
-import { UseJsonDataStore } from "../stores/JsonData";
+import { useJsonDataStore } from "../stores/JsonData";
 import { Button } from "@mui/material";
 
 const DownloadButton = () => {
-  const { content, name } = UseJsonDataStore((state) => state);
+  const { content, name } = useJsonDataStore((state) => state);
 
   const handleDownload = () => {
     if (content) {

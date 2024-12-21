@@ -1,27 +1,26 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from "zustand";
 import { ReactNode } from "react";
-import { SubmitHandler } from "react-hook-form";
-import { SxProps } from "@mui/material";
+import { FieldValues, SubmitHandler } from "react-hook-form";
+import { ButtonProps } from "@mui/material";
 
 export interface DialogStore {
   title: string;
   isOpen: boolean;
   content: ReactNode;
-  functions?: {
+  functions?: (ButtonProps & {
     name: string;
-    disabled: boolean;
-    action: ([any]: any) => void;
-    isSubmit: boolean;
-  }[];
+    action: (args: unknown) => void;
+    isSubmit?: boolean;
+    closeAfterwards?: boolean;
+  })[];
   isForm?: boolean;
   formName?: string;
-  submitFunction?: SubmitHandler<any>;
-  style?: {
-    dialog?: SxProps;
-    dialogTitle?: SxProps;
-    dialogContent?: SxProps;
-    dialogActions?: SxProps;
+  submitFunction?: SubmitHandler<FieldValues>;
+  classNames?: {
+    dialog?: string;
+    dialogTitle?: string;
+    dialogContent?: string;
+    dialogActions?: string;
   };
   setOpen: () => void;
   setContent: (newContent: Omit<DialogStore, "setOpen" | "setContent">) => void;

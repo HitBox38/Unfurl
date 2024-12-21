@@ -1,23 +1,29 @@
 import { Box, Checkbox, TextField, Typography } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import useLocalStorage from "../hooks/useLocalStorage";
+import { useStorage } from "../hooks/useStorage";
 import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
+import { tss } from "tss-react/mui";
 
 export const NodeMetadataEditor = () => {
-  const [{ config }] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
-    config: [],
+  const [{ config }] = useStorage<MetadataConfigTemplate>({
+    key: "metadataConfig",
+    defaultValue: {
+      config: [],
+    },
   });
 
   const { register, control } = useFormContext();
 
+  const { classes } = useStyles();
+
   return (
-    <Box width={"350px"}>
+    <Box className={classes.nodeMetadataEditor}>
       {config.length ? <Typography variant="h4">Metadata</Typography> : null}
       {config.map((conLine, index) => {
         if (conLine.type === "number") {
           return (
             <TextField
-              sx={{ width: "150px" }}
+              className={classes.field}
               label={conLine.label}
               {...register(`metadata.${conLine.name}`)}
               type="number"
@@ -46,3 +52,12 @@ export const NodeMetadataEditor = () => {
     </Box>
   );
 };
+
+const useStyles = tss.create(() => ({
+  nodeMetadataEditor: {
+    width: "350px",
+  },
+  field: {
+    width: "150px",
+  },
+}));

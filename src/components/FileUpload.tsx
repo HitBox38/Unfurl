@@ -9,29 +9,32 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { UseJsonDataStore } from "../stores/JsonData";
+import { useJsonDataStore } from "../stores/JsonData";
 import { fromTwee } from "../functions/convertors/fromTwee";
 import { StoryData } from "../interfaces/StoryData";
-import useLocalStorage from "../hooks/useLocalStorage";
+import { useStorage } from "../hooks/useStorage";
 import { MetadataConfigTemplate } from "../interfaces/MetadataConfigTemplate";
 import { SupportedFileTypes } from "../interfaces/SupportedFileTypes";
 import { fromMd } from "../functions/convertors/fromMd";
 import DescriptionIcon from "@mui/icons-material/Description";
 import DeleteIcon from "@mui/icons-material/Delete";
-import styled from "styled-components";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import Loader from "../assets/loader.svg";
+import { tss } from "tss-react/mui";
 
 const FileUpload = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [title, setTitle] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { name, setJson: setJsonData } = UseJsonDataStore((state) => state);
+  const { name, setJson: setJsonData } = useJsonDataStore((state) => state);
   const [fileType, setFileType] = useState<SupportedFileTypes>("twee");
   const [caughtError, setCaughtError] = useState<string | null>(null);
 
-  const [{ config }] = useLocalStorage<MetadataConfigTemplate>("metadataConfig", {
-    config: [],
+  const [{ config }] = useStorage<MetadataConfigTemplate>({
+    key: "metadataConfig",
+    defaultValue: {
+      config: [],
+    },
   });
 
   const handleTypeChange = (event: SelectChangeEvent) =>
@@ -141,19 +144,16 @@ const FileUpload = () => {
     }
   }, [fileType]);
 
+  const { classes } = useStyles();
+
   return (
-    <Box
-      display="flex"
-      flexDirection="column"
-      justifyContent="center"
-      alignItems="center"
-      rowGap="8px">
-      <Box display="flex" justifyContent="center" alignItems="center" columnGap="24px">
+    <Box className={classes.fileUpload}>
+      <Box className={classes.fileUploadWrapper}>
         <Select
           value={fileType}
           onChange={handleTypeChange}
           size="medium"
-          sx={{ textAlign: "left", width: "150px" }}
+          className={classes.select}
           label="File Type">
           <MenuItem value="twee">Twee</MenuItem>
           <MenuItem value="json">JSON</MenuItem>
@@ -165,7 +165,8 @@ const FileUpload = () => {
           variant="contained"
           startIcon={<FileUploadIcon />}>
           Select {fileType !== "md" && "a"} .{fileType} file{fileType === "md" && "s"}
-          <VisuallyHiddenInput
+          <input
+            className={classes.visuallyHiddenInput}
             type="file"
             onChange={onFileChange}
             multiple={fileType === "md"}
@@ -188,12 +189,12 @@ const FileUpload = () => {
       {fileType === "md" && (
         <TextField
           placeholder="What is the title of this dialog?"
-          sx={{ width: "350px" }}
+          className={classes.fileTypeInput}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
       )}
-      <Box display="flex" justifyContent="center" alignItems="center" columnGap="8px">
+      <Box className={classes.fileTags}>
         {files.length > 0 &&
           files.map((f, index) => (
             <Chip
@@ -207,16 +208,7 @@ const FileUpload = () => {
           ))}
       </Box>
       {caughtError ? (
-        <Typography
-          variant="caption"
-          sx={{
-            color: ({ palette }) => palette.error.main,
-            background: ({ palette }) => palette.warning.light,
-            fontWeight: ({ typography }) => typography.fontWeightBold,
-            padding: ({ spacing }) => spacing(1),
-            borderRadius: "10px",
-            maxWidth: "350px",
-          }}>
+        <Typography variant="caption" className={classes.error}>
           {caughtError}
         </Typography>
       ) : null}
@@ -224,16 +216,55 @@ const FileUpload = () => {
   );
 };
 
-const VisuallyHiddenInput = styled.input`
-  position: absolute;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  height: 1px;
-  width: 1px;
-  overflow: hidden;
-  white-space: nowrap;
-  bottom: 0;
-  left: 0;
-`;
+const useStyles = tss.create(({ theme }) => ({
+  visuallyHiddenInput: {
+    position: "absolute",
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    height: "1px",
+    width: "1px",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    bottom: "0",
+    left: "0",
+  },
+  fileUpload: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    rowGap: "8px",
+  },
+  fileUploadWrapper: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    columnGap: "24px",
+  },
+  select: {
+    textAlign: "left",
+    width: "150px",
+  },
+  fileTypeInput: {
+    width: "350px",
+  },
+  fileTags: {
+    display: "flex",
+    flexWrap: "wrap",
+    maxWidth: "750px",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: "8px",
+  },
+  error: {
+    color: theme.palette.error.main,
+    background: theme.palette.warning.light,
+    fontWeight: theme.typography.fontWeightBold,
+    padding: theme.spacing(1),
+    borderRadius: "10px",
+    maxWidth: "350px",
+  },
+}));
 
 export default FileUpload;

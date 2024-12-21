@@ -10,7 +10,7 @@ interface JsonData {
   setNode: (newNode: StoryNode, oldJson: JsonData) => void;
 }
 
-export const UseJsonDataStore = create<JsonData>((set) => ({
+export const useJsonDataStore = create<JsonData>((set) => ({
   name: "",
   content: { nodes: [], start: null, title: null },
   isLoading: false,
