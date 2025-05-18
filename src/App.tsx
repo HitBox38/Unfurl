@@ -1,77 +1,86 @@
 import { ThemeProvider } from "@mui/material/styles";
 import UnfurlLogo from "./assets/UnfurlLogo.png";
-import "./App.css";
 import FileUpload from "./components/FileUpload";
-import { UseJsonDataStore } from "./stores/JsonData";
+import { useJsonDataStore } from "./stores/JsonData";
 import DownloadButton from "./components/DownloadButton";
 import { UseNodeStore } from "./stores/Node";
 import { darkTheme } from "./theme";
-import { AppBar, CircularProgress, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Button, CircularProgress, Toolbar, Typography } from "@mui/material";
 import { MetadataConfig } from "./components/MetadataConfig";
-import styled, { keyframes } from "styled-components";
+import { keyframes } from "tss-react";
 import { useDialogStore } from "./stores/DialogStore";
 import useKeyboardShortcut from "./hooks/useKeyboardShortcut";
 import { useMetadataConfigFormModal } from "./modals/MetadataConfigFormModal";
-import { lazy } from "react";
 import NodeEditor from "./components/NodeEditor";
 import { EveryWhereDialog } from "./components/EverywhereDialog";
-
-const DialogViewer = lazy(() => import("./components/DialogViewer"));
+import ItchIoLogo from "./assets/itchio-logo.svg";
+import DialogViewer from "./components/DialogViewer";
+import { tss } from "tss-react/mui";
 
 const App = () => {
-  const { name, isLoading } = UseJsonDataStore((state) => state);
+  const { name, isLoading } = useJsonDataStore((state) => state);
   const { node } = UseNodeStore((state) => state);
   const { setContent } = useDialogStore((state) => state);
   const content = useMetadataConfigFormModal();
+  const { classes } = useStyles();
+  const isOnline =
+    location.hostname.includes(".vercel.app") && location.hostname.includes("unfurl");
 
   useKeyboardShortcut(() => setContent(content), { codes: ["KeyC", "KeyF"], ctrlKey: true });
 
   return (
     <ThemeProvider theme={darkTheme}>
-      <AppBar sx={{ WebkitAppRegion: "drag", zIndex: "999" }}>
-        <Toolbar variant="dense" sx={{ backgroundColor: "#3d3d3d" }}>
-          <Typography variant="h6">Unfurl</Typography>
-        </Toolbar>
-      </AppBar>
-      <div>
-        <img src={UnfurlLogo} className="logo" alt="Unfurl logo" aria-label="logo" />
-      </div>
-      <Typography variant="h3" fontWeight={"bold"}>
-        Unfurl
-      </Typography>
-      <StyledRotatorWrapper variant="h5" display="flex" flexDirection="row" justifyContent="center">
-        <StyledSpanWrapper>
-          <span>Twee</span>
-          <span>Obsidian</span>
-          <span>md</span>
-          <span>JSON</span>
-          <span>Twee</span>
-        </StyledSpanWrapper>
-        Convertor & Editor
-      </StyledRotatorWrapper>
-      {name === "" ? (
-        <FileUpload />
-      ) : (
-        <button onClick={() => location.reload()}>Upload another file</button>
-      )}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          margin: "0 auto",
-          width: "80vw",
-          padding: "15px 0",
-        }}>
-        {name !== "" ? (
-          <>
-            <DialogViewer /> {node && <NodeEditor />}
-          </>
+      {!isOnline ? (
+        <AppBar className={classes.appBar}>
+          <Toolbar variant="dense" className={classes.toolbar}>
+            <Typography variant="h6">Unfurl</Typography>
+          </Toolbar>
+        </AppBar>
+      ) : null}
+      <img src={UnfurlLogo} className={classes.logo} alt="Unfurl logo" aria-label="logo" />
+      <Box className={classes.appWrapper}>
+        <Typography variant="h3" fontWeight={"bold"}>
+          Unfurl{isOnline ? " Online" : ""}
+        </Typography>
+        <Typography variant="h5" className={classes.rotatorWrapper}>
+          <Box className={classes.spanWrapper}>
+            <span>Twee</span>
+            <span>Obsidian</span>
+            <span>md</span>
+            <span>JSON</span>
+            <span>Twee</span>
+          </Box>
+          Convertor & Editor
+        </Typography>
+        {name === "" ? (
+          <FileUpload />
         ) : (
-          isLoading && <CircularProgress />
+          <Button variant="contained" color="secondary" onClick={() => location.reload()}>
+            Upload another file
+          </Button>
         )}
-      </div>
-      {name !== "" ? <DownloadButton /> : <MetadataConfig />}
+        <Box className={classes.editorsWrapper}>
+          {name !== "" ? (
+            <>
+              <DialogViewer /> {node && <NodeEditor />}
+            </>
+          ) : (
+            isLoading && <CircularProgress />
+          )}
+        </Box>
+        <Box className={classes.lowerButtons}>
+          {name !== "" ? <DownloadButton /> : <MetadataConfig />}
+          {isOnline && (
+            <Button
+              startIcon={<ItchIoLogo />}
+              href="https://hit-box38.itch.io/unfurl"
+              variant="contained"
+              color="secondary">
+              Get the Desktop version
+            </Button>
+          )}
+        </Box>
+      </Box>
       <EveryWhereDialog />
     </ThemeProvider>
   );
@@ -104,21 +113,61 @@ const rotateWords = keyframes`
     }
 `;
 
-const StyledRotatorWrapper = styled(Typography)`
-  box-sizing: content-box;
-  height: 27px;
-`;
-
-const StyledSpanWrapper = styled.div`
-  overflow: hidden;
-
-  & > span {
-    display: block;
-    height: 100%;
-    padding-right: 10px;
-    text-align: right;
-    animation: ${rotateWords} 6s infinite;
-  }
-`;
+const useStyles = tss.create(() => ({
+  appBar: {
+    WebkitAppRegion: "drag",
+    zIndex: "999",
+  },
+  toolbar: {
+    backgroundColor: "#3d3d3d",
+  },
+  logo: {
+    height: "8em",
+    padding: "1.5em",
+    willChange: "filter",
+    transition: "filter 300ms",
+    "&:hover": {
+      filter: "drop-shadow(0 0 2em #646cffaa)",
+    },
+  },
+  appWrapper: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    rowGap: "15px",
+  },
+  rotatorWrapper: {
+    boxSizing: "content-box",
+    height: "27px",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  spanWrapper: {
+    overflow: "hidden",
+    "& > span": {
+      display: "block",
+      height: "100%",
+      paddingRight: "10px",
+      textAlign: "right",
+      animation: `${rotateWords} 6s infinite`,
+    },
+  },
+  editorsWrapper: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+    margin: "0 auto",
+    width: "80vw",
+    padding: "15px 0",
+  },
+  lowerButtons: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "15px",
+    alignItems: "center",
+  },
+}));
 
 export default App;
