@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, MenuItem } from "electron";
+import { app, BrowserWindow, Menu, MenuItem, shell } from "electron";
 import path from "node:path";
 
 // The built directory structure
@@ -69,6 +69,18 @@ function createWindow() {
     }
 
     menu.popup();
+  });
+
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: "deny" };
+  });
+
+  win.webContents.on("will-navigate", (event, url) => {
+    if (url !== win?.webContents.getURL()) {
+      event.preventDefault();
+      shell.openExternal(url);
+    }
   });
 
   if (VITE_DEV_SERVER_URL) {

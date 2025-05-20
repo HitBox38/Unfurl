@@ -16,17 +16,22 @@ import { EveryWhereDialog } from "./components/EverywhereDialog";
 import ItchIoLogo from "./assets/itchio-logo.svg";
 import DialogViewer from "./components/DialogViewer";
 import { tss } from "tss-react/mui";
+import { useFaqModal } from "./modals/faqModal";
 
 const App = () => {
   const { name, isLoading } = useJsonDataStore((state) => state);
   const { node } = UseNodeStore((state) => state);
   const { setContent } = useDialogStore((state) => state);
-  const content = useMetadataConfigFormModal();
+  const metadataConfigForm = useMetadataConfigFormModal();
+  const faqModal = useFaqModal();
   const { classes } = useStyles();
   const isOnline =
     location.hostname.includes(".vercel.app") && location.hostname.includes("unfurl");
 
-  useKeyboardShortcut(() => setContent(content), { codes: ["KeyC", "KeyF"], ctrlKey: true });
+  useKeyboardShortcut(() => setContent(metadataConfigForm), {
+    codes: ["KeyC", "KeyF"],
+    ctrlKey: true,
+  });
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -79,6 +84,9 @@ const App = () => {
               Get the Desktop version
             </Button>
           )}
+          <Button variant="contained" color="info" onClick={() => setContent(faqModal)}>
+            FAQ
+          </Button>
         </Box>
       </Box>
       <EveryWhereDialog />
