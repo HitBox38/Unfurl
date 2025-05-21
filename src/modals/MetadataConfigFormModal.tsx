@@ -30,47 +30,47 @@ export const useMetadataConfigFormModal = (): Omit<DialogStore, "setOpen" | "set
         color: "primary",
         action: () => {},
       },
-      config.config.length > 0
-        ? {
-            name: "Export Config",
-            color: "info",
-            action: () => {
-              const element = document.createElement("a");
-              const file = new Blob([JSON.stringify(config)], { type: "application/json" });
-              element.href = URL.createObjectURL(file);
-              element.download = "metadataConfig.json";
-              element.click();
-              element.remove();
-            },
-          }
-        : {
-            name: "Import Config",
-            disabled: config.config.length > 0,
-            color: "info",
-            closeAfterwards: false,
-            action: () => {
-              const element = document.createElement("input");
-              element.type = "file";
-              element.accept = ".json";
-              element.onchange = () => {
-                const file = element.files?.[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onload = () => {
-                    const data = JSON.parse(reader.result as string);
-                    if (!data.config) {
-                      alert("Invalid JSON file");
-                      return;
-                    }
-                    setConfig(data);
-                  };
-                  reader.readAsText(file);
+      {
+        name: "Export Config",
+        color: "info",
+        action: () => {
+          const element = document.createElement("a");
+          const file = new Blob([JSON.stringify(config)], { type: "application/json" });
+          element.href = URL.createObjectURL(file);
+          element.download = "metadataConfig.json";
+          element.click();
+          element.remove();
+        },
+        disabled: config.config.length === 0,
+      },
+      {
+        name: "Import Config",
+        disabled: config.config.length > 0,
+        color: "info",
+        closeAfterwards: false,
+        action: () => {
+          const element = document.createElement("input");
+          element.type = "file";
+          element.accept = ".json";
+          element.onchange = () => {
+            const file = element.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = () => {
+                const data = JSON.parse(reader.result as string);
+                if (!data.config) {
+                  alert("Invalid JSON file");
+                  return;
                 }
+                setConfig(data);
               };
-              element.click();
-              element.remove();
-            },
-          },
+              reader.readAsText(file);
+            }
+          };
+          element.click();
+          element.remove();
+        },
+      },
     ],
     submitFunction: (data) => submitConfig(data as MetadataConfigTemplate),
     classNames: {
