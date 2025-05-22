@@ -39,13 +39,25 @@ export const useFaqModal = (): Omit<DialogStore, "setOpen" | "setContent"> => {
         </div>
         <div>
           <Typography variant="h6">What are the supported formats?</Typography>
-          <Typography variant="body1">
-            Unfurl supports the following formats:{" "}
-            <span className={classes.boldText}>twee (Twine)</span>,{" "}
-            <span className={classes.boldText}>markdown (Obsidian & such)</span>,{" "}
-            <span className={classes.boldText}>md</span> &{" "}
-            <span className={classes.boldText}>JSON</span>.
-          </Typography>
+          <Typography variant="body1">Unfurl supports the following formats: </Typography>
+
+          <ul>
+            <li>
+              <Typography variant="body1" className={classes.boldText}>
+                twee (Twine)
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body1" className={classes.boldText}>
+                markdown (.md files, compatible with tools like Obsidian)
+              </Typography>
+            </li>
+            <li>
+              <Typography variant="body1" className={classes.boldText}>
+                JSON
+              </Typography>
+            </li>
+          </ul>
         </div>
         <div>
           <Typography variant="h6">How can I contribute?</Typography>
