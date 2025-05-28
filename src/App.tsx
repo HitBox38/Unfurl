@@ -17,6 +17,7 @@ import ItchIoLogo from "./assets/itchio-logo.svg";
 import DialogViewer from "./components/DialogViewer";
 import { tss } from "tss-react/mui";
 import { useFaqModal } from "./modals/faqModal";
+import { DemoButton } from "./components/DemoButton";
 
 const App = () => {
   const { name, isLoading } = useJsonDataStore((state) => state);
@@ -67,15 +68,16 @@ const App = () => {
         <Box className={classes.editorsWrapper}>
           {name !== "" ? (
             <>
-              <DialogViewer /> {node && <NodeEditor />}
+              <DialogViewer /> {node ? <NodeEditor /> : null}
             </>
-          ) : (
-            isLoading && <CircularProgress />
-          )}
+          ) : isLoading ? (
+            <CircularProgress />
+          ) : null}
         </Box>
         <Box className={classes.lowerButtons}>
           {name !== "" ? <DownloadButton /> : <MetadataConfig />}
-          {isOnline && (
+          <DemoButton />
+          {isOnline ? (
             <Button
               startIcon={<ItchIoLogo />}
               href="https://hit-box38.itch.io/unfurl"
@@ -83,7 +85,7 @@ const App = () => {
               color="secondary">
               Get the Desktop version
             </Button>
-          )}
+          ) : null}
           <Button variant="contained" color="info" onClick={() => setContent(faqModal)}>
             FAQ
           </Button>

@@ -13,14 +13,17 @@ export const useFaqModal = (): Omit<DialogStore, "setOpen" | "setContent"> => {
           <Typography variant="body1">
             The tool that can take your extensive dialogs you wrote in Twine or in other markdown
             formats and visualize, edit and convert them to a JSON format for your game!
+            <br />
+            If you want to test it out, you can use the demo file{" "}
+            <span className={classes.boldText}>(Hold Control + T + N)</span>.
           </Typography>
         </div>
         <div>
           <Typography variant="h6">How do I use these files in my game?</Typography>
           <Typography variant="body1">
             You can use these files in your game by importing them as a JSON file. This can change
-            depending on the engine you are using. For example, in Unity, you'll need to build your
-            own dialog manager and import the JSON file as a text asset.
+            depending on how you're building your game. For example, in Unity, you'll need to build
+            your own dialog manager and import the JSON file as a text asset.
           </Typography>
         </div>
         <div>

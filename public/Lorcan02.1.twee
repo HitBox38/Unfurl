@@ -1,0 +1,150 @@
+:: StoryTitle
+Lorcan02
+
+
+:: StoryData
+{
+  "ifid": "721172DC-6A7E-4D57-A42D-0E4A54B29448",
+  "format": "Harlowe",
+  "format-version": "3.3.7",
+  "start": "Untitled Passage",
+  "zoom": 1
+}
+
+
+:: Changing forest {"position":"800,1200","size":"100,100"}
+"The magical influence of the Fairies who live here make the very land shift and move. 
+no track through this place is ever the same.
+but if you keep in your mind your destination, eventually you will find it."
+
+[["Anything else i should keep in mind?"->Practical advice]]
+[["it's hard to do but i will get it eventually. slow is smooth, smooth is fast."->Lorcans Blessing]]
+
+
+
+:: Farewell Dullahan {"position":"1200,1500","size":"100,100"}
+"Farewell Dullahan. 
+Happy hunting"
+
+
+:: Lorcan Disappointed {"position":"1150,900","size":"100,100"}
+#@-1
+"I expected more from you.
+Perhaps it was my mistake.
+There is still much more you need to learn.
+This topic can wait for your growth."
+
+[["My growth arrives with each step i take towards my head."->Practical advice]]
+[["something in particular you have in mind?"->Path of self mastery]]
+
+
+
+:: Lorcan exited {"position":"850,900","size":"100,100"}
+#@1
+#*#*
+"It is good you are on the path of self mastery.
+There are many kinds of warriors, but the ones who fight to better themselves are my favourite.
+if you need directions on this path I am here to help.
+Here. Take this"
+
+[["I will do my best to improve with each fight. Guess i need something to focus on"->Practical advice]]
+[["I will need all the help I can get. this forest is confusing"->Changing forest]]
+[["Thank you for your support. but what's this head?"->The Skull Head]]
+
+
+
+:: Lorcans Blessing {"position":"1000,1400","size":"100,100"}
+#?1
+#%#%
+"you are deffinetly right.
+May your attempts at growth meet nurishment."
+
+[["Goodbie friend. and thank you"->Farewell Dullahan]]
+
+
+:: Path of self mastery {"position":"1200,1200","size":"100,100"}
+#@1
+"There are many types of warriors.
+Some are tricksters, trying to deceive their enemies.
+Others are bullies, trying to fight others who are weaker than they are.
+Few are crusaders, Fighting for what they believe is just.
+But the greatest of them all are the ones who fight for self mastery.
+For the sole purpose of being better.
+if you want to be the best, that is what you must learn."
+
+[["this is good advice. got any more?"->Practical advice]]
+[["I will think about it. thank you"->Farewell Dullahan]]
+
+
+:: Practical advice {"position":"1000,1100","size":"100,100"}
+"It sounds like you would like to strive to end fights quickly.
+Don't give your opponents room to react. 
+If they fight at range, strike them face to face.
+And if they fight face to face keep your distance and use superior range.
+And lastly.
+don't stop moving, do this and you will find fights ending in no time."
+
+[["I will do my best to remember that."->Farewell Dullahan]]
+[["I will start with focusing on your advice. slow is smooth, smooth is fast."->Lorcans Blessing]]
+
+
+
+:: The Skull Head {"position":"700,1000","size":"100,100"}
+"Long ago I fought a worthy human adversary.
+A master swordsman with the manarisems of a ruler that held his own against me for two days and nights.
+we both agreed the winner keeps the loser's skull.
+and now it is yours."
+
+[["How should i use it?"->Practical advice]]
+[["Prehaps it will show a new prespective on the forest"->Changing forest]]
+
+
+:: Untitled Passage {"position":"1000,350","size":"100,100"}
+"Hello once again Dullahan, how goes the hunting?"
+[["It will take more than those damn cultists to keep me down"->fighting]]
+
+
+:: Why no {"position":"1000,700","size":"100,100"}
+"Why do you still fight then?
+And why do you not enjoy fighting?"
+
+[["I am a lover, not a fighter. but i happen to like myself, so i will fight for myself"->Lorcan exited]]
+[["It's a nasty business, people get hurt. I would rather talk it out, but some people can't be reasoned with"->Practical advice]]
+[["Fighting hurts, I dislike the pain. but i want my head so i am going to get it"->Lorcan Disappointed]]
+
+
+
+:: Why yes {"position":"1300,700","size":"100,100"}
+"Why? 
+What about the fight is fun?"
+
+[["The violence. and feeling of my enemies obliteration"->Lorcan Disappointed]]
+[["The feeling of mastery over my body and self"->Lorcan exited]]
+[["Knowing with each strike i take my power back from those who stole it from me"->Practical advice]]
+
+
+
+:: fighting {"position":"1000,475","size":"100,100"}
+"This is good to hear. 
+Strong warriors are needed here."
+
+Lorcan smiles revealing mis sharp maw.
+
+"Tell me. Do you enjoy fighting?"
+
+[["yes. I do"->Why yes]]
+[["No. but it must be done"->Why no]]
+[["at times yes. not always."->why indecisive]]
+
+
+
+
+
+:: why indecisive {"position":"700,700","size":"100,100"}
+"Why? 
+You seem indecisive."
+
+[["it's hard to put in words"->Lorcan Disappointed]]
+[["moving freely and testing my limits IS fun. But the killing intent part of combat is not fun"->Lorcan exited]]
+[["I feel i get closer to my head with each fight. But hurting others is not something I relish."->Practical advice]]
+
