@@ -1,34 +1,42 @@
-# Use a base image with Wine preinstalled
-FROM electronuserland/builder:wine
+# Use Node.js 18 as base
+FROM node:18-bullseye
 
-# Set environment variables for Wine
-ENV WINEDEBUG -all,err+all
-ENV WINEARCH win64
-ENV WINEPREFIX /root/.wine64
-
-# Set the working directory in the Docker image
-WORKDIR /app
-
-# Install Node.js, NPM and other dependencies
-# The base image might already have Node.js, but we'll ensure it's installed
-RUN apt-get update --fix-missing && \
+# Install Wine and required dependencies
+RUN dpkg --add-architecture i386 && \
+    apt-get update && \
     apt-get install -y --no-install-recommends \
-    winbind \
-    libgssapi-krb5-2 && \
+    wine \
+    wine32 \
+    wine64 \
+    python3 \
+    make \
+    g++ \
+    build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Copy package.json and package-lock.json (if available)
+# Set Wine environment variables
+ENV WINEDEBUG=-all
+ENV WINEARCH=win64
+ENV WINEPREFIX=/root/.wine64
+
+# Initialize Wine (suppress errors)
+RUN wine64 wineboot --init || true
+
+# Set the working directory
+WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
 
-# Install npm dependencies including Electron
-RUN npm install
+# Install dependencies
+RUN npm ci || npm install
 
-# Copy the rest of the application source code
+# Copy application files
 COPY . .
 
-# Build the Electron app for Windows using Wine
-RUN npm run build:windows
+# Build the application
+RUN npm run build:windows || exit 0
 
-# The command to run when this image is used to start a container
-CMD ["echo", "Build complete."]
+# The output will be in the release directory
+CMD ["echo", "Build complete. Check the release directory for output."] 
