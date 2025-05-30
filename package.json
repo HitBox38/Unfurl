@@ -5,6 +5,11 @@
   "author": {
     "name": "HitBox38"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron"
+    ]
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
