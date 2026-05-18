@@ -29,7 +29,12 @@ export const EveryWhereDialog = () => {
 
   const renderActions = () =>
     functions && functions.length > 0 ? (
-      <DialogFooter className={classNames?.dialogActions}>
+      <DialogFooter
+        className={cn(
+          "border-t border-border/40 bg-background/60 px-6 py-4",
+          classNames?.dialogActions,
+        )}
+      >
         {functions.map(
           (
             {

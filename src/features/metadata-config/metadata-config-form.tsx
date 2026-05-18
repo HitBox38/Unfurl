@@ -3,7 +3,6 @@ import { useEffect } from "react";
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 
 import { useStorage } from "@/shared/hooks";
-import { cn } from "@/shared/lib/cn";
 import type { MetadataConfigTemplate } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -16,24 +15,10 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 
-interface FieldProps {
-  className?: string;
-  label: string;
-  helperText?: string;
-  children: React.ReactNode;
-}
-
-const FormField = ({ className, label, helperText, children }: FieldProps) => (
-  <div className={cn("flex flex-col gap-1 text-left", className)}>
-    <Label className="text-xs uppercase tracking-wide text-muted-foreground">
-      {label}
-    </Label>
-    {children}
-    {helperText ? (
-      <span className="text-[11px] text-muted-foreground">{helperText}</span>
-    ) : null}
-  </div>
-);
+const COLUMN_HEADER_CLASS =
+  "text-xs uppercase tracking-wide text-muted-foreground";
+const ROW_GRID_CLASS =
+  "grid grid-cols-[minmax(0,1.1fr)_minmax(0,1.1fr)_minmax(120px,140px)_minmax(0,1.1fr)_36px] items-center gap-x-3 gap-y-1.5";
 
 export const MetadataConfigForm = () => {
   const [storedConfig] = useStorage<MetadataConfigTemplate>({
@@ -52,75 +37,113 @@ export const MetadataConfigForm = () => {
     }
   }, [storedConfig, reset]);
 
+  const hasRows = fields.length > 0;
+
   return (
-    <div className="flex flex-col items-center justify-evenly gap-4 pt-2">
-      {fields.map((line, index) => (
-        <div
-          key={line.id}
-          className="flex min-w-[700px] flex-wrap items-end justify-between gap-2"
-        >
-          <FormField className="w-[230px]" label="Name">
-            <Input
-              {...register(`config.${index}.name`, { required: true })}
-              defaultValue={line.name}
-            />
-          </FormField>
-          <FormField
-            className="w-[200px]"
-            label="Sign"
-            helperText="Use a set of symbols that won't repeat in the dialog"
-          >
-            <Input
-              {...register(`config.${index}.sign`, { required: true })}
-              defaultValue={line.sign}
-            />
-          </FormField>
-          <FormField className="w-[120px]" label="Type">
-            <Controller
-              name={`config.${index}.type`}
-              defaultValue={line.type}
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger aria-label="Type">
-                    <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="number">Number</SelectItem>
-                    <SelectItem value="boolean">Boolean</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </FormField>
-          <FormField className="w-[230px]" label="Label">
-            <Input
-              {...register(`config.${index}.label`)}
-              defaultValue={line.label ?? ""}
-            />
-          </FormField>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => remove(index)}
-            aria-label="Remove metadata field"
-            className="text-destructive"
-          >
-            <Trash2 className="size-4" />
-          </Button>
+    <div className="flex flex-col gap-4 pt-2">
+      {hasRows ? (
+        <div className="flex flex-col divide-y divide-border/60">
+          {fields.map((line, index) => (
+            <div key={line.id} className={`${ROW_GRID_CLASS} py-3`}>
+              <Label
+                htmlFor={`config.${index}.name`}
+                className={COLUMN_HEADER_CLASS}
+              >
+                Name
+              </Label>
+              <Label
+                htmlFor={`config.${index}.sign`}
+                className={COLUMN_HEADER_CLASS}
+              >
+                Sign
+              </Label>
+              <Label
+                htmlFor={`config.${index}.type`}
+                className={COLUMN_HEADER_CLASS}
+              >
+                Type
+              </Label>
+              <Label
+                htmlFor={`config.${index}.label`}
+                className={COLUMN_HEADER_CLASS}
+              >
+                Label
+              </Label>
+              <span aria-hidden />
+
+              <Input
+                id={`config.${index}.name`}
+                defaultValue={line.name}
+                {...register(`config.${index}.name`, { required: true })}
+              />
+              <Input
+                id={`config.${index}.sign`}
+                defaultValue={line.sign}
+                {...register(`config.${index}.sign`, { required: true })}
+              />
+              <Controller
+                name={`config.${index}.type`}
+                defaultValue={line.type}
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger
+                      id={`config.${index}.type`}
+                      aria-label="Type"
+                    >
+                      <SelectValue placeholder="Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="number">Number</SelectItem>
+                      <SelectItem value="boolean">Boolean</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <Input
+                id={`config.${index}.label`}
+                defaultValue={line.label ?? ""}
+                {...register(`config.${index}.label`)}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => remove(index)}
+                aria-label={`Remove ${line.name || "field"}`}
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              >
+                <Trash2 className="size-4" />
+              </Button>
+
+              <span aria-hidden />
+              <p className="text-[11px] leading-snug text-muted-foreground">
+                Use a set of symbols that won&apos;t repeat in the dialog.
+              </p>
+              <span aria-hidden />
+              <span aria-hidden />
+              <span aria-hidden />
+            </div>
+          ))}
         </div>
-      ))}
-      <Button
-        type="button"
-        variant="secondary"
-        onClick={() =>
-          append({ name: "", sign: "", type: "number", label: "" })
-        }
-      >
-        Add
-      </Button>
+      ) : (
+        <p className="text-sm text-muted-foreground">
+          No metadata fields configured yet. Click <strong>Add</strong> to
+          create your first one.
+        </p>
+      )}
+      <div className="flex justify-center">
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() =>
+            append({ name: "", sign: "", type: "number", label: "" })
+          }
+        >
+          Add
+        </Button>
+      </div>
     </div>
   );
 };

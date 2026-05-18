@@ -26,7 +26,8 @@ export const useMetadataConfigFormModal = (): DialogContentValue => {
     isForm: true,
     formName: "metadata-config",
     classNames: {
-      dialogContent: "max-h-[70vh]",
+      dialog: "sm:max-w-3xl",
+      dialogContent: "max-h-[60vh]",
     },
     functions: [
       {
