@@ -11,18 +11,28 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Install Node.js, NPM
-        uses: actions/setup-node@v2
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "22.x"
+          cache: pnpm
 
-      - name: Install libraries
-        run: npm i
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
 
       - name: Build app
-        run: npm run build:linux
+        run: pnpm build:linux
 
       - name: Deploy
         uses: josephbmanley/butler-publish-itchio-action@v1.0.3
