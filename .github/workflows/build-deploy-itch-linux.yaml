@@ -34,10 +34,15 @@ jobs:
       - name: Build app
         run: pnpm build:linux
 
-      - name: Deploy
-        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
+      - name: Set up butler
+        uses: jdno/setup-butler@v1
+        with:
+          version: latest
+
+      - name: Push to itch.io
+        run: butler push "$PACKAGE" "$ITCH_USER/$ITCH_GAME:$CHANNEL"
         env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
+          BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
           CHANNEL: linux
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
