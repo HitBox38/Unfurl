@@ -18,6 +18,7 @@ import { useFaqModal } from "@/features/faq";
 import { FileUpload } from "@/features/file-upload";
 import { MetadataConfig } from "@/features/metadata-config";
 import { NodeEditor } from "@/features/node-editor";
+import { Open5eSpells } from "@/features/open5e-spells";
 
 const isOnlineHost = () =>
   typeof location !== "undefined" &&
@@ -81,6 +82,11 @@ const App = () => {
             <Loader2 className="animate-spin" />
           ) : null}
         </section>
+        {name === "" ? (
+          <section className="flex w-full justify-center px-4 py-4">
+            <Open5eSpells />
+          </section>
+        ) : null}
         <section className="flex flex-col items-center gap-4 pb-8">
           {name !== "" ? <DownloadButton /> : <MetadataConfig />}
           <DemoButton />
