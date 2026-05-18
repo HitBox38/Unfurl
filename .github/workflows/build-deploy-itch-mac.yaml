@@ -40,9 +40,9 @@ jobs:
           version: latest
 
       - name: Push to itch.io
-        run: sh entrypoint.sh
+        run: butler push "$PACKAGE" "$ITCH_USER/$ITCH_GAME:$CHANNEL"
         env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
+          BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
           CHANNEL: osx
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38
