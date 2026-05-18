@@ -5,6 +5,18 @@ branching dialog files (Twee, Obsidian markdown, JSON). This file tells humans
 and AI agents the conventions and commands they need to be productive here
 without breaking anything.
 
+## Cursor Cloud specific instructions
+
+Unfurl is a client-side dialog/story file editor. **No databases or backend
+services are required** — everything runs in the renderer / Electron process
+against the user's filesystem and `localStorage`.
+
+In headless cloud environments the Electron main process will emit GPU /
+D-Bus errors on `pnpm dev`, but the Vite renderer still serves the app at
+the printed URL (default `http://localhost:5173`). For manual UI testing in
+the cloud, prefer `pnpm preview` against a fresh `pnpm build` — it's
+deterministic and binds cleanly to `127.0.0.1`.
+
 ## Stack
 
 - **Bundler**: Vite 8 (`vite.config.ts`) with `@vitejs/plugin-react`,
@@ -128,7 +140,7 @@ opening a PR. CI in `.github/workflows/*.yaml` reruns them on every push to
 pnpm dlx shadcn@latest add <component>
 ```
 
-Components.json is configured to drop new primitives into
+`components.json` is configured to drop new primitives into
 `src/shared/ui/` and the utility helper into `src/shared/lib/cn`.
 
 ## Electron bits
@@ -143,6 +155,12 @@ Components.json is configured to drop new primitives into
 - `dist-electron/` is the build output for the main + preload bundles;
   `dist/` is the renderer; both are gitignored.
 
+## Sample data
+
+`public/Lorcan02.1.twee` is a sample Twee dialog file that can be imported
+via the app's upload UI (or unlocked through the Konami code in the
+`features/demo` button) to verify the graph editor works end-to-end.
+
 ## Don't
 
 - Don't re-introduce MUI, `@emotion/*`, or `tss-react` — the migration
@@ -152,3 +170,4 @@ Components.json is configured to drop new primitives into
   `coverage`, or `package-lock.json`.
 - Don't add inline imports halfway down a file.
 - Don't lower the `--max-warnings 0` gate on `pnpm lint`.
+- Don't fall back to `npm`/`yarn` — pnpm is pinned via `packageManager`.
