@@ -3,6 +3,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -94,6 +95,9 @@ export const EveryWhereDialog = () => {
               {title ? (
                 <DialogHeader className={cn("p-6 pb-2", classNames?.dialogTitle)}>
                   <DialogTitle>{title}</DialogTitle>
+                  <DialogDescription className="sr-only">
+                    {title}
+                  </DialogDescription>
                 </DialogHeader>
               ) : null}
               <div
@@ -112,6 +116,9 @@ export const EveryWhereDialog = () => {
             {title ? (
               <DialogHeader className={cn("p-6 pb-2", classNames?.dialogTitle)}>
                 <DialogTitle>{title}</DialogTitle>
+                <DialogDescription className="sr-only">
+                  {title}
+                </DialogDescription>
               </DialogHeader>
             ) : null}
             <div
