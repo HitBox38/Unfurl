@@ -135,7 +135,7 @@ export const FilePage = () => {
     );
   }
 
-  if (!fileId || activeFileId !== fileId || name === "") {
+  if (!fileId || activeFileId !== fileId) {
     return (
       <main className="flex min-h-screen items-center justify-center">
         <Loader2 className="animate-spin" aria-label="Loading editable file" />
@@ -150,7 +150,7 @@ export const FilePage = () => {
           <p className="text-sm uppercase tracking-wide text-muted-foreground">
             Editing
           </p>
-          <h1 className="text-3xl font-bold">{name}</h1>
+          <h1 className="text-3xl font-bold">{name || "Untitled"}</h1>
         </div>
         <Button asChild variant="secondary">
           <Link to="/">Upload another file</Link>

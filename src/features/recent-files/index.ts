@@ -9,3 +9,4 @@ export {
   type EditableFileRecord,
 } from "@/features/recent-files/recent-files-storage";
 export { RecentFilesSidebar } from "@/features/recent-files/recent-files-sidebar";
+export { useOpenEditableFile } from "@/features/recent-files/use-open-editable-file";

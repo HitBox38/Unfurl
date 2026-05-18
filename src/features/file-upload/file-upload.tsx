@@ -4,12 +4,10 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, type ChangeEvent } from "react";
 
 import { useStorage } from "@/shared/hooks";
 import { fromMd, fromTwee } from "@/shared/lib/convertors";
-import { useJsonDataStore } from "@/shared/stores";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -26,7 +24,7 @@ import {
   type StoryData,
   type SupportedFileType,
 } from "@/shared/types";
-import { saveEditableFile } from "@/features/recent-files";
+import { useOpenEditableFile } from "@/features/recent-files";
 
 const FILE_TYPE_LABEL: Record<SupportedFileType, string> = {
   twee: "Twee",
@@ -45,8 +43,7 @@ export const FileUpload = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [fileType, setFileType] = useState<SupportedFileType>("twee");
   const [caughtError, setCaughtError] = useState<string | null>(null);
-  const setJsonData = useJsonDataStore((state) => state.setJson);
-  const navigate = useNavigate();
+  const openEditableFile = useOpenEditableFile();
 
   const [{ config }] = useStorage<MetadataConfigTemplate>({
     key: "metadataConfig",
@@ -84,10 +81,10 @@ export const FileUpload = () => {
     try {
       if (fileType === "twee") {
         const data = await fromTwee(files[0]);
-        openEditableFile(data, files[0].name.split(".")[0]);
+        openEditableFile(data, files[0].name.split(".")[0], fileType);
       } else if (fileType === "md") {
         const data = await fromMd(files, title);
-        openEditableFile(data, title);
+        openEditableFile(data, title, fileType);
       } else if (fileType === "json") {
         const text = await files[0].text();
         const json = JSON.parse(text) as StoryData;
@@ -107,7 +104,7 @@ export const FileUpload = () => {
             metadata: { ...node.metadata, ...extras },
           };
         });
-        openEditableFile(json, files[0].name.split(".")[0]);
+        openEditableFile(json, files[0].name.split(".")[0], fileType);
       }
     } catch (error) {
       setCaughtError(error instanceof Error ? error.message : String(error));
@@ -119,21 +116,13 @@ export const FileUpload = () => {
   const uploadDisabled =
     isLoading ||
     files.length === 0 ||
-    files.some((file) => fileExtension(file) !== fileType);
+    files.some((file) => fileExtension(file) !== fileType) ||
+    (fileType === "md" && title.trim() === "");
 
   const inputLabelText =
     fileType === "md"
       ? "Select .md files"
       : `Select a .${fileType} file`;
-
-  const openEditableFile = (content: StoryData, name: string) => {
-    const record = saveEditableFile({ name, fileType, content });
-    setJsonData(record.content, record.name, record.id);
-    void navigate({
-      to: "/files/$fileId",
-      params: { fileId: record.id },
-    });
-  };
 
   return (
     <div className="flex flex-col items-center justify-center gap-2">

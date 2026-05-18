@@ -54,6 +54,25 @@ describe("FileUpload", () => {
     expect(fileInput).toHaveAttribute("multiple");
   });
 
+  it("keeps md upload disabled until a title is provided", async () => {
+    render(<FileUpload />);
+    const trigger = screen.getByLabelText(/file type/i);
+    await userEvent.click(trigger);
+    await userEvent.click(
+      screen.getByRole("option", { name: /Obsidian/i }),
+    );
+
+    const fileInput = screen.getByLabelText(/select \.md files/i, {
+      selector: "input",
+    }) as HTMLInputElement;
+    await userEvent.upload(
+      fileInput,
+      new File(["# Intro"], "intro.md", { type: "text/markdown" }),
+    );
+
+    expect(screen.getByRole("button", { name: /^upload$/i })).toBeDisabled();
+  });
+
   it("upload button is disabled until a file is selected", () => {
     render(<FileUpload />);
     const upload = screen.getByRole("button", { name: /^upload$/i });

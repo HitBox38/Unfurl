@@ -1,8 +1,8 @@
 import { Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { useOpenEditableFile } from "@/features/recent-files";
 import { fromTwee } from "@/shared/lib/convertors";
-import { useJsonDataStore } from "@/shared/stores";
 import { Button } from "@/shared/ui/button";
 
 const KONAMI_SEQUENCE = [
@@ -23,7 +23,7 @@ const RESET_DELAY_MS = 2000;
 export const DemoButton = () => {
   const [isDemoFileButtonVisible, setIsDemoFileButtonVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const setJsonData = useJsonDataStore((state) => state.setJson);
+  const openEditableFile = useOpenEditableFile();
 
   const inputSequence = useRef<string[]>([]);
   const resetTimer = useRef<number | null>(null);
@@ -72,7 +72,7 @@ export const DemoButton = () => {
       const blob = await response.blob();
       const file = new File([blob], "Lorcan02.1.twee");
       const data = await fromTwee(file);
-      setJsonData(data, "Lorcan02.1");
+      openEditableFile(data, "Lorcan02.1", "twee");
     } finally {
       setIsLoading(false);
     }
