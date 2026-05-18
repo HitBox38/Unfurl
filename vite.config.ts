@@ -1,18 +1,27 @@
-import { defineConfig } from "vite";
 import path from "node:path";
-import electron from "vite-plugin-electron/simple";
+import { fileURLToPath } from "node:url";
+
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from "vite";
+import electron from "vite-plugin-electron/simple";
 import svgr from "vite-plugin-svgr";
 
-// https://vitejs.dev/config/
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: {
+      "@": path.resolve(projectRoot, "src"),
+    },
+  },
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          reactflow: ["reactflow"],
-          materialUI: ["@mui/material"],
-          dagre: ["dagre"],
+        manualChunks: (id) => {
+          if (id.includes("@xyflow/react")) return "xyflow";
+          if (id.includes("/dagre/")) return "dagre";
+          return undefined;
         },
       },
     },
@@ -28,19 +37,14 @@ export default defineConfig({
       include: "**/*.svg",
     }),
     react(),
+    tailwindcss(),
     electron({
       main: {
-        // Shortcut of `build.lib.entry`.
         entry: "electron/main.ts",
       },
       preload: {
-        // Shortcut of `build.rollupOptions.input`.
-        // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-        input: path.join(__dirname, "electron/preload.ts"),
+        input: path.join(projectRoot, "electron/preload.ts"),
       },
-      // Ployfill the Electron and Node.js built-in modules for Renderer process.
-      // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
-      renderer: {},
     }),
   ],
 });
