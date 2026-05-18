@@ -1,13 +1,22 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useJsonDataStore } from "@/shared/stores";
 
 import { FileUpload } from "@/features/file-upload/file-upload";
 
+const { navigate } = vi.hoisted(() => ({
+  navigate: vi.fn(),
+}));
+
+vi.mock("@tanstack/react-router", () => ({
+  useNavigate: () => navigate,
+}));
+
 describe("FileUpload", () => {
   beforeEach(() => {
+    navigate.mockReset();
     useJsonDataStore.getState().reset();
   });
 

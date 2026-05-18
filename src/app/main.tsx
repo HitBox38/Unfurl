@@ -1,7 +1,8 @@
 import React, { Suspense } from "react";
 import ReactDOM from "react-dom/client";
+import { RouterProvider } from "@tanstack/react-router";
 
-import App from "@/app/app";
+import { router } from "@/app/router";
 import "@/styles/index.css";
 
 const rootElement = document.getElementById("root");
@@ -12,7 +13,7 @@ if (!rootElement) {
 ReactDOM.createRoot(rootElement).render(
   <React.StrictMode>
     <Suspense>
-      <App />
+      <RouterProvider router={router} />
     </Suspense>
   </React.StrictMode>,
 );

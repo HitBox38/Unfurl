@@ -7,7 +7,7 @@ import {
   type Node,
 } from "@xyflow/react";
 import dagre from "dagre";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData, StoryNode } from "@/shared/types";
@@ -100,6 +100,10 @@ export const DialogViewer = () => {
   }, [content, setNodes, setEdges]);
 
   const width = isOnlineHost() ? "100%" : "500px";
+
+  useEffect(() => {
+    onLayout();
+  }, [onLayout]);
 
   return (
     <div
