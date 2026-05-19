@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { getEditableFile, saveEditableFile } from "@/features/recent-files";
 import { useJsonDataStore } from "@/shared/stores/json-data-store";
 import type { StoryData } from "@/shared/types";
 
@@ -57,5 +58,26 @@ describe("useJsonDataStore", () => {
     expect(intro?.content).toEqual(["Updated"]);
     expect(intro?.metadata).toEqual({ visited: true });
     expect(outro?.content).toEqual(["Bye"]);
+  });
+
+  it("persists node edits into the active editable file", () => {
+    saveEditableFile(
+      { name: "demo", fileType: "twee", content: sample },
+      { createId: () => "demo-id" },
+    );
+    useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
+
+    useJsonDataStore.getState().setNode({
+      name: "Intro",
+      content: ["Stored edit"],
+      choices: [],
+      metadata: { visited: true },
+    });
+
+    expect(
+      getEditableFile("demo-id")?.content.nodes.find(
+        (node) => node.name === "Intro",
+      )?.content,
+    ).toEqual(["Stored edit"]);
   });
 });

@@ -1,0 +1,49 @@
+import { render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+import App from "@/app/app";
+
+vi.mock("@tanstack/react-router", () => ({
+  Outlet: () => <div data-testid="route-outlet" />,
+}));
+
+vi.mock("@/features/recent-files", () => ({
+  RecentFilesSidebar: () => <nav aria-label="Editable files" />,
+}));
+
+describe("App shell", () => {
+  afterEach(() => {
+    Reflect.deleteProperty(window, "ipcRenderer");
+  });
+
+  it("does not render the Electron titlebar in the web view", () => {
+    render(<App />);
+
+    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /toggle editable files sidebar/i }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("main")).toHaveLength(1);
+    expect(
+      screen.getByRole("navigation", { name: /editable files/i }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders Electron navigation chrome in the Electron app view", () => {
+    Object.defineProperty(window, "ipcRenderer", {
+      configurable: true,
+      value: { on: vi.fn() },
+    });
+
+    render(<App />);
+
+    expect(screen.getByRole("banner")).toHaveTextContent("Unfurl");
+    expect(screen.getByRole("banner")).toHaveClass(
+      "electron-titlebar-drag-region",
+    );
+    expect(screen.getByRole("banner")).not.toHaveClass("draggable");
+    expect(
+      screen.getByRole("navigation", { name: /editable files/i }),
+    ).toBeInTheDocument();
+  });
+});

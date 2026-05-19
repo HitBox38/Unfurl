@@ -13,6 +13,41 @@ export interface FromTweeOptions {
   config?: MetadataConfigTemplate | null;
 }
 
+interface TweeDeclarationMetadata {
+  position?: string;
+  size?: string;
+}
+
+const parseCoordinatePair = (value: string | undefined) => {
+  if (!value) return null;
+  const [first, second] = value.split(",").map((part) => Number(part.trim()));
+  if (!Number.isFinite(first) || !Number.isFinite(second)) return null;
+  return { first, second };
+};
+
+const parseDeclarationMetadata = (
+  declaration: string,
+): Pick<StoryNode, "position" | "size"> => {
+  const metadataStart = declaration.indexOf("{");
+  if (metadataStart === -1) return {};
+
+  try {
+    const metadata = JSON.parse(
+      declaration.slice(metadataStart),
+    ) as TweeDeclarationMetadata;
+    const position = parseCoordinatePair(metadata.position);
+    const size = parseCoordinatePair(metadata.size);
+    return {
+      ...(position
+        ? { position: { x: position.first, y: position.second } }
+        : {}),
+      ...(size ? { size: { width: size.first, height: size.second } } : {}),
+    };
+  } catch {
+    return {};
+  }
+};
+
 export const parseTwee = (
   source: string,
   options: FromTweeOptions = {},
@@ -52,8 +87,10 @@ export const parseTwee = (
       const declaration = line.slice(2).trim();
       const declareName = declaration.split("[")[0];
       const name = declareName.split("{")[0].trim();
+      const layout = parseDeclarationMetadata(declaration);
       currentNode = {
         name,
+        ...layout,
         metadata: seedMetadataDefaults(config),
         choices: [],
         content: [],

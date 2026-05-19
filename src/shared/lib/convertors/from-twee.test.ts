@@ -39,6 +39,20 @@ describe("parseTwee", () => {
     expect(cave?.content).toEqual(["The cave is silent."]);
   });
 
+  it("preserves Twee node position and size metadata", () => {
+    const story = parseTwee(
+      `:: Intro {"position":"25,50","size":"200,100"}
+Hello
+`,
+      { config: null },
+    );
+
+    expect(story.nodes[0]).toMatchObject({
+      position: { x: 25, y: 50 },
+      size: { width: 200, height: 100 },
+    });
+  });
+
   it("applies metadata sign matching when a config is provided", () => {
     const source = `:: Hero
 $hp 10
