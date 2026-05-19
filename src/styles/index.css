@@ -96,7 +96,7 @@
   }
 }
 
-.draggable {
+.electron-titlebar-drag-region {
   -webkit-app-region: drag;
   background: #3d3d3d;
   width: 100vw;

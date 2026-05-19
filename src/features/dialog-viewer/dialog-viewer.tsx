@@ -14,9 +14,8 @@ import {
   type DialogNodeData,
 } from "@/features/dialog-viewer/dialog-graph";
 
-const isOnlineHost = () =>
-  location.hostname.includes(".vercel.app") &&
-  location.hostname.includes("unfurl");
+const isElectronRenderer = () =>
+  typeof window !== "undefined" && Boolean(window.ipcRenderer);
 
 export const DialogViewer = () => {
   const content = useJsonDataStore((state) => state.content);
@@ -38,7 +37,7 @@ export const DialogViewer = () => {
     setEdges([...updated.edges]);
   }, [content, setNodes, setEdges]);
 
-  const width = isOnlineHost() ? "100%" : "500px";
+  const width = isElectronRenderer() ? "500px" : "100%";
 
   useEffect(() => {
     onLayout();
@@ -46,11 +45,13 @@ export const DialogViewer = () => {
 
   return (
     <div
+      aria-label="Dialog flow chart"
       className="mr-6 h-[750px] rounded-xl bg-[#121212] bg-[image:linear-gradient(rgba(255,255,255,0.05),rgba(255,255,255,0.05))] shadow-md transition-shadow"
       style={{ width }}
     >
       <ReactFlow
         fitView
+        colorMode="dark"
         nodes={nodes}
         edges={edges}
         onNodesChange={onNodesChange}

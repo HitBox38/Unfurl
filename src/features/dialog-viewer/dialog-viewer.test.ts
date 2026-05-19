@@ -12,6 +12,7 @@ describe("buildDialogGraph", () => {
         {
           name: "Intro",
           position: { x: 25, y: 50 },
+          size: { width: 100, height: 100 },
           metadata: {},
           content: [],
           choices: [{ text: "Next", destination: "Outro" }],
@@ -19,6 +20,7 @@ describe("buildDialogGraph", () => {
         {
           name: "Outro",
           position: { x: 200, y: 50 },
+          size: { width: 100, height: 100 },
           metadata: {},
           content: [],
           choices: [],
@@ -29,6 +31,10 @@ describe("buildDialogGraph", () => {
     expect(graph.nodes.map((node) => [node.id, node.position])).toEqual([
       ["Intro", { x: 25, y: 50 }],
       ["Outro", { x: 200, y: 50 }],
+    ]);
+    expect(graph.nodes.map((node) => node.style)).toEqual([
+      undefined,
+      undefined,
     ]);
     expect(graph.edges).toEqual([
       expect.objectContaining({ source: "Intro", target: "Outro" }),

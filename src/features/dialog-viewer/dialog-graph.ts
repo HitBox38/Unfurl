@@ -54,9 +54,6 @@ export const buildDialogGraph = (
     id: node.name,
     data: { label: node.name, metadata: node },
     position: node.position ?? { x: 0, y: 0 },
-    ...(node.size
-      ? { style: { width: node.size.width, height: node.size.height } }
-      : {}),
   }));
 
   const nodeIds = new Set(nodes.map((node) => node.id));

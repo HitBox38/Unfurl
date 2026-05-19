@@ -22,7 +22,7 @@ const App = () => {
   return (
     <>
       {isElectron ? (
-        <header className="draggable z-50 flex items-center bg-[#3d3d3d] px-3">
+        <header className="electron-titlebar-drag-region z-50 flex items-center bg-[#3d3d3d] px-3">
           <span className="text-base font-medium">Unfurl</span>
         </header>
       ) : null}

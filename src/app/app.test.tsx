@@ -34,6 +34,10 @@ describe("App shell", () => {
     render(<App />);
 
     expect(screen.getByRole("banner")).toHaveTextContent("Unfurl");
+    expect(screen.getByRole("banner")).toHaveClass(
+      "electron-titlebar-drag-region",
+    );
+    expect(screen.getByRole("banner")).not.toHaveClass("draggable");
     expect(
       screen.getByRole("navigation", { name: /editable files/i }),
     ).toBeInTheDocument();
