@@ -8,7 +8,19 @@ import {
   type EditableFileRecord,
 } from "@/features/recent-files";
 import { STORAGE_EVENT } from "@/shared/hooks";
-import { Input } from "@/shared/ui/input";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInput,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from "@/shared/ui/sidebar";
 
 const formatUpdatedAt = (updatedAt: number) =>
   new Intl.DateTimeFormat(undefined, {
@@ -61,62 +73,75 @@ export const RecentFilesSidebar = () => {
   }, [query, refreshFiles]);
 
   return (
-    <aside className="flex min-h-screen w-72 shrink-0 flex-col gap-4 border-r bg-card/70 p-4 text-left">
-      <div>
-        <h2 className="text-lg font-semibold">Editable files</h2>
-        <p className="text-sm text-muted-foreground">
-          Browse files saved on this device.
-        </p>
-      </div>
-      <label className="relative block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          aria-label="Search editable files"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Search files"
-          className="pl-9"
-        />
-      </label>
-      <nav aria-label="Editable files" className="flex flex-1 flex-col gap-2">
-        {files.length > 0 ? (
-          files.map((file) => (
-            <RecentFileLink key={file.id} file={file} />
-          ))
-        ) : (
-          <p className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
-            {query.trim()
-              ? "No editable files match your search."
-              : "Uploaded files will appear here."}
+    <Sidebar collapsible="icon" aria-label="Editable files sidebar">
+      <SidebarHeader>
+        <div className="px-2 py-1 group-data-[collapsible=icon]:hidden">
+          <h2 className="text-lg font-semibold">Editable files</h2>
+          <p className="text-sm text-sidebar-foreground/70">
+            Browse files saved on this device.
           </p>
-        )}
-      </nav>
-    </aside>
+        </div>
+        <label className="relative block px-2 group-data-[collapsible=icon]:hidden">
+          <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-sidebar-foreground/70" />
+          <SidebarInput
+            aria-label="Search editable files"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search files"
+            className="pl-9"
+          />
+        </label>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Past files</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu aria-label="Editable files">
+              {files.length > 0 ? (
+                files.map((file) => (
+                  <RecentFileLink key={file.id} file={file} />
+                ))
+              ) : (
+                <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+                  <p className="rounded-lg border border-dashed p-3 text-sm text-sidebar-foreground/70">
+                    {query.trim()
+                      ? "No editable files match your search."
+                      : "Uploaded files will appear here."}
+                  </p>
+                </SidebarMenuItem>
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   );
 };
 
 const RecentFileLink = ({ file }: { file: EditableFileRecord }) => (
-  <Link
-    to="/files/$fileId"
-    params={{ fileId: file.id }}
-    className="rounded-lg border bg-background/60 p-3 text-left transition-colors hover:bg-accent"
-    activeProps={{
-      className: "border-primary bg-primary/20",
-    }}
-  >
-    <span className="flex items-start gap-2">
-      <FileText className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-      <span className="min-w-0">
-        <span className="block truncate font-medium">{file.name}</span>
-        {file.content.title ? (
-          <span className="block truncate text-xs text-muted-foreground">
-            {file.content.title}
+  <SidebarMenuItem>
+    <SidebarMenuButton asChild tooltip={file.name} className="h-auto min-h-10">
+      <Link
+        to="/files/$fileId"
+        params={{ fileId: file.id }}
+        activeProps={{
+          className: "bg-sidebar-accent text-sidebar-accent-foreground",
+        }}
+      >
+        <FileText className="size-4" />
+        <span className="min-w-0">
+          <span className="block truncate font-medium">{file.name}</span>
+          {file.content.title ? (
+            <span className="block truncate text-xs text-sidebar-foreground/70">
+              {file.content.title}
+            </span>
+          ) : null}
+          <span className="mt-0.5 block truncate text-xs uppercase tracking-wide text-sidebar-foreground/70">
+            {file.fileType} - {formatUpdatedAt(file.updatedAt)}
           </span>
-        ) : null}
-        <span className="mt-1 block text-xs uppercase tracking-wide text-muted-foreground">
-          {file.fileType} - {formatUpdatedAt(file.updatedAt)}
         </span>
-      </span>
-    </span>
-  </Link>
+      </Link>
+    </SidebarMenuButton>
+  </SidebarMenuItem>
 );

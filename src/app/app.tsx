@@ -5,6 +5,11 @@ import { EveryWhereDialog } from "@/shared/components";
 import { useDialogStore } from "@/shared/stores";
 import { RecentFilesSidebar } from "@/features/recent-files";
 import { useFaqModal } from "@/features/faq";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/shared/ui/sidebar";
 
 const isElectronRenderer = () =>
   typeof window !== "undefined" && Boolean(window.ipcRenderer);
@@ -26,12 +31,15 @@ const App = () => {
           <span className="text-base font-medium">Unfurl</span>
         </header>
       ) : null}
-      <div className="flex min-h-screen w-full">
+      <SidebarProvider>
         <RecentFilesSidebar />
-        <div className="min-w-0 flex-1">
+        <SidebarInset className="min-w-0">
+          <div className="fixed left-2 top-2 z-40">
+            <SidebarTrigger aria-label="Toggle editable files sidebar" />
+          </div>
           <Outlet />
-        </div>
-      </div>
+        </SidebarInset>
+      </SidebarProvider>
       <EveryWhereDialog />
     </>
   );
