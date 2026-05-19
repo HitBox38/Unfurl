@@ -64,7 +64,7 @@ export const HomePage = ({ isOnline }: PageProps) => {
   }, [resetJson, setSelectedNode]);
 
   return (
-    <main className="flex flex-col items-center justify-center gap-4 p-6">
+    <div className="flex flex-col items-center justify-center gap-4 p-6">
       <EmptyAppHero isOnline={isOnline} />
       <FileUpload />
       <section className="flex flex-col items-center gap-4 pb-8">
@@ -87,7 +87,7 @@ export const HomePage = ({ isOnline }: PageProps) => {
           FAQ
         </Button>
       </section>
-    </main>
+    </div>
   );
 };
 
@@ -117,7 +117,7 @@ export const FilePage = () => {
 
   if (isMissing) {
     return (
-      <main className="flex min-h-screen items-center justify-center p-6">
+      <div className="flex min-h-screen items-center justify-center p-6">
         <Card className="max-w-md text-left">
           <CardHeader>
             <CardTitle>File not found</CardTitle>
@@ -131,20 +131,20 @@ export const FilePage = () => {
             </Button>
           </CardContent>
         </Card>
-      </main>
+      </div>
     );
   }
 
   if (!fileId || activeFileId !== fileId) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="animate-spin" aria-label="Loading editable file" />
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="flex flex-col items-center justify-center gap-4 p-6">
+    <div className="flex flex-col items-center justify-center gap-4 p-6">
       <div className="flex w-full max-w-6xl items-center justify-between gap-4">
         <div className="text-left">
           <p className="text-sm uppercase tracking-wide text-muted-foreground">
@@ -164,6 +164,6 @@ export const FilePage = () => {
         <DownloadButton />
         <DemoButton />
       </section>
-    </main>
+    </div>
   );
 };

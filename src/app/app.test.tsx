@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import App from "@/app/app";
 
 vi.mock("@tanstack/react-router", () => ({
-  Outlet: () => <main data-testid="route-outlet" />,
+  Outlet: () => <div data-testid="route-outlet" />,
 }));
 
 vi.mock("@/features/recent-files", () => ({
@@ -23,6 +23,7 @@ describe("App shell", () => {
     expect(
       screen.getByRole("button", { name: /toggle editable files sidebar/i }),
     ).toBeInTheDocument();
+    expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(
       screen.getByRole("navigation", { name: /editable files/i }),
     ).toBeInTheDocument();

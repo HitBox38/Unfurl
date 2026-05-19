@@ -96,21 +96,23 @@ export const RecentFilesSidebar = () => {
         <SidebarGroup>
           <SidebarGroupLabel>Past files</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu aria-label="Editable files">
-              {files.length > 0 ? (
-                files.map((file) => (
-                  <RecentFileLink key={file.id} file={file} />
-                ))
-              ) : (
-                <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-                  <p className="rounded-lg border border-dashed p-3 text-sm text-sidebar-foreground/70">
-                    {query.trim()
-                      ? "No editable files match your search."
-                      : "Uploaded files will appear here."}
-                  </p>
-                </SidebarMenuItem>
-              )}
-            </SidebarMenu>
+            <nav aria-label="Editable files">
+              <SidebarMenu>
+                {files.length > 0 ? (
+                  files.map((file) => (
+                    <RecentFileLink key={file.id} file={file} />
+                  ))
+                ) : (
+                  <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
+                    <p className="rounded-lg border border-dashed p-3 text-sm text-sidebar-foreground/70">
+                      {query.trim()
+                        ? "No editable files match your search."
+                        : "Uploaded files will appear here."}
+                    </p>
+                  </SidebarMenuItem>
+                )}
+              </SidebarMenu>
+            </nav>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
