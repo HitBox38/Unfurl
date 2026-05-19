@@ -16,13 +16,13 @@ describe("App shell", () => {
     Reflect.deleteProperty(window, "ipcRenderer");
   });
 
-  it("does not render Electron navigation chrome in the web view", () => {
+  it("does not render the Electron titlebar in the web view", () => {
     render(<App />);
 
     expect(screen.queryByRole("banner")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("navigation", { name: /editable files/i }),
-    ).not.toBeInTheDocument();
+      screen.getByRole("navigation", { name: /editable files/i }),
+    ).toBeInTheDocument();
   });
 
   it("renders Electron navigation chrome in the Electron app view", () => {

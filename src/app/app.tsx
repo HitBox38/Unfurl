@@ -27,7 +27,7 @@ const App = () => {
         </header>
       ) : null}
       <div className="flex min-h-screen w-full">
-        {isElectron ? <RecentFilesSidebar /> : null}
+        <RecentFilesSidebar />
         <div className="min-w-0 flex-1">
           <Outlet />
         </div>
