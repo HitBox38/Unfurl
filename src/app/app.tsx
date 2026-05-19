@@ -3,18 +3,16 @@ import { Outlet } from "@tanstack/react-router";
 import { useKeyboardShortcut } from "@/shared/hooks";
 import { EveryWhereDialog } from "@/shared/components";
 import { useDialogStore } from "@/shared/stores";
-import { useFaqModal } from "@/features/faq";
 import { RecentFilesSidebar } from "@/features/recent-files";
+import { useFaqModal } from "@/features/faq";
 
-const isOnlineHost = () =>
-  typeof location !== "undefined" &&
-  location.hostname.includes(".vercel.app") &&
-  location.hostname.includes("unfurl");
+const isElectronRenderer = () =>
+  typeof window !== "undefined" && Boolean(window.ipcRenderer);
 
 const App = () => {
   const setContent = useDialogStore((state) => state.setContent);
   const faqModal = useFaqModal();
-  const isOnline = isOnlineHost();
+  const isElectron = isElectronRenderer();
 
   useKeyboardShortcut(() => setContent(faqModal), {
     codes: ["KeyC", "KeyF"],
@@ -23,13 +21,13 @@ const App = () => {
 
   return (
     <>
-      {!isOnline ? (
+      {isElectron ? (
         <header className="draggable z-50 flex items-center bg-[#3d3d3d] px-3">
           <span className="text-base font-medium">Unfurl</span>
         </header>
       ) : null}
       <div className="flex min-h-screen w-full">
-        <RecentFilesSidebar />
+        {isElectron ? <RecentFilesSidebar /> : null}
         <div className="min-w-0 flex-1">
           <Outlet />
         </div>

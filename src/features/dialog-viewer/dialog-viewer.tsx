@@ -6,74 +6,13 @@ import {
   type Edge,
   type Node,
 } from "@xyflow/react";
-import dagre from "dagre";
 import { useCallback, useEffect, useMemo } from "react";
 
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
-import type { StoryData, StoryNode } from "@/shared/types";
-
-interface DialogNodeData extends Record<string, unknown> {
-  label: string;
-  metadata: StoryNode;
-}
-
-const NODE_WIDTH = 150;
-const NODE_HEIGHT = 50;
-
-const layoutDagre = (
-  nodes: Node<DialogNodeData>[],
-  edges: Edge[],
-): Node<DialogNodeData>[] => {
-  const graph = new dagre.graphlib.Graph();
-  graph.setDefaultEdgeLabel(() => ({}));
-  graph.setGraph({});
-
-  nodes.forEach((node) => {
-    graph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
-  });
-
-  edges.forEach((edge) => {
-    graph.setEdge(edge.source, edge.target);
-  });
-
-  dagre.layout(graph);
-
-  return nodes.map((node) => {
-    const positioned = graph.node(node.id);
-    return {
-      ...node,
-      position: {
-        x: positioned.x - NODE_WIDTH / 2,
-        y: positioned.y - NODE_HEIGHT / 2,
-      },
-    };
-  });
-};
-
-const transformJsonToNodesAndEdges = (
-  json: StoryData,
-): { nodes: Node<DialogNodeData>[]; edges: Edge[] } => {
-  const nodes: Node<DialogNodeData>[] = json.nodes.map((node, index) => ({
-    id: index.toString(),
-    data: { label: node.name, metadata: node },
-    position: { x: 0, y: 0 },
-  }));
-
-  const edges: Edge[] = json.nodes.flatMap((node, index) =>
-    node.choices.map((choice) => {
-      const targetIndex = json.nodes.findIndex(
-        (n) => n.name === choice.destination,
-      );
-      return {
-        id: `e${index}-${targetIndex}`,
-        source: index.toString(),
-        target: targetIndex.toString(),
-      } satisfies Edge;
-    }),
-  );
-
-  return { nodes: layoutDagre(nodes, edges), edges };
-};
+import {
+  buildDialogGraph,
+  type DialogNodeData,
+} from "@/features/dialog-viewer/dialog-graph";
 
 const isOnlineHost = () =>
   location.hostname.includes(".vercel.app") &&
@@ -84,7 +23,7 @@ export const DialogViewer = () => {
   const setSelectedNode = useNodeStore((state) => state.setNode);
 
   const initial = useMemo(
-    () => transformJsonToNodesAndEdges(content),
+    () => buildDialogGraph(content),
     [content],
   );
 
@@ -94,7 +33,7 @@ export const DialogViewer = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges);
 
   const onLayout = useCallback(() => {
-    const updated = transformJsonToNodesAndEdges(content);
+    const updated = buildDialogGraph(content);
     setNodes([...updated.nodes]);
     setEdges([...updated.edges]);
   }, [content, setNodes, setEdges]);
