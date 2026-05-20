@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import {
+  Controller,
   FormProvider,
   useFieldArray,
   useForm,
@@ -17,6 +18,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 
 import { NodeMetadataEditor } from "@/features/node-editor/node-metadata-editor";
@@ -28,7 +36,13 @@ interface StoryNodeForm extends Omit<StoryNode, "content"> {
 export const NodeEditor = () => {
   const node = useNodeStore((state) => state.node);
   const setNode = useNodeStore((state) => state.setNode);
+  const setPreviewNodeName = useNodeStore((state) => state.setPreviewNodeName);
+  const content = useJsonDataStore((state) => state.content);
   const setJsonNode = useJsonDataStore((state) => state.setNode);
+  const nodeNames = useMemo(
+    () => content.nodes.map((storyNode) => storyNode.name),
+    [content.nodes],
+  );
 
   const methods = useForm<StoryNodeForm>({
     defaultValues: {
@@ -65,9 +79,16 @@ export const NodeEditor = () => {
     }
   }, [node, methods]);
 
+  useEffect(() => () => setPreviewNodeName(null), [setPreviewNodeName]);
+
   if (!node) {
     return null;
   }
+
+  const getDestinationOptions = (destination: string) =>
+    destination && !nodeNames.includes(destination)
+      ? [destination, ...nodeNames]
+      : nodeNames;
 
   return (
     <FormProvider {...methods}>
@@ -93,9 +114,49 @@ export const NodeEditor = () => {
                   defaultValue={field.text}
                 />
                 <ArrowRight className="size-12 text-muted-foreground" />
-                <span className="text-xl font-semibold">
-                  {field.destination}
-                </span>
+                <Controller
+                  control={methods.control}
+                  name={`choices.${index}.destination`}
+                  render={({ field: destination }) => {
+                    const optionText =
+                      methods.watch(`choices.${index}.text`) || field.text;
+                    return (
+                      <Select
+                        value={destination.value}
+                        onValueChange={destination.onChange}
+                        onOpenChange={(open) => {
+                          if (!open) setPreviewNodeName(null);
+                        }}
+                      >
+                        <SelectTrigger
+                          aria-label={`Destination for option ${optionText}`}
+                          className="w-[180px]"
+                        >
+                          <SelectValue placeholder="Select node" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getDestinationOptions(destination.value).map(
+                            (nodeName) => (
+                              <SelectItem
+                                key={nodeName}
+                                value={nodeName}
+                                onFocus={() => setPreviewNodeName(nodeName)}
+                                onMouseEnter={() =>
+                                  setPreviewNodeName(nodeName)
+                                }
+                                onPointerMove={() =>
+                                  setPreviewNodeName(nodeName)
+                                }
+                              >
+                                {nodeName}
+                              </SelectItem>
+                            ),
+                          )}
+                        </SelectContent>
+                      </Select>
+                    );
+                  }}
+                />
               </div>
             ))}
             <NodeMetadataEditor />
@@ -104,7 +165,10 @@ export const NodeEditor = () => {
             <Button
               type="button"
               variant="warning"
-              onClick={() => setNode(null)}
+              onClick={() => {
+                setPreviewNodeName(null);
+                setNode(null);
+              }}
             >
               Cancel
             </Button>

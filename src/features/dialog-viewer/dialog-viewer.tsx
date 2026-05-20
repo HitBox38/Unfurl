@@ -5,8 +5,9 @@ import {
   useNodesState,
   type Edge,
   type Node,
+  type ReactFlowInstance,
 } from "@xyflow/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import {
@@ -17,9 +18,15 @@ import {
 const isElectronRenderer = () =>
   typeof window !== "undefined" && Boolean(window.ipcRenderer);
 
+const PREVIEW_NODE_CLASS =
+  "dialog-node-preview ring-2 ring-primary ring-offset-2 ring-offset-background";
+
 export const DialogViewer = () => {
   const content = useJsonDataStore((state) => state.content);
   const setSelectedNode = useNodeStore((state) => state.setNode);
+  const previewNodeName = useNodeStore((state) => state.previewNodeName);
+  const flowInstanceRef =
+    useRef<ReactFlowInstance<Node<DialogNodeData>, Edge> | null>(null);
 
   const initial = useMemo(
     () => buildDialogGraph(content),
@@ -30,6 +37,21 @@ export const DialogViewer = () => {
     initial.nodes,
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges);
+  const displayedNodes = useMemo(
+    () =>
+      nodes.map((node) =>
+        node.id === previewNodeName
+          ? {
+              ...node,
+              selected: true,
+              className: [node.className, PREVIEW_NODE_CLASS]
+                .filter(Boolean)
+                .join(" "),
+            }
+          : node,
+      ),
+    [nodes, previewNodeName],
+  );
 
   const onLayout = useCallback(() => {
     const updated = buildDialogGraph(content);
@@ -43,6 +65,17 @@ export const DialogViewer = () => {
     onLayout();
   }, [onLayout]);
 
+  useEffect(() => {
+    if (!previewNodeName || !flowInstanceRef.current) return;
+    if (!nodes.some((node) => node.id === previewNodeName)) return;
+
+    void flowInstanceRef.current.fitView({
+      nodes: [{ id: previewNodeName }],
+      duration: 250,
+      padding: 0.6,
+    });
+  }, [nodes, previewNodeName]);
+
   return (
     <div
       aria-label="Dialog flow chart"
@@ -52,13 +85,16 @@ export const DialogViewer = () => {
       <ReactFlow
         fitView
         colorMode="dark"
-        nodes={nodes}
+        nodes={displayedNodes}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={(_e, node) => setSelectedNode(node.data.metadata)}
         connectionLineType={ConnectionLineType.Step}
-        onInit={onLayout}
+        onInit={(instance) => {
+          flowInstanceRef.current = instance;
+          onLayout();
+        }}
       />
     </div>
   );
