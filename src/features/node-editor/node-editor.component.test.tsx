@@ -12,7 +12,7 @@ const { flowInstance, reactFlow } = vi.hoisted(() => ({
   flowInstance: {
     fitView: vi.fn(),
   },
-  reactFlow: vi.fn(() => <div data-testid="react-flow" />),
+  reactFlow: vi.fn((_props: unknown) => <div data-testid="react-flow" />),
 }));
 
 vi.mock("@xyflow/react", () => ({
