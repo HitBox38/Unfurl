@@ -1,8 +1,14 @@
-import { app, BrowserWindow, Menu, MenuItem, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
 
 import { createMainWindowOptions } from "./main-window-options";
 import { resolveMainProcessPaths } from "./main-paths";
+import {
+  SPELLCHECK_ADD_WORD_CHANNEL,
+  SPELLCHECK_CONTEXT_MENU_CHANNEL,
+  SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
+  type SpellcheckContextMenuPayload,
+} from "@/shared/types";
 
 // The built directory structure
 //
@@ -22,6 +28,21 @@ let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.length > 0;
+
+ipcMain.on(SPELLCHECK_REPLACE_MISSPELLING_CHANNEL, (_event, suggestion) => {
+  if (isNonEmptyString(suggestion)) {
+    win?.webContents.replaceMisspelling(suggestion);
+  }
+});
+
+ipcMain.on(SPELLCHECK_ADD_WORD_CHANNEL, (_event, word) => {
+  if (isNonEmptyString(word)) {
+    win?.webContents.session.addWordToSpellCheckerDictionary(word);
+  }
+});
+
 function createWindow() {
   console.log(process.env.VITE_PUBLIC);
 
@@ -37,31 +58,20 @@ function createWindow() {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
 
-  win.webContents.on("context-menu", (_e, params) => {
-    const menu = new Menu();
+  win.webContents.on("context-menu", (_event, params) => {
+    const payload: SpellcheckContextMenuPayload = {
+      dictionarySuggestions: [...params.dictionarySuggestions],
+      misspelledWord: params.misspelledWord || undefined,
+      x: params.x,
+      y: params.y,
+    };
 
-    // Add each spelling suggestion
-    for (const suggestion of params.dictionarySuggestions) {
-      menu.append(
-        new MenuItem({
-          label: suggestion,
-          click: () => win?.webContents.replaceMisspelling(suggestion),
-        })
-      );
+    if (
+      payload.dictionarySuggestions.length > 0 ||
+      payload.misspelledWord
+    ) {
+      win?.webContents.send(SPELLCHECK_CONTEXT_MENU_CHANNEL, payload);
     }
-
-    // Allow users to add the misspelled word to the dictionary
-    if (params.misspelledWord) {
-      menu.append(
-        new MenuItem({
-          label: "Add to dictionary",
-          click: () =>
-            win?.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
-        })
-      );
-    }
-
-    menu.popup();
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {

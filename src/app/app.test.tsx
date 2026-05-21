@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import App from "@/app/app";
@@ -34,7 +34,7 @@ describe("App shell", () => {
   it("renders Electron navigation chrome in the Electron app view", () => {
     Object.defineProperty(window, "ipcRenderer", {
       configurable: true,
-      value: { on: vi.fn() },
+      value: { on: vi.fn(), removeListener: vi.fn(), send: vi.fn() },
     });
 
     render(<App />);
@@ -81,5 +81,13 @@ describe("App shell", () => {
     });
 
     expect(screen.getByRole("dialog", { name: "FAQ" })).toBeInTheDocument();
+  });
+
+  it("does not open an edit menu from a normal renderer right click", () => {
+    render(<App />);
+
+    fireEvent.contextMenu(screen.getByTestId("app-shell"));
+
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 });

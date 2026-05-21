@@ -42,6 +42,7 @@
     "clsx": "^2.1.1",
     "dagre": "^0.8.5",
     "lucide-react": "^1.16.0",
+    "radix-ui": "^1.4.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.76.0",

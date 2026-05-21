@@ -4,6 +4,7 @@ import { useHotkeySequence } from "@tanstack/react-hotkeys";
 import { EveryWhereDialog } from "@/shared/components";
 import { useDialogStore } from "@/shared/stores";
 import { RecentFilesSidebar } from "@/features/recent-files";
+import { SpellcheckContextMenu } from "@/features/spellcheck-context-menu";
 import { useFaqModal } from "@/features/faq";
 import {
   SidebarInset,
@@ -57,6 +58,7 @@ const App = () => {
         </SidebarInset>
       </SidebarProvider>
       <EveryWhereDialog />
+      <SpellcheckContextMenu />
     </div>
   );
 };

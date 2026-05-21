@@ -10,3 +10,9 @@ export {
   SUPPORTED_FILE_TYPES,
   type SupportedFileType,
 } from "@/shared/types/supported-file-types";
+export {
+  SPELLCHECK_ADD_WORD_CHANNEL,
+  SPELLCHECK_CONTEXT_MENU_CHANNEL,
+  SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
+  type SpellcheckContextMenuPayload,
+} from "@/shared/types/spellcheck-context-menu";
