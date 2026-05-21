@@ -7,7 +7,11 @@ import { resolveMainProcessPaths } from "./main-paths";
 
 describe("resolveMainProcessPaths", () => {
   it("resolves ESM-safe Electron paths from the main module URL", () => {
-    const appRoot = path.join("C:", "projects", "unfurl");
+    const appRoot = path.resolve(
+      path.parse(process.cwd()).root,
+      "projects",
+      "unfurl"
+    );
     const mainModuleUrl = pathToFileURL(
       path.join(appRoot, "dist-electron", "main.js")
     ).href;
