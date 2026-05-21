@@ -1,6 +1,9 @@
 import { app, BrowserWindow, Menu, MenuItem, shell } from "electron";
 import path from "node:path";
 
+import { createMainWindowOptions } from "./main-window-options";
+import { resolveMainProcessPaths } from "./main-paths";
+
 // The built directory structure
 //
 // ├─┬─┬ dist
@@ -8,12 +11,12 @@ import path from "node:path";
 // │ │
 // │ ├─┬ dist-electron
 // │ │ ├── main.js
-// │ │ └── preload.js
+// │ │ └── preload.mjs
 // │
-process.env.DIST = path.join(__dirname, "../dist");
-process.env.VITE_PUBLIC = app.isPackaged
-  ? process.env.DIST
-  : path.join(process.env.DIST, "../public");
+const mainProcessPaths = resolveMainProcessPaths(import.meta.url, app.isPackaged);
+
+process.env.DIST = mainProcessPaths.dist;
+process.env.VITE_PUBLIC = mainProcessPaths.vitePublic;
 
 let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
@@ -22,22 +25,12 @@ const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 function createWindow() {
   console.log(process.env.VITE_PUBLIC);
 
-  win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "UnfurlLogo.ico"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      spellcheck: true,
-    },
-    title: "Unfurl",
-    titleBarStyle: "hidden",
-    minHeight: 500,
-    minWidth: 800,
-    titleBarOverlay: {
-      color: "#3d3d3d",
-      symbolColor: "#fff",
-      height: 48,
-    },
-  });
+  win = new BrowserWindow(
+    createMainWindowOptions({
+      preload: mainProcessPaths.preload,
+      vitePublic: mainProcessPaths.vitePublic,
+    })
+  );
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {

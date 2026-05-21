@@ -53,8 +53,8 @@ export const RecentFilesSidebar = () => {
           query.trim()
             ? searchEditableFiles(query)
             : [...event.detail.newValue].sort(
-                (a, b) => b.updatedAt - a.updatedAt,
-              ),
+              (a, b) => b.updatedAt - a.updatedAt,
+            ),
         );
       }
     };
@@ -76,10 +76,7 @@ export const RecentFilesSidebar = () => {
     <Sidebar collapsible="icon" aria-label="Editable files sidebar">
       <SidebarHeader>
         <div className="px-2 py-1 group-data-[collapsible=icon]:hidden">
-          <h2 className="text-lg font-semibold">Editable files</h2>
-          <p className="text-sm text-sidebar-foreground/70">
-            Browse files saved on this device.
-          </p>
+          <h2 className="text-lg font-semibold">Unfurl</h2>
         </div>
         <label className="relative block px-2 group-data-[collapsible=icon]:hidden">
           <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-sidebar-foreground/70" />

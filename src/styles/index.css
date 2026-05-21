@@ -112,16 +112,35 @@
   }
 }
 
+.electron-app-shell {
+  --electron-titlebar-height: env(titlebar-area-height, 32px);
+  background: var(--background);
+}
+
 .electron-titlebar-drag-region {
   -webkit-app-region: drag;
   background: #3d3d3d;
-  width: 100vw;
-  min-height: 1rem;
+  height: var(--electron-titlebar-height);
+  left: env(titlebar-area-x, 0px);
+  position: fixed;
+  top: env(titlebar-area-y, 0px);
+  user-select: none;
+  width: env(titlebar-area-width, 100vw);
+}
+
+.electron-sidebar-layout {
+  height: calc(100svh - var(--electron-titlebar-height));
+  margin-top: var(--electron-titlebar-height);
+}
+
+.electron-app-shell [data-slot="sidebar-container"] {
+  bottom: 0;
   height: auto;
-  max-height: 1.5rem;
-  position: absolute;
-  top: 0;
-  left: 0;
+  top: var(--electron-titlebar-height);
+}
+
+.electron-sidebar-trigger {
+  top: calc(var(--electron-titlebar-height) + 0.5rem);
 }
 
 @keyframes rotate-words {

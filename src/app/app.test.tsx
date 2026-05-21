@@ -38,6 +38,15 @@ describe("App shell", () => {
     render(<App />);
 
     expect(screen.getByRole("banner")).toHaveTextContent("Unfurl");
+    expect(screen.getByTestId("app-shell")).toHaveClass(
+      "electron-app-shell",
+      "h-svh",
+      "overflow-hidden",
+    );
+    expect(screen.getByTestId("app-sidebar-layout")).toHaveClass(
+      "electron-sidebar-layout",
+      "min-h-0",
+    );
     expect(screen.getByRole("banner")).toHaveClass(
       "electron-titlebar-drag-region",
     );

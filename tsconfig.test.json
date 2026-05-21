@@ -6,6 +6,6 @@
     "types": ["vitest/globals", "@testing-library/jest-dom"]
   },
   "references": [{ "path": "./tsconfig.app.json" }],
-  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**/*"],
+  "include": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**/*", "electron/**/*.test.ts"],
   "exclude": []
 }
