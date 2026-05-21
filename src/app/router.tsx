@@ -5,6 +5,7 @@ import {
 } from "@tanstack/react-router";
 
 import App from "@/app/app";
+import { createRuntimeHistory } from "@/app/router-history";
 import { FilePage, HomePage } from "@/app/pages";
 
 const isOnlineHost = () =>
@@ -30,7 +31,10 @@ const fileRoute = createRoute({
 
 const routeTree = rootRoute.addChildren([indexRoute, fileRoute]);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({
+  routeTree,
+  history: createRuntimeHistory(),
+});
 
 declare module "@tanstack/react-router" {
   interface Register {
