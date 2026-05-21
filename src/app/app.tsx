@@ -1,6 +1,6 @@
 import { Outlet } from "@tanstack/react-router";
+import { useHotkeySequence } from "@tanstack/react-hotkeys";
 
-import { useKeyboardShortcut } from "@/shared/hooks";
 import { EveryWhereDialog } from "@/shared/components";
 import { useDialogStore } from "@/shared/stores";
 import { RecentFilesSidebar } from "@/features/recent-files";
@@ -28,9 +28,11 @@ const App = () => {
     ? "electron-sidebar-trigger fixed left-2 z-40"
     : "fixed left-2 top-2 z-40";
 
-  useKeyboardShortcut(() => setContent(faqModal), {
-    codes: ["KeyC", "KeyF"],
-    ctrlKey: true,
+  useHotkeySequence(["Control+C", "Control+F"], () => setContent(faqModal), {
+    ignoreInputs: false,
+    preventDefault: false,
+    stopPropagation: false,
+    timeout: Number.POSITIVE_INFINITY,
   });
 
   return (

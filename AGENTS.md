@@ -57,7 +57,7 @@ src/
     node-editor/
   shared/
     components/            # Cross-feature composites (EveryWhereDialog, …)
-    hooks/                 # useStorage, useKeyboardShortcut
+    hooks/                 # useStorage
     lib/
       cn.ts                # shadcn `cn` util
       convertors/          # from-twee, from-md, metadata helpers
