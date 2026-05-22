@@ -3,11 +3,23 @@ import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import electron from "vite-plugin-electron/simple";
 import svgr from "vite-plugin-svgr";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
+const electronPreloadOutputCompat = (): Plugin => {
+  return {
+    name: "electron-preload-output-compat",
+    configResolved(config) {
+      const output = config.build.rollupOptions?.output;
+      if (output == null || Array.isArray(output)) return;
+      delete (output as { inlineDynamicImports?: boolean }).inlineDynamicImports;
+      output.codeSplitting = false;
+    },
+  };
+}
 
 export default defineConfig({
   resolve: {
@@ -55,6 +67,9 @@ export default defineConfig({
       },
       preload: {
         input: path.join(projectRoot, "electron/preload.ts"),
+        vite: {
+          plugins: [electronPreloadOutputCompat()],
+        },
       },
     }),
   ],
