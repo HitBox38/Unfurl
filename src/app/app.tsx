@@ -11,6 +11,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/shared/ui/sidebar";
+import { TooltipProvider } from "@/shared/ui/tooltip";
 
 const isElectronRenderer = () =>
   typeof window !== "undefined" && Boolean(window.ipcRenderer);
@@ -37,6 +38,7 @@ const App = () => {
   });
 
   return (
+    <TooltipProvider>
     <div className={shellClassName} data-testid="app-shell">
       {isElectron ? (
         <header className="electron-titlebar-drag-region z-50 flex items-center px-3">
@@ -60,6 +62,7 @@ const App = () => {
       <EveryWhereDialog />
       <SpellcheckContextMenu />
     </div>
+    </TooltipProvider>
   );
 };
 
