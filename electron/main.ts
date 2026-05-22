@@ -44,12 +44,10 @@ ipcMain.on(SPELLCHECK_ADD_WORD_CHANNEL, (_event, word) => {
 });
 
 function createWindow() {
-  console.log(process.env.VITE_PUBLIC);
-
   win = new BrowserWindow(
     createMainWindowOptions({
       preload: mainProcessPaths.preload,
-      vitePublic: mainProcessPaths.vitePublic,
+      appIcon: mainProcessPaths.appIcon,
     })
   );
 
@@ -112,4 +110,9 @@ app.on("activate", () => {
   }
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (process.platform === "win32") {
+    app.setAppUserModelId("unfurl");
+  }
+  createWindow();
+});

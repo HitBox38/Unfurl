@@ -1,9 +1,8 @@
 import type { BrowserWindowConstructorOptions } from "electron";
-import path from "node:path";
 
 type MainWindowOptionsInput = {
   preload: string;
-  vitePublic: string;
+  appIcon: string;
 };
 
 const TITLE_BAR_OVERLAY_HEIGHT = 32;
@@ -11,9 +10,9 @@ const TITLE_BAR_OVERLAY_COLOR = "#3d3d3d";
 
 export const createMainWindowOptions = ({
   preload,
-  vitePublic,
+  appIcon,
 }: MainWindowOptionsInput): BrowserWindowConstructorOptions => ({
-  icon: path.join(vitePublic, "UnfurlLogo.ico"),
+  icon: appIcon,
   webPreferences: {
     preload,
     spellcheck: true,

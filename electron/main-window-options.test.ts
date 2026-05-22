@@ -6,10 +6,10 @@ import { createMainWindowOptions } from "./main-window-options";
 
 describe("createMainWindowOptions", () => {
   it("keeps the native window controls aligned with the custom titlebar", () => {
-    const vitePublic = path.join("C:", "projects", "unfurl", "public");
+    const appIcon = path.join("C:", "projects", "unfurl", "public", "UnfurlLogo.ico");
     const preload = path.join("C:", "projects", "unfurl", "dist-electron", "preload.mjs");
 
-    expect(createMainWindowOptions({ vitePublic, preload })).toMatchObject({
+    expect(createMainWindowOptions({ appIcon, preload })).toMatchObject({
       title: "Unfurl",
       titleBarStyle: "hidden",
       titleBarOverlay: {
@@ -17,7 +17,7 @@ describe("createMainWindowOptions", () => {
         symbolColor: "#fff",
         height: 32,
       },
-      icon: path.join(vitePublic, "UnfurlLogo.ico"),
+      icon: appIcon,
       webPreferences: {
         preload,
         spellcheck: true,
