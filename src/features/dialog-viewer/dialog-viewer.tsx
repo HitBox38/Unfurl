@@ -15,6 +15,11 @@ import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { appendChoice, cn, createChoice } from "@/shared/lib";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
+import {
+  clearQueuedDialogNodeFocus,
+  peekQueuedDialogNodeFocus,
+  setDialogFlowInstance,
+} from "@/features/dialog-viewer/dialog-flow-bridge";
 import { DialogFlowNode } from "@/features/dialog-viewer/dialog-flow-node";
 import {
   buildChoiceEdgeId,
@@ -166,6 +171,13 @@ export const DialogViewer = () => {
     onLayout();
   }, [onLayout]);
 
+  useEffect(
+    () => () => {
+      setDialogFlowInstance(null);
+    },
+    [],
+  );
+
   useEffect(() => {
     if (!previewNodeName || !flowInstanceRef.current) return;
     if (!nodes.some((node) => node.id === previewNodeName)) return;
@@ -176,6 +188,19 @@ export const DialogViewer = () => {
       padding: 0.6,
     });
   }, [nodes, previewNodeName]);
+
+  useEffect(() => {
+    const nodeName = peekQueuedDialogNodeFocus();
+    if (!nodeName || !flowInstanceRef.current) return;
+    if (!nodes.some((node) => node.id === nodeName)) return;
+
+    clearQueuedDialogNodeFocus();
+    void flowInstanceRef.current.fitView({
+      nodes: [{ id: nodeName }],
+      duration: 250,
+      padding: 0.6,
+    });
+  }, [nodes]);
 
   return (
     <div
@@ -195,6 +220,7 @@ export const DialogViewer = () => {
         deleteKeyCode={null}
         onInit={(instance) => {
           flowInstanceRef.current = instance;
+          setDialogFlowInstance(instance);
           onLayout();
         }}
       >

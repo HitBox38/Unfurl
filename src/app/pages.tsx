@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import unfurlLogo from "@/assets/unfurl-logo.png";
 import ItchIoLogo from "@/assets/itchio-logo.svg";
 import { DemoButton } from "@/features/demo";
-import { DialogViewer } from "@/features/dialog-viewer";
+import { AddNodeButton, DialogViewer } from "@/features/dialog-viewer";
 import { DownloadButton } from "@/features/download";
 import { FileHistoryControls } from "@/features/file-history";
 import { FileUpload } from "@/features/file-upload";
@@ -220,7 +220,7 @@ export const FilePage = () => {
       <section className="relative min-h-0 flex-1 overflow-hidden">
         <div
           data-testid="file-page-header"
-          className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-9rem)] items-center rounded-full border bg-card/90 px-2.5 py-1.5 shadow-lg backdrop-blur-md sm:max-w-[min(36rem,calc(100%-9rem))]"
+          className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-12rem)] items-center rounded-full border bg-card/90 px-2.5 py-1.5 shadow-lg backdrop-blur-md sm:max-w-[min(36rem,calc(100%-12rem))]"
         >
           <FileNameHeaderInput
             key={name || "Untitled"}
@@ -230,9 +230,15 @@ export const FilePage = () => {
         </div>
         <div
           data-testid="file-history-bubble"
-          className="absolute right-16 top-4 z-10 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+          className="absolute right-[7.5rem] top-4 z-10 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
         >
           <FileHistoryControls />
+        </div>
+        <div
+          data-testid="file-add-node-bubble"
+          className="absolute right-16 top-4 z-10 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+        >
+          <AddNodeButton />
         </div>
         <div
           data-testid="file-download-bubble"

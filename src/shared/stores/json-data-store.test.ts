@@ -60,6 +60,39 @@ describe("useJsonDataStore", () => {
     expect(outro?.content).toEqual(["Bye"]);
   });
 
+  it("addNode appends a node and sets start when the story is empty", () => {
+    useJsonDataStore.getState().setJson(
+      { title: null, start: null, nodes: [] },
+      "demo",
+    );
+
+    useJsonDataStore.getState().addNode({
+      name: "Node",
+      content: [],
+      choices: [],
+      metadata: {},
+    });
+
+    const state = useJsonDataStore.getState();
+    expect(state.content.nodes).toHaveLength(1);
+    expect(state.content.nodes[0]?.name).toBe("Node");
+    expect(state.content.start).toBe("Node");
+    expect(state.canUndo).toBe(true);
+  });
+
+  it("addNode ignores duplicate node names", () => {
+    useJsonDataStore.getState().setJson(sample, "demo");
+
+    useJsonDataStore.getState().addNode({
+      name: "Intro",
+      content: ["Duplicate"],
+      choices: [],
+      metadata: {},
+    });
+
+    expect(useJsonDataStore.getState().content).toEqual(sample);
+  });
+
   it("setNode can rename a node and update story references", () => {
     useJsonDataStore.getState().setJson(
       {

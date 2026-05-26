@@ -27,6 +27,7 @@ export interface JsonDataState {
   ) => void;
   setName: (name: string) => void;
   setNode: (newNode: StoryNode, previousName?: string) => void;
+  addNode: (node: StoryNode) => void;
   undo: () => void;
   redo: () => void;
   setLoading: (isLoading: boolean) => void;
@@ -86,6 +87,32 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
             ),
           };
         }),
+      };
+
+      if (snapshotsAreEqual({ name: state.name, content }, state)) {
+        return {};
+      }
+
+      persistActiveFileContent(state.activeFileId, content);
+      const past = pushHistorySnapshot(state);
+      return {
+        content,
+        past,
+        future: [],
+        canUndo: true,
+        canRedo: false,
+      };
+    }),
+  addNode: (node) =>
+    set((state) => {
+      if (state.content.nodes.some((existing) => existing.name === node.name)) {
+        return {};
+      }
+
+      const content: StoryData = {
+        ...state.content,
+        start: state.content.start ?? node.name,
+        nodes: [...state.content.nodes, node],
       };
 
       if (snapshotsAreEqual({ name: state.name, content }, state)) {

@@ -26,6 +26,11 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/features/dialog-viewer", () => ({
+  AddNodeButton: () => (
+    <button type="button" aria-label="Add node" data-variant="secondary" data-size="icon-sm">
+      Add node
+    </button>
+  ),
   DialogViewer: () => <div data-testid="dialog-viewer" />,
 }));
 
@@ -85,10 +90,16 @@ describe("FilePage", () => {
       "bg-card/90",
     );
     expect(
+      container.querySelector('[data-testid="file-add-node-bubble"]'),
+    ).toHaveClass("rounded-full", "bg-card/90", "shadow-lg");
+    expect(
       container.querySelector('[data-testid="file-history-bubble"]'),
     ).toHaveClass("rounded-full", "bg-card/90", "shadow-lg");
     expect(screen.getByRole("button", { name: /undo edit/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /redo edit/i })).toBeDisabled();
+    const addNode = screen.getByRole("button", { name: /add node/i });
+    expect(addNode).toHaveAttribute("data-variant", "secondary");
+    expect(addNode).toHaveAttribute("data-size", "icon-sm");
     const download = screen.getByRole("button", { name: /download/i });
     expect(download).toHaveAttribute(
       "data-variant",
