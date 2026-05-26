@@ -52,7 +52,7 @@ const App = () => {
         data-testid="app-sidebar-layout"
       >
         <RecentFilesSidebar />
-        <SidebarInset className="min-w-0">
+        <SidebarInset className="min-h-0 min-w-0">
           <div className={sidebarTriggerClassName}>
             <SidebarTrigger aria-label="Toggle editable files sidebar" />
           </div>

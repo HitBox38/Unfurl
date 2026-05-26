@@ -13,7 +13,7 @@ export interface JsonDataState {
     newName: string,
     activeFileId?: string | null,
   ) => void;
-  setNode: (newNode: StoryNode) => void;
+  setNode: (newNode: StoryNode, previousName?: string) => void;
   setLoading: (isLoading: boolean) => void;
   reset: () => void;
 }
@@ -32,13 +32,23 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
       content: newJson,
       isLoading: false,
     }),
-  setNode: (newNode) =>
+  setNode: (newNode, previousName = newNode.name) =>
     set((state) => ({
       content: persistActiveFileContent(state.activeFileId, {
         ...state.content,
-        nodes: state.content.nodes.map((node) =>
-          node.name === newNode.name ? newNode : node,
-        ),
+        start:
+          state.content.start === previousName ? newNode.name : state.content.start,
+        nodes: state.content.nodes.map((node) => {
+          const nextNode = node.name === previousName ? newNode : node;
+          return {
+            ...nextNode,
+            choices: nextNode.choices.map((choice) =>
+              choice.destination === previousName
+                ? { ...choice, destination: newNode.name }
+                : choice,
+            ),
+          };
+        }),
       }),
     })),
   setLoading: (isLoading) => set({ isLoading }),

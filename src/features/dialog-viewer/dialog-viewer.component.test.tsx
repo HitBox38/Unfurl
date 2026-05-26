@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { useJsonDataStore } from "@/shared/stores";
+import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 
 import { DialogViewer } from "@/features/dialog-viewer/dialog-viewer";
 
 const { reactFlow } = vi.hoisted(() => ({
-  reactFlow: vi.fn(() => <div data-testid="react-flow" />),
+  reactFlow: vi.fn((_props: unknown) => <div data-testid="react-flow" />),
 }));
 
 vi.mock("@xyflow/react", () => ({
@@ -35,6 +35,7 @@ describe("DialogViewer", () => {
     reactFlow.mockClear();
     Reflect.deleteProperty(window, "ipcRenderer");
     useJsonDataStore.getState().reset();
+    useNodeStore.getState().setNode(null);
   });
 
   it("renders React Flow in dark mode so node labels remain visible", () => {
@@ -48,13 +49,39 @@ describe("DialogViewer", () => {
     );
   });
 
-  it("uses full web width outside Electron", () => {
+  it("fills the available flow workspace", () => {
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");
 
     render(<DialogViewer />);
 
-    expect(screen.getByLabelText(/dialog flow chart/i)).toHaveStyle({
-      width: "100%",
-    });
+    expect(screen.getByLabelText(/dialog flow chart/i)).toHaveClass(
+      "h-full",
+      "w-full",
+    );
+  });
+
+  it("highlights the selected story node", () => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+    useNodeStore.getState().setNode(story.nodes[0]);
+
+    render(<DialogViewer />);
+
+    const latestReactFlowProps = reactFlow.mock.calls.at(-1)?.[0] as
+      | {
+          nodes: Array<{
+            id: string;
+            selected?: boolean;
+            className?: string;
+          }>;
+        }
+      | undefined;
+
+    expect(latestReactFlowProps?.nodes.find((node) => node.id === "Intro"))
+      .toEqual(
+        expect.objectContaining({
+          selected: true,
+          className: expect.stringContaining("dialog-node-selected"),
+        }),
+      );
   });
 });

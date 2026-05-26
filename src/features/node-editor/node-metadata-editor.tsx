@@ -2,6 +2,11 @@ import { Controller, useFormContext } from "react-hook-form";
 
 import { useStorage } from "@/shared/hooks";
 import type { MetadataConfigTemplate } from "@/shared/types";
+import {
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/shared/ui/accordion";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -19,8 +24,12 @@ export const NodeMetadataEditor = () => {
   }
 
   return (
-    <div className="flex w-[350px] flex-col gap-3 text-left">
-      <h4 className="text-lg font-semibold">Metadata</h4>
+    <AccordionItem
+      value="metadata"
+      className="rounded-xl border bg-muted/20 px-3"
+    >
+      <AccordionTrigger>Metadata</AccordionTrigger>
+      <AccordionContent className="flex flex-col gap-3 text-left">
       {config.map((field, index) => {
         if (field.type === "number") {
           return (
@@ -55,6 +64,7 @@ export const NodeMetadataEditor = () => {
           </div>
         );
       })}
-    </div>
+      </AccordionContent>
+    </AccordionItem>
   );
 };

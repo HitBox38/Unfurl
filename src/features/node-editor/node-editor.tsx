@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { X } from "lucide-react";
 import { useEffect, useMemo } from "react";
 import {
   Controller,
@@ -10,14 +10,22 @@ import {
 
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryNode } from "@/shared/types";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/shared/ui/accordion";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 import {
   Select,
   SelectContent,
@@ -46,6 +54,7 @@ export const NodeEditor = () => {
 
   const methods = useForm<StoryNodeForm>({
     defaultValues: {
+      name: node?.name,
       content: node?.content.join("\n"),
       choices: node?.choices,
       metadata: { ...node?.metadata },
@@ -60,18 +69,19 @@ export const NodeEditor = () => {
   const submitNode: SubmitHandler<StoryNodeForm> = (data) => {
     if (!node) return;
     const updated: StoryNode = {
-      name: node.name,
+      name: data.name.trim(),
       content: data.content.split("\n"),
       choices: data.choices,
       metadata: { ...data.metadata },
     };
     setNode(updated);
-    setJsonNode(updated);
+    setJsonNode(updated, node.name);
   };
 
   useEffect(() => {
     if (node) {
       methods.reset({
+        name: node.name,
         content: node.content.join("\n"),
         choices: node.choices,
         metadata: { ...node.metadata },
@@ -92,94 +102,199 @@ export const NodeEditor = () => {
 
   return (
     <FormProvider {...methods}>
-      <Card className="m-auto h-fit w-full max-w-[650px] p-2.5">
-        <CardHeader className="text-left">
-          <CardTitle className="text-2xl">{node.name}</CardTitle>
-        </CardHeader>
-        <form onSubmit={methods.handleSubmit(submitNode)}>
-          <CardContent className="flex flex-col items-start gap-7">
-            <Textarea
-              {...methods.register("content")}
-              className="min-h-[140px] w-full"
-              defaultValue={node.content.join("\n")}
-            />
-            {fields.map((field, index) => (
-              <div
-                key={field.id}
-                className="flex flex-nowrap items-center justify-center gap-3"
-              >
-                <Textarea
-                  {...methods.register(`choices.${index}.text`)}
-                  className="min-h-[60px] w-[350px]"
-                  defaultValue={field.text}
-                />
-                <ArrowRight className="size-12 text-muted-foreground" />
-                <Controller
-                  control={methods.control}
-                  name={`choices.${index}.destination`}
-                  render={({ field: destination }) => {
-                    const optionText =
-                      methods.watch(`choices.${index}.text`) || field.text;
-                    return (
-                      <Select
-                        value={destination.value}
-                        onValueChange={destination.onChange}
-                        onOpenChange={(open) => {
-                          if (!open) setPreviewNodeName(null);
-                        }}
-                      >
-                        <SelectTrigger
-                          aria-label={`Destination for option ${optionText}`}
-                          className="w-[180px]"
-                        >
-                          <SelectValue placeholder="Select node" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getDestinationOptions(destination.value).map(
-                            (nodeName) => (
-                              <SelectItem
-                                key={nodeName}
-                                value={nodeName}
-                                onFocus={() => setPreviewNodeName(nodeName)}
-                                onMouseEnter={() =>
-                                  setPreviewNodeName(nodeName)
-                                }
-                                onPointerMove={() =>
-                                  setPreviewNodeName(nodeName)
-                                }
-                              >
-                                {nodeName}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                    );
-                  }}
-                />
-              </div>
-            ))}
-            <NodeMetadataEditor />
-          </CardContent>
-          <CardFooter className="flex items-center gap-2 px-6 pt-2">
+      <Card className="flex max-h-[calc(100vh-8rem)] min-h-0 w-full flex-col rounded-xl border bg-card/95 p-0 shadow-2xl backdrop-blur-sm">
+        <CardHeader className="gap-3 border-b px-4 py-3 text-left">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1 space-y-1">
+              <CardDescription className="text-xs font-medium uppercase tracking-wide">
+                Edit node
+              </CardDescription>
+              <Label htmlFor="node-name" className="sr-only">
+                Node name
+              </Label>
+              <Input
+                id="node-name"
+                aria-label="Node name"
+                {...methods.register("name", {
+                  required: "Node name is required",
+                  setValueAs: (value) =>
+                    typeof value === "string" ? value.trim() : value,
+                  validate: (value) =>
+                    value === node.name ||
+                    !nodeNames.includes(value) ||
+                    "Node name must be unique",
+                })}
+                className="h-auto rounded-md border border-transparent bg-transparent px-1 py-0 font-heading text-2xl font-medium leading-snug shadow-none ring-0 hover:border-input hover:bg-background/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-2xl dark:bg-transparent"
+              />
+              {methods.formState.errors.name ? (
+                <p className="text-xs text-destructive">
+                  {methods.formState.errors.name.message}
+                </p>
+              ) : null}
+            </div>
             <Button
               type="button"
-              variant="warning"
+              variant="ghost"
+              size="icon-sm"
+              aria-label="Close node editor"
+              className="shrink-0"
               onClick={() => {
                 setPreviewNodeName(null);
                 setNode(null);
               }}
             >
-              Cancel
+              <X />
             </Button>
-            <Button type="submit" disabled={!methods.formState.isDirty}>
-              Update Node
-            </Button>
+          </div>
+        </CardHeader>
+        <form
+          className="flex min-h-0 flex-1 flex-col"
+          onSubmit={methods.handleSubmit(submitNode)}
+        >
+          <CardContent className="min-h-0 flex-1 overflow-y-auto p-4">
+            <Accordion
+              type="multiple"
+              defaultValue={["content", "choices", "metadata"]}
+              className="flex flex-col gap-3"
+            >
+              <AccordionItem
+                value="content"
+                className="rounded-xl border bg-muted/20 px-3"
+              >
+                <AccordionTrigger>Content</AccordionTrigger>
+                <AccordionContent>
+                  <Label htmlFor="node-content" className="sr-only">
+                    Content
+                  </Label>
+                  <Textarea
+                    id="node-content"
+                    {...methods.register("content")}
+                    className="min-h-[140px] w-full resize-y bg-background/80"
+                    defaultValue={node.content.join("\n")}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem
+                value="choices"
+                className="rounded-xl border bg-muted/20 px-3"
+              >
+                <AccordionTrigger>Choices</AccordionTrigger>
+                <AccordionContent className="space-y-3">
+                  {fields.map((field, index) => (
+                    <div
+                      key={field.id}
+                      className="space-y-3 rounded-xl border bg-background/80 p-3 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-2 border-b pb-2">
+                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Choice {index + 1}
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label
+                          htmlFor={`choice-${index}-text`}
+                          className="text-xs text-muted-foreground"
+                        >
+                          Text
+                        </Label>
+                        <Textarea
+                          id={`choice-${index}-text`}
+                          aria-label={`Choice ${index + 1} text`}
+                          {...methods.register(`choices.${index}.text`)}
+                          className="min-h-[64px] min-w-0 resize-y"
+                          defaultValue={field.text}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Controller
+                          control={methods.control}
+                          name={`choices.${index}.destination`}
+                          render={({ field: destination }) => {
+                            const optionText =
+                              methods.watch(`choices.${index}.text`) ||
+                              field.text;
+                            return (
+                              <>
+                                <Label
+                                  htmlFor={`choice-${index}-destination`}
+                                  className="text-xs text-muted-foreground"
+                                >
+                                  Destination
+                                </Label>
+                                <div className="flex items-center">
+                                  <Select
+                                    value={destination.value}
+                                    onValueChange={destination.onChange}
+                                    onOpenChange={(open) => {
+                                      if (!open) setPreviewNodeName(null);
+                                    }}
+                                  >
+                                    <SelectTrigger
+                                      id={`choice-${index}-destination`}
+                                      aria-label={`Destination for option ${optionText}`}
+                                      className="w-full bg-background"
+                                    >
+                                      <SelectValue placeholder="Select node" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      {getDestinationOptions(
+                                        destination.value,
+                                      ).map((nodeName) => (
+                                        <SelectItem
+                                          key={nodeName}
+                                          value={nodeName}
+                                          onFocus={() =>
+                                            setPreviewNodeName(nodeName)
+                                          }
+                                          onMouseEnter={() =>
+                                            setPreviewNodeName(nodeName)
+                                          }
+                                          onPointerMove={() =>
+                                            setPreviewNodeName(nodeName)
+                                          }
+                                        >
+                                          {nodeName}
+                                        </SelectItem>
+                                      ))}
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </>
+                            );
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </AccordionContent>
+              </AccordionItem>
+              <NodeMetadataEditor />
+            </Accordion>
+          </CardContent>
+          <CardFooter className="flex items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
             {methods.formState.isDirty ? (
-              <span className="px-1 text-sm text-warning">
-                *Unsaved changes
+              <span className="text-sm text-warning">Unsaved changes</span>
+            ) : (
+              <span className="text-sm text-muted-foreground">
+                No unsaved changes
               </span>
-            ) : null}
+            )}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="warning"
+                onClick={() => {
+                  setPreviewNodeName(null);
+                  setNode(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!methods.formState.isDirty}>
+                Update Node
+              </Button>
+            </div>
           </CardFooter>
         </form>
       </Card>

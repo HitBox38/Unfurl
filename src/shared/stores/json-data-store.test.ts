@@ -60,6 +60,46 @@ describe("useJsonDataStore", () => {
     expect(outro?.content).toEqual(["Bye"]);
   });
 
+  it("setNode can rename a node and update story references", () => {
+    useJsonDataStore.getState().setJson(
+      {
+        ...sample,
+        nodes: sample.nodes.map((node) =>
+          node.name === "Outro"
+            ? {
+                ...node,
+                choices: [{ text: "Again", destination: "Intro" }],
+              }
+            : node,
+        ),
+      },
+      "demo",
+    );
+
+    useJsonDataStore.getState().setNode(
+      {
+        name: "Start",
+        content: ["Renamed"],
+        choices: [{ text: "Next", destination: "Outro" }],
+        metadata: {},
+      },
+      "Intro",
+    );
+
+    const state = useJsonDataStore.getState();
+    expect(state.content.start).toBe("Start");
+    expect(state.content.nodes.some((node) => node.name === "Intro")).toBe(
+      false,
+    );
+    expect(state.content.nodes.find((node) => node.name === "Start")).toEqual(
+      expect.objectContaining({ content: ["Renamed"] }),
+    );
+    expect(
+      state.content.nodes.find((node) => node.name === "Outro")?.choices[0]
+        ?.destination,
+    ).toBe("Start");
+  });
+
   it("persists node edits into the active editable file", () => {
     saveEditableFile(
       { name: "demo", fileType: "twee", content: sample },

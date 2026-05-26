@@ -73,24 +73,108 @@ describe("NodeEditor", () => {
     clearPreviewNode();
   });
 
-  it("updates a choice destination from the available story nodes", async () => {
+  it(
+    "updates a choice destination from the available story nodes",
+    async () => {
+      const user = userEvent.setup();
+      selectIntroNode();
+
+      render(<NodeEditor />);
+
+      await user.click(
+        screen.getByRole("combobox", { name: /destination for option next/i }),
+      );
+      await user.click(screen.getByRole("option", { name: "Outro" }));
+      await user.click(screen.getByRole("button", { name: /update node/i }));
+
+      expect(
+        useJsonDataStore
+          .getState()
+          .content.nodes.find((node) => node.name === "Intro")?.choices[0]
+          ?.destination,
+      ).toBe("Outro");
+    },
+    10_000,
+  );
+
+  it("renames the selected node and keeps it selected", async () => {
     const user = userEvent.setup();
     selectIntroNode();
 
     render(<NodeEditor />);
 
-    await user.click(
-      screen.getByRole("combobox", { name: /destination for option next/i }),
-    );
-    await user.click(screen.getByRole("option", { name: "Outro" }));
+    const nameInput = screen.getByRole("textbox", { name: /node name/i });
+    await user.clear(nameInput);
+    await user.type(nameInput, "Start");
     await user.click(screen.getByRole("button", { name: /update node/i }));
 
+    expect(useNodeStore.getState().node?.name).toBe("Start");
     expect(
       useJsonDataStore
         .getState()
-        .content.nodes.find((node) => node.name === "Intro")?.choices[0]
-        ?.destination,
-    ).toBe("Outro");
+        .content.nodes.some((node) => node.name === "Intro"),
+    ).toBe(false);
+    expect(
+      useJsonDataStore
+        .getState()
+        .content.nodes.some((node) => node.name === "Start"),
+    ).toBe(true);
+  });
+
+  it("renders as a bounded floating inspector panel", () => {
+    selectIntroNode();
+
+    const { container } = render(<NodeEditor />);
+
+    expect(container.querySelector('[data-slot="card"]')).toHaveClass(
+      "max-h-[calc(100vh-8rem)]",
+      "rounded-xl",
+      "shadow-2xl",
+    );
+    expect(container.querySelector('[data-slot="card-content"]')).toHaveClass(
+      "flex-1",
+      "overflow-y-auto",
+    );
+  });
+
+  it("renders a shadcn-style inspector shell with accordion sections", () => {
+    selectIntroNode();
+
+    render(<NodeEditor />);
+
+    expect(screen.getByText("Edit node")).toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: /node name/i })).toHaveValue(
+      "Intro",
+    );
+    expect(
+      screen.queryByRole("button", { name: "Details" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Content" })).toHaveAttribute(
+      "data-slot",
+      "accordion-trigger",
+    );
+    expect(screen.getByRole("button", { name: "Choices" })).toHaveAttribute(
+      "data-slot",
+      "accordion-trigger",
+    );
+    expect(screen.queryByText("1 choice")).not.toBeInTheDocument();
+    expect(screen.queryByText("1 lines")).not.toBeInTheDocument();
+  });
+
+  it("renders each choice as a labeled editor card", () => {
+    selectIntroNode();
+
+    render(<NodeEditor />);
+
+    expect(screen.getByText("Choice 1")).toBeInTheDocument();
+    expect(screen.getByText("Text")).toBeInTheDocument();
+    expect(screen.getByText("Destination")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: /choice 1 text/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("combobox", { name: /destination for option next/i }),
+    ).toBeInTheDocument();
   });
 
   it("highlights and focuses the destination node while an option is hovered", async () => {

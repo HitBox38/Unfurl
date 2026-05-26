@@ -15,14 +15,14 @@ import {
   type DialogNodeData,
 } from "@/features/dialog-viewer/dialog-graph";
 
-const isElectronRenderer = () =>
-  typeof window !== "undefined" && Boolean(window.ipcRenderer);
-
 const PREVIEW_NODE_CLASS =
   "dialog-node-preview ring-2 ring-primary ring-offset-2 ring-offset-background";
+const SELECTED_NODE_CLASS =
+  "dialog-node-selected ring-2 ring-primary/80 ring-offset-2 ring-offset-background";
 
 export const DialogViewer = () => {
   const content = useJsonDataStore((state) => state.content);
+  const selectedNode = useNodeStore((state) => state.node);
   const setSelectedNode = useNodeStore((state) => state.setNode);
   const previewNodeName = useNodeStore((state) => state.previewNodeName);
   const flowInstanceRef =
@@ -39,18 +39,24 @@ export const DialogViewer = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges);
   const displayedNodes = useMemo(
     () =>
-      nodes.map((node) =>
-        node.id === previewNodeName
-          ? {
-              ...node,
-              selected: true,
-              className: [node.className, PREVIEW_NODE_CLASS]
-                .filter(Boolean)
-                .join(" "),
-            }
-          : node,
-      ),
-    [nodes, previewNodeName],
+      nodes.map((node) => {
+        const isPreviewed = node.id === previewNodeName;
+        const isSelected = node.id === selectedNode?.name;
+        const className = isPreviewed
+          ? PREVIEW_NODE_CLASS
+          : isSelected
+            ? SELECTED_NODE_CLASS
+            : undefined;
+
+        if (!className) return node;
+
+        return {
+          ...node,
+          selected: true,
+          className: [node.className, className].filter(Boolean).join(" "),
+        };
+      }),
+    [nodes, previewNodeName, selectedNode?.name],
   );
 
   const onLayout = useCallback(() => {
@@ -58,8 +64,6 @@ export const DialogViewer = () => {
     setNodes([...updated.nodes]);
     setEdges([...updated.edges]);
   }, [content, setNodes, setEdges]);
-
-  const width = isElectronRenderer() ? "500px" : "100%";
 
   useEffect(() => {
     onLayout();
@@ -79,8 +83,7 @@ export const DialogViewer = () => {
   return (
     <div
       aria-label="Dialog flow chart"
-      className="mr-6 h-[750px] rounded-xl bg-[#121212] bg-[image:linear-gradient(rgba(255,255,255,0.05),rgba(255,255,255,0.05))] shadow-md transition-shadow"
-      style={{ width }}
+      className="h-full w-full bg-[#121212] bg-[image:linear-gradient(rgba(255,255,255,0.05),rgba(255,255,255,0.05))]"
     >
       <ReactFlow
         fitView

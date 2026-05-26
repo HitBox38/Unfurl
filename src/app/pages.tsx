@@ -144,25 +144,28 @@ export const FilePage = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 p-6">
-      <div className="flex w-full max-w-6xl items-center justify-between gap-4">
-        <div className="text-left">
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex shrink-0 items-center justify-between gap-4 border-b bg-background/95 px-4 py-3">
+        <div className="min-w-0 text-left">
           <p className="text-sm uppercase tracking-wide text-muted-foreground">
             Editing
           </p>
-          <h1 className="text-3xl font-bold">{name || "Untitled"}</h1>
+          <h1 className="truncate text-3xl font-bold">{name || "Untitled"}</h1>
         </div>
-        <Button asChild variant="secondary">
-          <Link to="/">Upload another file</Link>
-        </Button>
+        <div className="flex shrink-0 items-center gap-2">
+          <DownloadButton />
+          <Button asChild variant="secondary">
+            <Link to="/">Upload another file</Link>
+          </Button>
+        </div>
       </div>
-      <section className="mx-auto flex w-full max-w-6xl flex-row items-start justify-evenly py-4">
+      <section className="relative min-h-0 flex-1 overflow-hidden">
         <DialogViewer />
-        {node ? <NodeEditor /> : null}
-      </section>
-      <section className="flex flex-col items-center gap-4 pb-8">
-        <DownloadButton />
-        <DemoButton />
+        {node ? (
+          <aside className="absolute right-4 top-4 z-10 w-[calc(100%-2rem)] sm:w-[28rem]">
+            <NodeEditor />
+          </aside>
+        ) : null}
       </section>
     </div>
   );
