@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { buildDialogGraph } from "@/features/dialog-viewer/dialog-graph";
+import {
+  buildChoiceEdgeId,
+  buildDialogGraph,
+} from "@/features/dialog-viewer/dialog-graph";
 import type { StoryData } from "@/shared/types";
 
 describe("buildDialogGraph", () => {
+  it("builds stable choice edge ids from source, target, and choice index", () => {
+    expect(buildChoiceEdgeId("Intro", "Outro", 2)).toBe("eIntro-Outro-2");
+  });
+
   it("uses stored Twee positions and stable node-name ids", () => {
     const graph = buildDialogGraph({
       title: "Demo",
@@ -46,6 +53,7 @@ describe("buildDialogGraph", () => {
         target: "Outro",
       }),
     ]);
+    expect(graph.edges.map((edge) => edge.type)).toEqual([undefined]);
   });
 
   it("does not create edges to missing destination nodes", () => {

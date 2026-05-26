@@ -1,5 +1,7 @@
 import {
   addEdge,
+  Background,
+  BackgroundVariant,
   ReactFlow,
   useEdgesState,
   useNodesState,
@@ -11,19 +13,15 @@ import {
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
-import { appendChoice, createChoice } from "@/shared/lib";
+import { appendChoice, cn, createChoice } from "@/shared/lib";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import { DialogFlowNode } from "@/features/dialog-viewer/dialog-flow-node";
 import {
+  buildChoiceEdgeId,
   buildDialogGraph,
   DIALOG_NODE_TYPE,
   type DialogNodeData,
 } from "@/features/dialog-viewer/dialog-graph";
-
-const PREVIEW_NODE_CLASS =
-  "dialog-node-preview ring-2 ring-primary ring-offset-2 ring-offset-background";
-const SELECTED_NODE_CLASS =
-  "dialog-node-selected ring-2 ring-primary/80 ring-offset-2 ring-offset-background";
 
 export const DialogViewer = () => {
   const content = useJsonDataStore((state) => state.content);
@@ -31,6 +29,7 @@ export const DialogViewer = () => {
   const selectedNode = useNodeStore((state) => state.node);
   const setSelectedNode = useNodeStore((state) => state.setNode);
   const previewNodeName = useNodeStore((state) => state.previewNodeName);
+  const previewEdgeId = useNodeStore((state) => state.previewEdgeId);
   const flowInstanceRef =
     useRef<ReactFlowInstance<Node<DialogNodeData>, Edge> | null>(null);
 
@@ -50,26 +49,82 @@ export const DialogViewer = () => {
       }) satisfies NodeTypes,
     [],
   );
-  const displayedNodes = useMemo(
-    () =>
-      nodes.map((node) => {
+  const displayedNodes = useMemo<Node<DialogNodeData>[]>(
+    () => {
+      const connectedNodeIds = new Set<string>();
+      if (selectedNode) {
+        edges.forEach((edge) => {
+          if (
+            edge.source !== selectedNode.name &&
+            edge.target !== selectedNode.name
+          ) {
+            return;
+          }
+
+          connectedNodeIds.add(edge.source);
+          connectedNodeIds.add(edge.target);
+        });
+      }
+
+      return nodes.map((node) => {
         const isPreviewed = node.id === previewNodeName;
         const isSelected = node.id === selectedNode?.name;
-        const className = isPreviewed
-          ? PREVIEW_NODE_CLASS
-          : isSelected
-            ? SELECTED_NODE_CLASS
-            : undefined;
+        const isConnected = connectedNodeIds.has(node.id);
+        let highlight: DialogNodeData["highlight"];
+        if (isPreviewed) {
+          highlight = "preview";
+        } else if (isSelected) {
+          highlight = "selected";
+        } else if (isConnected) {
+          highlight = "connected";
+        }
 
-        if (!className) return node;
+        if (!highlight) {
+          return {
+            ...node,
+            selected: false,
+            data: { ...node.data, highlight },
+          };
+        }
 
         return {
           ...node,
           selected: true,
-          className: [node.className, className].filter(Boolean).join(" "),
+          data: { ...node.data, highlight },
+        };
+      });
+    },
+    [edges, nodes, previewNodeName, selectedNode],
+  );
+  const displayedEdges = useMemo<Edge[]>(
+    () =>
+      edges.map((edge): Edge => {
+        const isPreviewed = edge.id === previewEdgeId;
+        const isConnected =
+          Boolean(selectedNode) &&
+          (edge.source === selectedNode?.name ||
+            edge.target === selectedNode?.name);
+        const isDimmed =
+          Boolean(selectedNode || previewEdgeId) && !isPreviewed && !isConnected;
+
+        return {
+          ...edge,
+          animated: isPreviewed || edge.animated,
+          className: cn(
+            edge.className,
+            isPreviewed && "dialog-edge-preview",
+            isConnected && !isPreviewed && "dialog-edge-connected",
+            isDimmed && "dialog-edge-dimmed",
+          ),
+          style: {
+            ...edge.style,
+            opacity: isDimmed ? 0.35 : 1,
+            strokeWidth: isPreviewed ? 3 : isConnected ? 2.5 : 1.5,
+          },
+          zIndex: isPreviewed ? 20 : isConnected ? 10 : edge.zIndex,
         };
       }),
-    [nodes, previewNodeName, selectedNode?.name],
+    [edges, previewEdgeId, selectedNode],
   );
 
   const onLayout = useCallback(() => {
@@ -102,7 +157,11 @@ export const DialogViewer = () => {
         addEdge(
           {
             ...connection,
-            id: `e${connection.source}-${connection.target}-${choiceIndex}`,
+            id: buildChoiceEdgeId(
+              connection.source,
+              connection.target,
+              choiceIndex,
+            ),
           },
           currentEdges,
         ),
@@ -129,13 +188,12 @@ export const DialogViewer = () => {
   return (
     <div
       aria-label="Dialog flow chart"
-      className="h-full w-full bg-[#121212] bg-[image:linear-gradient(rgba(255,255,255,0.05),rgba(255,255,255,0.05))]"
+      className="dialog-flow-viewer h-full w-full bg-background"
     >
       <ReactFlow
         fitView
-        colorMode="dark"
         nodes={displayedNodes}
-        edges={edges}
+        edges={displayedEdges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
@@ -147,7 +205,9 @@ export const DialogViewer = () => {
           flowInstanceRef.current = instance;
           onLayout();
         }}
-      />
+      >
+        <Background variant={BackgroundVariant.Dots} gap={18} size={1.3} />
+      </ReactFlow>
     </div>
   );
 };

@@ -17,7 +17,9 @@ const { addEdge, reactFlow, setEdges } = vi.hoisted(() => ({
 
 vi.mock("@xyflow/react", () => ({
   addEdge,
-  ConnectionLineType: { Step: "step" },
+  Background: vi.fn(() => null),
+  BackgroundVariant: { Dots: "dots" },
+  ConnectionLineType: { SmoothStep: "smoothstep", Step: "step" },
   Handle: vi.fn(() => null),
   Position: { Bottom: "bottom", Top: "top" },
   ReactFlow: reactFlow,
@@ -34,7 +36,7 @@ const story = {
       position: { x: 0, y: 0 },
       metadata: {},
       content: [],
-      choices: [],
+      choices: [{ text: "Next", destination: "Outro" }],
     },
     {
       name: "Outro",
@@ -56,15 +58,35 @@ describe("DialogViewer", () => {
     useNodeStore.getState().setNode(null);
   });
 
-  it("renders React Flow in dark mode so node labels remain visible", () => {
+  it("uses the app theme for the flow workspace", () => {
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");
 
     render(<DialogViewer />);
 
-    expect(reactFlow).toHaveBeenCalledWith(
-      expect.objectContaining({ colorMode: "dark" }),
-      undefined,
+    expect(screen.getByLabelText(/dialog flow chart/i)).toHaveClass(
+      "dialog-flow-viewer",
+      "bg-background",
     );
+    expect(reactFlow.mock.calls.at(-1)?.[0]).not.toHaveProperty("colorMode");
+  });
+
+  it("uses React Flow's default curve for graph edges and the live connection line", () => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+
+    render(<DialogViewer />);
+
+    const latestReactFlowProps = reactFlow.mock.calls.at(-1)?.[0] as
+      | {
+          connectionLineType?: string;
+          defaultEdgeOptions?: { type?: string };
+          edges: Array<{ id: string; type?: string }>;
+        }
+      | undefined;
+
+    expect(latestReactFlowProps).not.toHaveProperty("connectionLineType");
+    expect(latestReactFlowProps).not.toHaveProperty("defaultEdgeOptions");
+    expect(latestReactFlowProps?.edges.find((edge) => edge.id === "eIntro-Outro-0"))
+      .toEqual(expect.not.objectContaining({ type: expect.any(String) }));
   });
 
   it("fills the available flow workspace", () => {
@@ -89,6 +111,10 @@ describe("DialogViewer", () => {
           nodes: Array<{
             id: string;
             selected?: boolean;
+            data: { highlight?: string };
+          }>;
+          edges: Array<{
+            id: string;
             className?: string;
           }>;
         }
@@ -98,7 +124,13 @@ describe("DialogViewer", () => {
       .toEqual(
         expect.objectContaining({
           selected: true,
-          className: expect.stringContaining("dialog-node-selected"),
+          data: expect.objectContaining({ highlight: "selected" }),
+        }),
+      );
+    expect(latestReactFlowProps?.edges.find((edge) => edge.id === "eIntro-Outro-0"))
+      .toEqual(
+        expect.objectContaining({
+          className: expect.stringContaining("dialog-edge-connected"),
         }),
       );
   });

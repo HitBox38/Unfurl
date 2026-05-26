@@ -27,6 +27,7 @@ import {
 } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -36,6 +37,7 @@ import {
 } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 
+import { buildChoiceEdgeId } from "@/features/dialog-viewer";
 import { NodeMetadataEditor } from "@/features/node-editor/node-metadata-editor";
 
 interface StoryNodeForm extends Omit<StoryNode, "content"> {
@@ -45,7 +47,7 @@ interface StoryNodeForm extends Omit<StoryNode, "content"> {
 export const NodeEditor = () => {
   const node = useNodeStore((state) => state.node);
   const setNode = useNodeStore((state) => state.setNode);
-  const setPreviewNodeName = useNodeStore((state) => state.setPreviewNodeName);
+  const setGraphPreview = useNodeStore((state) => state.setGraphPreview);
   const content = useJsonDataStore((state) => state.content);
   const setJsonNode = useJsonDataStore((state) => state.setNode);
   const nodeNames = useMemo(
@@ -62,7 +64,7 @@ export const NodeEditor = () => {
     },
   });
 
-  const { append, fields } = useFieldArray({
+  const { append, fields, remove } = useFieldArray({
     control: methods.control,
     name: "choices",
   });
@@ -90,7 +92,7 @@ export const NodeEditor = () => {
     }
   }, [node, methods]);
 
-  useEffect(() => () => setPreviewNodeName(null), [setPreviewNodeName]);
+  useEffect(() => () => setGraphPreview(null), [setGraphPreview]);
 
   if (!node) {
     return null;
@@ -103,6 +105,21 @@ export const NodeEditor = () => {
 
   const getDefaultChoiceDestination = () =>
     nodeNames.find((nodeName) => nodeName !== node.name) ?? "";
+
+  const previewChoice = (
+    destination: string | null | undefined,
+    index: number,
+  ) => {
+    if (!destination) {
+      setGraphPreview(null);
+      return;
+    }
+
+    setGraphPreview({
+      nodeName: destination,
+      edgeId: buildChoiceEdgeId(node.name, destination, index),
+    });
+  };
 
   return (
     <FormProvider {...methods}>
@@ -143,7 +160,7 @@ export const NodeEditor = () => {
               aria-label="Close node editor"
               className="shrink-0"
               onClick={() => {
-                setPreviewNodeName(null);
+                setGraphPreview(null);
                 setNode(null);
               }}
             >
@@ -155,16 +172,13 @@ export const NodeEditor = () => {
           className="flex min-h-0 flex-1 flex-col"
           onSubmit={methods.handleSubmit(submitNode)}
         >
-          <CardContent className="min-h-0 flex-1 overflow-y-auto p-4">
+          <CardContent className="min-h-0 flex-1 overflow-y-auto">
             <Accordion
               type="multiple"
               defaultValue={["content", "choices", "metadata"]}
               className="flex flex-col gap-3"
             >
-              <AccordionItem
-                value="content"
-                className="rounded-xl border bg-muted/20 px-3"
-              >
+              <AccordionItem value="content">
                 <AccordionTrigger>Content</AccordionTrigger>
                 <AccordionContent>
                   <Label htmlFor="node-content" className="sr-only">
@@ -179,21 +193,35 @@ export const NodeEditor = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem
-                value="choices"
-                className="rounded-xl border bg-muted/20 px-3"
-              >
+              <AccordionItem value="choices">
                 <AccordionTrigger>Choices</AccordionTrigger>
                 <AccordionContent className="space-y-3">
                   {fields.map((field, index) => (
-                    <div
+                    <section
                       key={field.id}
+                      aria-label={`Choice ${index + 1} editor`}
                       className="space-y-3 rounded-xl border bg-background/80 p-3 shadow-sm"
+                      onMouseEnter={() =>
+                        previewChoice(
+                          methods.getValues(`choices.${index}.destination`),
+                          index,
+                        )
+                      }
+                      onMouseLeave={() => setGraphPreview(null)}
                     >
                       <div className="flex items-center justify-between gap-2 border-b pb-2">
-                        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        <span className="text-xs font-semibold tracking-wide text-muted-foreground">
                           Choice {index + 1}
                         </span>
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon-xs"
+                          aria-label="Delete choice"
+                          onClick={() => remove(index)}
+                        >
+                          <Trash />
+                        </Button>
                       </div>
                       <div className="space-y-2">
                         <Label
@@ -231,7 +259,7 @@ export const NodeEditor = () => {
                                     value={destination.value}
                                     onValueChange={destination.onChange}
                                     onOpenChange={(open) => {
-                                      if (!open) setPreviewNodeName(null);
+                                      if (!open) setGraphPreview(null);
                                     }}
                                   >
                                     <SelectTrigger
@@ -249,13 +277,13 @@ export const NodeEditor = () => {
                                           key={nodeName}
                                           value={nodeName}
                                           onFocus={() =>
-                                            setPreviewNodeName(nodeName)
+                                            previewChoice(nodeName, index)
                                           }
                                           onMouseEnter={() =>
-                                            setPreviewNodeName(nodeName)
+                                            previewChoice(nodeName, index)
                                           }
                                           onPointerMove={() =>
-                                            setPreviewNodeName(nodeName)
+                                            previewChoice(nodeName, index)
                                           }
                                         >
                                           {nodeName}
@@ -269,7 +297,7 @@ export const NodeEditor = () => {
                           }}
                         />
                       </div>
-                    </div>
+                    </section>
                   ))}
                   <Button
                     type="button"
@@ -299,7 +327,7 @@ export const NodeEditor = () => {
                 type="button"
                 variant="warning"
                 onClick={() => {
-                  setPreviewNodeName(null);
+                  setGraphPreview(null);
                   setNode(null);
                 }}
               >

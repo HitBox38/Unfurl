@@ -4,11 +4,18 @@ import dagre from "dagre";
 import type { StoryData, StoryNode } from "@/shared/types";
 
 export interface DialogNodeData extends Record<string, unknown> {
+  highlight?: "selected" | "preview" | "connected";
   label: string;
   metadata: StoryNode;
 }
 
 export const DIALOG_NODE_TYPE = "dialog";
+
+export const buildChoiceEdgeId = (
+  source: string,
+  target: string,
+  choiceIndex: number,
+) => `e${source}-${target}-${choiceIndex}`;
 
 const NODE_WIDTH = 150;
 const NODE_HEIGHT = 50;
@@ -64,7 +71,7 @@ export const buildDialogGraph = (
     node.choices.flatMap((choice, choiceIndex) => {
       if (!nodeIds.has(choice.destination)) return [];
       return {
-        id: `e${node.name}-${choice.destination}-${choiceIndex}`,
+        id: buildChoiceEdgeId(node.name, choice.destination, choiceIndex),
         source: node.name,
         target: choice.destination,
       } satisfies Edge;

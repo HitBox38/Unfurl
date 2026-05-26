@@ -121,6 +121,50 @@
   }
 }
 
+.dialog-flow-viewer .react-flow {
+  --xy-background-pattern-dots-color-default: color-mix(
+    in oklch,
+    var(--border) 70%,
+    transparent
+  );
+  --xy-connectionline-stroke-default: var(--primary);
+  --xy-edge-stroke-default: var(--border);
+  --xy-edge-stroke-selected-default: var(--primary);
+  --xy-handle-background-color-default: var(--primary);
+  --xy-handle-border-color-default: var(--background);
+  --xy-node-background-color-default: var(--card);
+  --xy-node-border-default: 1px solid var(--border);
+  --xy-selection-background-color-default: color-mix(
+    in oklch,
+    var(--primary) 12%,
+    transparent
+  );
+  --xy-selection-border-default: 1px solid var(--primary);
+}
+
+.dialog-flow-viewer .react-flow__edge-path {
+  transition:
+    opacity 150ms ease,
+    stroke 150ms ease,
+    stroke-width 150ms ease,
+    filter 150ms ease;
+}
+
+.dialog-flow-viewer .dialog-edge-connected .react-flow__edge-path {
+  stroke: var(--primary);
+}
+
+.dialog-flow-viewer .dialog-edge-preview .react-flow__edge-path {
+  filter: drop-shadow(
+    0 0 4px color-mix(in oklch, var(--chart-2) 50%, transparent)
+  );
+  stroke: var(--chart-2);
+}
+
+.dialog-flow-viewer .dialog-edge-dimmed .react-flow__edge-path {
+  opacity: 0.35;
+}
+
 .electron-app-shell {
   --electron-titlebar-height: env(titlebar-area-height, 32px);
   background: var(--background);

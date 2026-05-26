@@ -17,7 +17,9 @@ const { flowInstance, reactFlow } = vi.hoisted(() => ({
 
 vi.mock("@xyflow/react", () => ({
   addEdge: vi.fn((connection, edges) => [...edges, connection]),
-  ConnectionLineType: { Step: "step" },
+  Background: vi.fn(() => null),
+  BackgroundVariant: { Dots: "dots" },
+  ConnectionLineType: { SmoothStep: "smoothstep", Step: "step" },
   Handle: vi.fn(() => null),
   Position: { Bottom: "bottom", Top: "top" },
   ReactFlow: reactFlow,
@@ -62,8 +64,12 @@ const clearPreviewNode = () => {
   const state = useNodeStore.getState() as ReturnType<
     typeof useNodeStore.getState
   > & {
+    setGraphPreview?: (
+      preview: { nodeName: string; edgeId?: string } | null,
+    ) => void;
     setPreviewNodeName?: (nodeName: string | null) => void;
   };
+  state.setGraphPreview?.(null);
   state.setPreviewNodeName?.(null);
 };
 
@@ -209,6 +215,46 @@ describe("NodeEditor", () => {
     ).toBeInTheDocument();
   });
 
+  it("highlights the current choice edge while its editor card is hovered", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+
+    render(
+      <>
+        <DialogViewer />
+        <NodeEditor />
+      </>,
+    );
+
+    const latestReactFlowProps = () =>
+      reactFlow.mock.calls.at(-1)?.[0] as
+        | {
+            edges: Array<{
+              id: string;
+              animated?: boolean;
+              className?: string;
+            }>;
+          }
+        | undefined;
+
+    await user.hover(screen.getByRole("region", { name: /choice 1 editor/i }));
+
+    await waitFor(() => {
+      expect(useNodeStore.getState().previewNodeName).toBe("Middle");
+      expect(useNodeStore.getState().previewEdgeId).toBe("eIntro-Middle-0");
+      expect(
+        latestReactFlowProps()?.edges.find(
+          (edge) => edge.id === "eIntro-Middle-0",
+        ),
+      ).toEqual(
+        expect.objectContaining({
+          animated: true,
+          className: expect.stringContaining("dialog-edge-preview"),
+        }),
+      );
+    });
+  });
+
   it("highlights and focuses the destination node while an option is hovered", async () => {
     const user = userEvent.setup();
     selectIntroNode();
@@ -226,7 +272,7 @@ describe("NodeEditor", () => {
             nodes: Array<{
               id: string;
               selected?: boolean;
-              className?: string;
+              data: { highlight?: string };
             }>;
             onInit?: (instance: typeof flowInstance) => void;
           }
@@ -254,7 +300,7 @@ describe("NodeEditor", () => {
       expect(outro).toEqual(
         expect.objectContaining({
           selected: true,
-          className: expect.stringContaining("dialog-node-preview"),
+          data: expect.objectContaining({ highlight: "preview" }),
         }),
       );
     });
