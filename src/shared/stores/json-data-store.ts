@@ -28,6 +28,7 @@ export interface JsonDataState {
   setName: (name: string) => void;
   setNode: (newNode: StoryNode, previousName?: string) => void;
   addNode: (node: StoryNode) => void;
+  removeNode: (nodeName: string) => void;
   undo: () => void;
   redo: () => void;
   setLoading: (isLoading: boolean) => void;
@@ -113,6 +114,44 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
         ...state.content,
         start: state.content.start ?? node.name,
         nodes: [...state.content.nodes, node],
+      };
+
+      if (snapshotsAreEqual({ name: state.name, content }, state)) {
+        return {};
+      }
+
+      persistActiveFileContent(state.activeFileId, content);
+      const past = pushHistorySnapshot(state);
+      return {
+        content,
+        past,
+        future: [],
+        canUndo: true,
+        canRedo: false,
+      };
+    }),
+  removeNode: (nodeName) =>
+    set((state) => {
+      if (!state.content.nodes.some((node) => node.name === nodeName)) {
+        return {};
+      }
+
+      const remainingNodes = state.content.nodes
+        .filter((node) => node.name !== nodeName)
+        .map((node) => ({
+          ...node,
+          choices: node.choices.filter(
+            (choice) => choice.destination !== nodeName,
+          ),
+        }));
+
+      const content: StoryData = {
+        ...state.content,
+        start:
+          state.content.start === nodeName
+            ? (remainingNodes[0]?.name ?? null)
+            : state.content.start,
+        nodes: remainingNodes,
       };
 
       if (snapshotsAreEqual({ name: state.name, content }, state)) {

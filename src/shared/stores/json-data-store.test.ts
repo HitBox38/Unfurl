@@ -93,6 +93,62 @@ describe("useJsonDataStore", () => {
     expect(useJsonDataStore.getState().content).toEqual(sample);
   });
 
+  it("removeNode deletes a node and strips choices pointing to it", () => {
+    useJsonDataStore.getState().setJson(sample, "demo");
+
+    useJsonDataStore.getState().removeNode("Outro");
+
+    const state = useJsonDataStore.getState();
+    expect(state.content.nodes).toHaveLength(1);
+    expect(state.content.nodes[0]?.name).toBe("Intro");
+    expect(state.content.nodes[0]?.choices).toEqual([]);
+    expect(state.canUndo).toBe(true);
+  });
+
+  it("removeNode reassigns start when the start node is deleted", () => {
+    useJsonDataStore.getState().setJson(sample, "demo");
+
+    useJsonDataStore.getState().removeNode("Intro");
+
+    const state = useJsonDataStore.getState();
+    expect(state.content.start).toBe("Outro");
+    expect(state.content.nodes).toHaveLength(1);
+    expect(state.content.nodes[0]?.name).toBe("Outro");
+  });
+
+  it("removeNode allows deleting the only node", () => {
+    useJsonDataStore.getState().setJson(
+      {
+        title: "Solo",
+        start: "Only",
+        nodes: [
+          {
+            name: "Only",
+            content: [],
+            choices: [],
+            metadata: {},
+          },
+        ],
+      },
+      "demo",
+    );
+
+    useJsonDataStore.getState().removeNode("Only");
+
+    const state = useJsonDataStore.getState();
+    expect(state.content.nodes).toEqual([]);
+    expect(state.content.start).toBeNull();
+  });
+
+  it("removeNode is a no-op for unknown node names", () => {
+    useJsonDataStore.getState().setJson(sample, "demo");
+
+    useJsonDataStore.getState().removeNode("Missing");
+
+    expect(useJsonDataStore.getState().content).toEqual(sample);
+    expect(useJsonDataStore.getState().canUndo).toBe(false);
+  });
+
   it("setNode can rename a node and update story references", () => {
     useJsonDataStore.getState().setJson(
       {

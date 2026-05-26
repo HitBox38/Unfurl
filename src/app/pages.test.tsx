@@ -26,10 +26,21 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 vi.mock("@/features/dialog-viewer", () => ({
-  AddNodeButton: () => (
-    <button type="button" aria-label="Add node" data-variant="secondary" data-size="icon-sm">
-      Add node
-    </button>
+  GraphNodeToolbar: () => (
+    <div data-testid="graph-node-toolbar">
+      <button type="button" aria-label="Add node" data-variant="secondary" data-size="icon-sm">
+        Add node
+      </button>
+      <button
+        type="button"
+        aria-label="Delete nodes"
+        aria-pressed="false"
+        data-variant="secondary"
+        data-size="icon-sm"
+      >
+        Delete nodes
+      </button>
+    </div>
   ),
   DialogViewer: () => <div data-testid="dialog-viewer" />,
 }));
@@ -81,14 +92,11 @@ describe("FilePage", () => {
       "backdrop-blur-md",
     );
     expect(
+      container.querySelector('[data-testid="file-toolbar"]'),
+    ).toHaveClass("absolute", "right-4", "top-4", "gap-2");
+    expect(
       container.querySelector('[data-testid="file-download-bubble"]'),
-    ).toHaveClass(
-      "absolute",
-      "right-4",
-      "top-4",
-      "rounded-full",
-      "bg-card/90",
-    );
+    ).toHaveClass("rounded-full", "bg-card/90");
     expect(
       container.querySelector('[data-testid="file-add-node-bubble"]'),
     ).toHaveClass("rounded-full", "bg-card/90", "shadow-lg");
@@ -100,6 +108,12 @@ describe("FilePage", () => {
     const addNode = screen.getByRole("button", { name: /add node/i });
     expect(addNode).toHaveAttribute("data-variant", "secondary");
     expect(addNode).toHaveAttribute("data-size", "icon-sm");
+    const deleteNodes = screen.getByRole("button", { name: /delete nodes/i });
+    expect(deleteNodes).toHaveAttribute("data-variant", "secondary");
+    expect(deleteNodes).toHaveAttribute("data-size", "icon-sm");
+    expect(
+      container.querySelector('[data-testid="file-add-node-bubble"]'),
+    ).toContainElement(screen.getByTestId("graph-node-toolbar"));
     const download = screen.getByRole("button", { name: /download/i });
     expect(download).toHaveAttribute(
       "data-variant",
