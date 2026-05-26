@@ -1,17 +1,22 @@
 import {
-  ConnectionLineType,
+  addEdge,
   ReactFlow,
   useEdgesState,
   useNodesState,
+  type Connection,
   type Edge,
   type Node,
+  type NodeTypes,
   type ReactFlowInstance,
 } from "@xyflow/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
+import { appendChoice, createChoice } from "@/shared/lib";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
+import { DialogFlowNode } from "@/features/dialog-viewer/dialog-flow-node";
 import {
   buildDialogGraph,
+  DIALOG_NODE_TYPE,
   type DialogNodeData,
 } from "@/features/dialog-viewer/dialog-graph";
 
@@ -22,6 +27,7 @@ const SELECTED_NODE_CLASS =
 
 export const DialogViewer = () => {
   const content = useJsonDataStore((state) => state.content);
+  const setJsonNode = useJsonDataStore((state) => state.setNode);
   const selectedNode = useNodeStore((state) => state.node);
   const setSelectedNode = useNodeStore((state) => state.setNode);
   const previewNodeName = useNodeStore((state) => state.previewNodeName);
@@ -37,6 +43,13 @@ export const DialogViewer = () => {
     initial.nodes,
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(initial.edges);
+  const nodeTypes = useMemo(
+    () =>
+      ({
+        [DIALOG_NODE_TYPE]: DialogFlowNode,
+      }) satisfies NodeTypes,
+    [],
+  );
   const displayedNodes = useMemo(
     () =>
       nodes.map((node) => {
@@ -65,6 +78,39 @@ export const DialogViewer = () => {
     setEdges([...updated.edges]);
   }, [content, setNodes, setEdges]);
 
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return;
+
+      const sourceNode = content.nodes.find(
+        (node) => node.name === connection.source,
+      );
+      if (!sourceNode) return;
+
+      const choiceIndex = sourceNode.choices.length;
+      const updatedSourceNode = appendChoice(
+        sourceNode,
+        createChoice(connection.target),
+      );
+
+      setJsonNode(updatedSourceNode, sourceNode.name);
+      if (selectedNode?.name === sourceNode.name) {
+        setSelectedNode(updatedSourceNode);
+      }
+
+      setEdges((currentEdges) =>
+        addEdge(
+          {
+            ...connection,
+            id: `e${connection.source}-${connection.target}-${choiceIndex}`,
+          },
+          currentEdges,
+        ),
+      );
+    },
+    [content.nodes, selectedNode?.name, setEdges, setJsonNode, setSelectedNode],
+  );
+
   useEffect(() => {
     onLayout();
   }, [onLayout]);
@@ -90,10 +136,13 @@ export const DialogViewer = () => {
         colorMode="dark"
         nodes={displayedNodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
         onNodeClick={(_e, node) => setSelectedNode(node.data.metadata)}
-        connectionLineType={ConnectionLineType.Step}
+        nodesConnectable
+        deleteKeyCode={null}
         onInit={(instance) => {
           flowInstanceRef.current = instance;
           onLayout();

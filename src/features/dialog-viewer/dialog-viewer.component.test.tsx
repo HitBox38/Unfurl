@@ -5,14 +5,23 @@ import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 
 import { DialogViewer } from "@/features/dialog-viewer/dialog-viewer";
 
-const { reactFlow } = vi.hoisted(() => ({
+const { addEdge, reactFlow, setEdges } = vi.hoisted(() => ({
+  addEdge: vi.fn((connection, edges) => [...edges, connection]),
   reactFlow: vi.fn((_props: unknown) => <div data-testid="react-flow" />),
+  setEdges: vi.fn((update: unknown) => {
+    if (typeof update === "function") {
+      update([]);
+    }
+  }),
 }));
 
 vi.mock("@xyflow/react", () => ({
+  addEdge,
   ConnectionLineType: { Step: "step" },
+  Handle: vi.fn(() => null),
+  Position: { Bottom: "bottom", Top: "top" },
   ReactFlow: reactFlow,
-  useEdgesState: <T,>(initial: T[]) => [initial, vi.fn(), vi.fn()],
+  useEdgesState: <T,>(initial: T[]) => [initial, setEdges, vi.fn()],
   useNodesState: <T,>(initial: T[]) => [initial, vi.fn(), vi.fn()],
 }));
 
@@ -27,12 +36,21 @@ const story = {
       content: [],
       choices: [],
     },
+    {
+      name: "Outro",
+      position: { x: 200, y: 0 },
+      metadata: {},
+      content: [],
+      choices: [],
+    },
   ],
 };
 
 describe("DialogViewer", () => {
   afterEach(() => {
+    addEdge.mockClear();
     reactFlow.mockClear();
+    setEdges.mockClear();
     Reflect.deleteProperty(window, "ipcRenderer");
     useJsonDataStore.getState().reset();
     useNodeStore.getState().setNode(null);
@@ -83,5 +101,46 @@ describe("DialogViewer", () => {
           className: expect.stringContaining("dialog-node-selected"),
         }),
       );
+  });
+
+  it("creates a story choice when nodes are connected in the flow chart", () => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+    useNodeStore.getState().setNode(story.nodes[0]);
+
+    render(<DialogViewer />);
+
+    const latestReactFlowProps = reactFlow.mock.calls.at(-1)?.[0] as
+      | {
+          onConnect?: (connection: {
+            source: string;
+            target: string;
+            sourceHandle: string | null;
+            targetHandle: string | null;
+          }) => void;
+        }
+      | undefined;
+
+    expect(latestReactFlowProps?.onConnect).toEqual(expect.any(Function));
+
+    latestReactFlowProps?.onConnect?.({
+      source: "Intro",
+      target: "Outro",
+      sourceHandle: null,
+      targetHandle: null,
+    });
+
+    expect(
+      useJsonDataStore
+        .getState()
+        .content.nodes.find((node) => node.name === "Intro")?.choices,
+    ).toContainEqual({ text: "", destination: "Outro" });
+    expect(useNodeStore.getState().node?.choices).toContainEqual({
+      text: "",
+      destination: "Outro",
+    });
+    expect(addEdge).toHaveBeenCalledWith(
+      expect.not.objectContaining({ type: expect.any(String) }),
+      expect.any(Array),
+    );
   });
 });

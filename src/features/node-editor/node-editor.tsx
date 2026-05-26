@@ -8,6 +8,7 @@ import {
   type SubmitHandler,
 } from "react-hook-form";
 
+import { createChoice } from "@/shared/lib";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryNode } from "@/shared/types";
 import {
@@ -61,7 +62,7 @@ export const NodeEditor = () => {
     },
   });
 
-  const { fields } = useFieldArray({
+  const { append, fields } = useFieldArray({
     control: methods.control,
     name: "choices",
   });
@@ -99,6 +100,9 @@ export const NodeEditor = () => {
     destination && !nodeNames.includes(destination)
       ? [destination, ...nodeNames]
       : nodeNames;
+
+  const getDefaultChoiceDestination = () =>
+    nodeNames.find((nodeName) => nodeName !== node.name) ?? "";
 
   return (
     <FormProvider {...methods}>
@@ -267,6 +271,16 @@ export const NodeEditor = () => {
                       </div>
                     </div>
                   ))}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() =>
+                      append(createChoice(getDefaultChoiceDestination()))
+                    }
+                  >
+                    Add choice
+                  </Button>
                 </AccordionContent>
               </AccordionItem>
               <NodeMetadataEditor />

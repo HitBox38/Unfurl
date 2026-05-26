@@ -32,12 +32,19 @@ describe("buildDialogGraph", () => {
       ["Intro", { x: 25, y: 50 }],
       ["Outro", { x: 200, y: 50 }],
     ]);
+    expect(graph.nodes.map((node) => node.type)).toEqual([
+      "dialog",
+      "dialog",
+    ]);
     expect(graph.nodes.map((node) => node.style)).toEqual([
       undefined,
       undefined,
     ]);
     expect(graph.edges).toEqual([
-      expect.objectContaining({ source: "Intro", target: "Outro" }),
+      expect.objectContaining({
+        source: "Intro",
+        target: "Outro",
+      }),
     ]);
   });
 

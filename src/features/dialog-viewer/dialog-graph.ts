@@ -8,6 +8,8 @@ export interface DialogNodeData extends Record<string, unknown> {
   metadata: StoryNode;
 }
 
+export const DIALOG_NODE_TYPE = "dialog";
+
 const NODE_WIDTH = 150;
 const NODE_HEIGHT = 50;
 
@@ -52,6 +54,7 @@ export const buildDialogGraph = (
 ): { nodes: Node<DialogNodeData>[]; edges: Edge[] } => {
   const nodes: Node<DialogNodeData>[] = json.nodes.map((node) => ({
     id: node.name,
+    type: DIALOG_NODE_TYPE,
     data: { label: node.name, metadata: node },
     position: node.position ?? { x: 0, y: 0 },
   }));

@@ -16,7 +16,10 @@ const { flowInstance, reactFlow } = vi.hoisted(() => ({
 }));
 
 vi.mock("@xyflow/react", () => ({
+  addEdge: vi.fn((connection, edges) => [...edges, connection]),
   ConnectionLineType: { Step: "step" },
+  Handle: vi.fn(() => null),
+  Position: { Bottom: "bottom", Top: "top" },
   ReactFlow: reactFlow,
   useEdgesState: <T,>(initial: T[]) => [initial, vi.fn(), vi.fn()],
   useNodesState: <T,>(initial: T[]) => [initial, vi.fn(), vi.fn()],
@@ -96,6 +99,35 @@ describe("NodeEditor", () => {
     },
     10_000,
   );
+
+  it("adds a new choice and saves it to the selected node", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+
+    render(<NodeEditor />);
+
+    await user.click(screen.getByRole("button", { name: /add choice/i }));
+    await user.type(
+      screen.getByRole("textbox", { name: /choice 2 text/i }),
+      "Finish",
+    );
+    await user.click(
+      screen.getByRole("combobox", {
+        name: /destination for option finish/i,
+      }),
+    );
+    await user.click(screen.getByRole("option", { name: "Outro" }));
+    await user.click(screen.getByRole("button", { name: /update node/i }));
+
+    expect(
+      useJsonDataStore
+        .getState()
+        .content.nodes.find((node) => node.name === "Intro")?.choices,
+    ).toEqual([
+      { text: "Next", destination: "Middle" },
+      { text: "Finish", destination: "Outro" },
+    ]);
+  });
 
   it("renames the selected node and keeps it selected", async () => {
     const user = userEvent.setup();
