@@ -6,6 +6,7 @@ import {
   saveEditableFile,
   searchEditableFiles,
   updateEditableFileContent,
+  updateEditableFileName,
 } from "@/features/recent-files";
 import type { StoryData } from "@/shared/types";
 
@@ -127,5 +128,26 @@ describe("recent editable file storage", () => {
       editedStory,
     );
     expect(getEditableFile("draft-id", { storage })?.updatedAt).toBe(500);
+  });
+
+  it("persists renamed editable files without changing content", () => {
+    const storage = localStorage;
+
+    saveEditableFile(
+      { name: "draft", fileType: "twee", content: firstStory },
+      { storage, now: () => 100, createId: () => "draft-id" },
+    );
+
+    updateEditableFileName("draft-id", "renamed draft", {
+      storage,
+      now: () => 600,
+    });
+
+    expect(getEditableFile("draft-id", { storage })).toMatchObject({
+      id: "draft-id",
+      name: "renamed draft",
+      content: firstStory,
+      updatedAt: 600,
+    });
   });
 });

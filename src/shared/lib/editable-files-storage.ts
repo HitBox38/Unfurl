@@ -131,3 +131,21 @@ export const updateEditableFileContent = (
     ),
   );
 };
+
+export const updateEditableFileName = (
+  id: string,
+  name: string,
+  options: Omit<StorageOptions, "createId"> = {},
+) => {
+  const storage = getStorage(options.storage);
+  const files = readFiles(storage);
+  const updatedAt = options.now?.() ?? defaultNow();
+  writeFiles(
+    storage,
+    sortNewestFirst(
+      files.map((file) =>
+        file.id === id ? { ...file, name, updatedAt } : file,
+      ),
+    ),
+  );
+};

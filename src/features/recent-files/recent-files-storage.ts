@@ -5,6 +5,7 @@ export {
   saveEditableFile,
   searchEditableFiles,
   updateEditableFileContent,
+  updateEditableFileName,
   type EditableFileDraft,
   type EditableFileRecord,
 } from "@/shared/lib/editable-files-storage";

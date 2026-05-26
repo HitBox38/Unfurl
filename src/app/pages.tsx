@@ -25,6 +25,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 
 interface PageProps {
   isOnline: boolean;
@@ -91,11 +93,57 @@ export const HomePage = ({ isOnline }: PageProps) => {
   );
 };
 
+interface FileNameHeaderInputProps {
+  name: string;
+  onCommit: (name: string) => void;
+}
+
+const FileNameHeaderInput = ({ name, onCommit }: FileNameHeaderInputProps) => {
+  const displayName = name || "Untitled";
+  const [draftName, setDraftName] = useState(displayName);
+
+  const commitName = (value: string) => {
+    const nextName = value.trim();
+    if (!nextName) {
+      setDraftName(displayName);
+      return;
+    }
+
+    if (nextName !== name) {
+      onCommit(nextName);
+    }
+    setDraftName(nextName);
+  };
+
+  return (
+    <div className="min-w-0 flex-1 text-left">
+      <Label htmlFor="file-name" className="sr-only">
+        File name
+      </Label>
+      <Input
+        id="file-name"
+        aria-label="File name"
+        value={draftName}
+        onChange={(event) => setDraftName(event.target.value)}
+        onBlur={(event) => commitName(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            event.currentTarget.blur();
+          }
+        }}
+        className="h-auto w-full truncate rounded-full border border-transparent bg-transparent px-2 py-0 text-3xl font-bold leading-tight shadow-none ring-0 hover:border-input hover:bg-background/60 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-3xl dark:bg-transparent"
+      />
+    </div>
+  );
+};
+
 export const FilePage = () => {
   const { fileId } = useParams({ strict: false }) as { fileId?: string };
   const name = useJsonDataStore((state) => state.name);
   const activeFileId = useJsonDataStore((state) => state.activeFileId);
   const setJsonData = useJsonDataStore((state) => state.setJson);
+  const setFileName = useJsonDataStore((state) => state.setName);
   const resetJson = useJsonDataStore((state) => state.reset);
   const node = useNodeStore((state) => state.node);
   const setSelectedNode = useNodeStore((state) => state.setNode);
@@ -145,24 +193,26 @@ export const FilePage = () => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex shrink-0 items-center justify-between gap-4 border-b bg-background/95 px-4 py-3">
-        <div className="min-w-0 text-left">
-          <p className="text-sm uppercase tracking-wide text-muted-foreground">
-            Editing
-          </p>
-          <h1 className="truncate text-3xl font-bold">{name || "Untitled"}</h1>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <DownloadButton />
-          <Button asChild variant="secondary">
-            <Link to="/">Upload another file</Link>
-          </Button>
-        </div>
-      </div>
       <section className="relative min-h-0 flex-1 overflow-hidden">
+        <div
+          data-testid="file-page-header"
+          className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] items-center rounded-full border bg-card/90 px-2.5 py-1.5 shadow-lg backdrop-blur-md sm:max-w-[min(36rem,calc(100%-5rem))]"
+        >
+          <FileNameHeaderInput
+            key={name || "Untitled"}
+            name={name}
+            onCommit={setFileName}
+          />
+        </div>
+        <div
+          data-testid="file-download-bubble"
+          className="absolute right-4 top-4 z-10 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+        >
+          <DownloadButton />
+        </div>
         <DialogViewer />
         {node ? (
-          <aside className="absolute right-4 top-4 z-10 w-[calc(100%-2rem)] sm:w-[28rem]">
+          <aside className="absolute right-4 top-16 z-10 w-[calc(100%-2rem)] sm:w-[28rem]">
             <NodeEditor />
           </aside>
         ) : null}

@@ -23,9 +23,10 @@ describe("DownloadButton", () => {
 
   it("renders a Download button", () => {
     render(<DownloadButton />);
-    expect(
-      screen.getByRole("button", { name: /download/i }),
-    ).toBeInTheDocument();
+    const button = screen.getByRole("button", { name: /download/i });
+    expect(button).toHaveAttribute("aria-label", "Download");
+    expect(button).toHaveAttribute("data-size", "icon-sm");
+    expect(button).toHaveTextContent("");
   });
 
   it("creates a download anchor with the encoded JSON when clicked", async () => {

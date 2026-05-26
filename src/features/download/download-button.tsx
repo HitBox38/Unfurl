@@ -1,3 +1,5 @@
+import { Download } from "lucide-react";
+
 import { useJsonDataStore } from "@/shared/stores";
 import { Button } from "@/shared/ui/button";
 
@@ -18,5 +20,14 @@ export const DownloadButton = () => {
     downloadAnchor.remove();
   };
 
-  return <Button onClick={handleDownload}>Download</Button>;
+  return (
+    <Button
+      variant="secondary"
+      size="icon-sm"
+      aria-label="Download"
+      onClick={handleDownload}
+    >
+      <Download aria-hidden="true" />
+    </Button>
+  );
 };

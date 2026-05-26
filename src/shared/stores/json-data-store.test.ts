@@ -120,4 +120,17 @@ describe("useJsonDataStore", () => {
       )?.content,
     ).toEqual(["Stored edit"]);
   });
+
+  it("persists active editable file renames", () => {
+    saveEditableFile(
+      { name: "demo", fileType: "twee", content: sample },
+      { createId: () => "demo-id" },
+    );
+    useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
+
+    useJsonDataStore.getState().setName("renamed demo");
+
+    expect(useJsonDataStore.getState().name).toBe("renamed demo");
+    expect(getEditableFile("demo-id")?.name).toBe("renamed demo");
+  });
 });

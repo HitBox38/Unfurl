@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { FileText, Search } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   EDITABLE_FILES_STORAGE_KEY,
-  searchEditableFiles,
+  listEditableFiles,
   type EditableFileRecord,
 } from "@/features/recent-files";
 import { STORAGE_EVENT } from "@/shared/hooks";
@@ -22,23 +22,40 @@ import {
   SidebarRail,
 } from "@/shared/ui/sidebar";
 
+const updatedAtFormatter = new Intl.DateTimeFormat(undefined, {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
 const formatUpdatedAt = (updatedAt: number) =>
-  new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(updatedAt));
+  updatedAtFormatter.format(new Date(updatedAt));
+
+const sortFilesNewestFirst = (files: EditableFileRecord[]) =>
+  Array.from(files).sort((a, b) => b.updatedAt - a.updatedAt);
 
 export const RecentFilesSidebar = () => {
   const [query, setQuery] = useState("");
-  const [files, setFiles] = useState<EditableFileRecord[]>(() =>
-    searchEditableFiles(""),
+  const [allFiles, setAllFiles] = useState<EditableFileRecord[]>(() =>
+    listEditableFiles(),
   );
+  const normalizedQuery = query.trim().toLowerCase();
+  const files = useMemo(() => {
+    if (!normalizedQuery) return allFiles;
+
+    return allFiles.filter((file) => {
+      const searchable = [file.name, file.content.title, file.fileType]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return searchable.includes(normalizedQuery);
+    });
+  }, [allFiles, normalizedQuery]);
 
   const refreshFiles = useCallback(() => {
-    setFiles(searchEditableFiles(query));
-  }, [query]);
+    setAllFiles(listEditableFiles());
+  }, []);
 
   useEffect(() => {
     refreshFiles();
@@ -49,13 +66,7 @@ export const RecentFilesSidebar = () => {
       event: CustomEvent<{ key: string; newValue: EditableFileRecord[] }>,
     ) => {
       if (event.detail.key === EDITABLE_FILES_STORAGE_KEY) {
-        setFiles(
-          query.trim()
-            ? searchEditableFiles(query)
-            : [...event.detail.newValue].sort(
-              (a, b) => b.updatedAt - a.updatedAt,
-            ),
-        );
+        setAllFiles(sortFilesNewestFirst(event.detail.newValue));
       }
     };
     const onNativeStorage = (event: StorageEvent) => {
@@ -70,17 +81,27 @@ export const RecentFilesSidebar = () => {
       window.removeEventListener(STORAGE_EVENT, onStorageChange as EventListener);
       window.removeEventListener("storage", onNativeStorage);
     };
-  }, [query, refreshFiles]);
+  }, [refreshFiles]);
 
   return (
     <Sidebar collapsible="icon" aria-label="Editable files sidebar">
       <SidebarHeader>
         <div className="px-2 py-1 group-data-[collapsible=icon]:hidden">
-          <h2 className="text-lg font-semibold">Unfurl</h2>
+          <Link
+            to="/"
+            aria-label="Go to home page"
+            className="block rounded-md text-lg font-semibold transition-colors hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+          >
+            Unfurl
+          </Link>
         </div>
-        <label className="relative block px-2 group-data-[collapsible=icon]:hidden">
+        <label
+          htmlFor="editable-files-search"
+          className="relative block px-2 group-data-[collapsible=icon]:hidden"
+        >
           <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-sidebar-foreground/70" />
           <SidebarInput
+            id="editable-files-search"
             aria-label="Search editable files"
             value={query}
             onChange={(event) => setQuery(event.target.value)}

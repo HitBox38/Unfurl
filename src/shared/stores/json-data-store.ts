@@ -1,6 +1,9 @@
 import { create } from "zustand";
 
-import { updateEditableFileContent } from "@/shared/lib/editable-files-storage";
+import {
+  updateEditableFileContent,
+  updateEditableFileName,
+} from "@/shared/lib/editable-files-storage";
 import type { StoryData, StoryNode } from "@/shared/types";
 
 export interface JsonDataState {
@@ -13,6 +16,7 @@ export interface JsonDataState {
     newName: string,
     activeFileId?: string | null,
   ) => void;
+  setName: (name: string) => void;
   setNode: (newNode: StoryNode, previousName?: string) => void;
   setLoading: (isLoading: boolean) => void;
   reset: () => void;
@@ -31,6 +35,11 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
       activeFileId,
       content: newJson,
       isLoading: false,
+    }),
+  setName: (name) =>
+    set((state) => {
+      persistActiveFileName(state.activeFileId, name);
+      return { name };
     }),
   setNode: (newNode, previousName = newNode.name) =>
     set((state) => ({
@@ -69,4 +78,10 @@ const persistActiveFileContent = (
     updateEditableFileContent(activeFileId, content);
   }
   return content;
+};
+
+const persistActiveFileName = (activeFileId: string | null, name: string) => {
+  if (activeFileId) {
+    updateEditableFileName(activeFileId, name);
+  }
 };

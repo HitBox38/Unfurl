@@ -5,6 +5,7 @@ export {
   saveEditableFile,
   searchEditableFiles,
   updateEditableFileContent,
+  updateEditableFileName,
   type EditableFileDraft,
   type EditableFileRecord,
 } from "@/features/recent-files/recent-files-storage";
