@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -84,6 +84,11 @@ describe("FilePage", () => {
       "rounded-full",
       "bg-card/90",
     );
+    expect(
+      container.querySelector('[data-testid="file-history-bubble"]'),
+    ).toHaveClass("rounded-full", "bg-card/90", "shadow-lg");
+    expect(screen.getByRole("button", { name: /undo edit/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /redo edit/i })).toBeDisabled();
     const download = screen.getByRole("button", { name: /download/i });
     expect(download).toHaveAttribute(
       "data-variant",
@@ -135,6 +140,83 @@ describe("FilePage", () => {
     await waitFor(() => {
       expect(useJsonDataStore.getState().name).toBe("entered demo");
       expect(getEditableFile("draft-id")?.name).toBe("entered demo");
+    });
+  });
+
+  it("keeps the selected node aligned when undo restores file content", async () => {
+    saveEditableFile(
+      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { now: () => 100 },
+    );
+
+    render(<FilePage />);
+
+    await screen.findByRole("textbox", { name: /file name/i });
+
+    act(() => {
+      useNodeStore.getState().setNode(story.nodes[0]);
+      useJsonDataStore.getState().setNode({
+        name: "Intro",
+        content: ["Changed"],
+        choices: [],
+        metadata: {},
+      });
+    });
+
+    await waitFor(() => {
+      expect(useNodeStore.getState().node?.content).toEqual(["Changed"]);
+    });
+
+    act(() => {
+      useJsonDataStore.getState().undo();
+    });
+
+    await waitFor(() => {
+      expect(useNodeStore.getState().node?.content).toEqual(["Hi"]);
+    });
+  });
+
+  it("keeps the selected node aligned when undo and redo restore node renames", async () => {
+    saveEditableFile(
+      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { now: () => 100 },
+    );
+
+    render(<FilePage />);
+
+    await screen.findByRole("textbox", { name: /file name/i });
+
+    act(() => {
+      const renamedNode = {
+        name: "Start",
+        content: ["Renamed"],
+        choices: [],
+        metadata: {},
+      };
+      useNodeStore.getState().setNode(renamedNode);
+      useJsonDataStore.getState().setNode(renamedNode, "Intro");
+    });
+
+    await waitFor(() => {
+      expect(useNodeStore.getState().node?.name).toBe("Start");
+    });
+
+    act(() => {
+      useJsonDataStore.getState().undo();
+    });
+
+    await waitFor(() => {
+      expect(useNodeStore.getState().node?.name).toBe("Intro");
+      expect(useNodeStore.getState().node?.content).toEqual(["Hi"]);
+    });
+
+    act(() => {
+      useJsonDataStore.getState().redo();
+    });
+
+    await waitFor(() => {
+      expect(useNodeStore.getState().node?.name).toBe("Start");
+      expect(useNodeStore.getState().node?.content).toEqual(["Renamed"]);
     });
   });
 });

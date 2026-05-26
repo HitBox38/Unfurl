@@ -1,12 +1,13 @@
 import { Link, useParams } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import unfurlLogo from "@/assets/unfurl-logo.png";
 import ItchIoLogo from "@/assets/itchio-logo.svg";
 import { DemoButton } from "@/features/demo";
 import { DialogViewer } from "@/features/dialog-viewer";
 import { DownloadButton } from "@/features/download";
+import { FileHistoryControls } from "@/features/file-history";
 import { FileUpload } from "@/features/file-upload";
 import { useFaqModal } from "@/features/faq";
 import { MetadataConfig } from "@/features/metadata-config";
@@ -142,12 +143,14 @@ export const FilePage = () => {
   const { fileId } = useParams({ strict: false }) as { fileId?: string };
   const name = useJsonDataStore((state) => state.name);
   const activeFileId = useJsonDataStore((state) => state.activeFileId);
+  const content = useJsonDataStore((state) => state.content);
   const setJsonData = useJsonDataStore((state) => state.setJson);
   const setFileName = useJsonDataStore((state) => state.setName);
   const resetJson = useJsonDataStore((state) => state.reset);
   const node = useNodeStore((state) => state.node);
   const setSelectedNode = useNodeStore((state) => state.setNode);
   const [isMissing, setIsMissing] = useState(false);
+  const previousContentNodesRef = useRef(content.nodes);
 
   useEffect(() => {
     if (!fileId) return;
@@ -162,6 +165,27 @@ export const FilePage = () => {
     setSelectedNode(null);
     setJsonData(file.content, file.name, file.id);
   }, [fileId, resetJson, setJsonData, setSelectedNode]);
+
+  useEffect(() => {
+    const previousNodes = previousContentNodesRef.current;
+    previousContentNodesRef.current = content.nodes;
+    if (!node) return;
+
+    const matchingNode = content.nodes.find(
+      (storyNode) => storyNode.name === node.name,
+    );
+    const previousNodeIndex = previousNodes.findIndex(
+      (storyNode) => storyNode.name === node.name,
+    );
+    const selectedNode = matchingNode ?? content.nodes[previousNodeIndex];
+    if (!selectedNode) {
+      setSelectedNode(null);
+      return;
+    }
+    if (selectedNode !== node) {
+      setSelectedNode(selectedNode);
+    }
+  }, [content.nodes, node, setSelectedNode]);
 
   if (isMissing) {
     return (
@@ -196,13 +220,19 @@ export const FilePage = () => {
       <section className="relative min-h-0 flex-1 overflow-hidden">
         <div
           data-testid="file-page-header"
-          className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-5rem)] items-center rounded-full border bg-card/90 px-2.5 py-1.5 shadow-lg backdrop-blur-md sm:max-w-[min(36rem,calc(100%-5rem))]"
+          className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-9rem)] items-center rounded-full border bg-card/90 px-2.5 py-1.5 shadow-lg backdrop-blur-md sm:max-w-[min(36rem,calc(100%-9rem))]"
         >
           <FileNameHeaderInput
             key={name || "Untitled"}
             name={name}
             onCommit={setFileName}
           />
+        </div>
+        <div
+          data-testid="file-history-bubble"
+          className="absolute right-16 top-4 z-10 rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+        >
+          <FileHistoryControls />
         </div>
         <div
           data-testid="file-download-bubble"

@@ -133,4 +133,77 @@ describe("useJsonDataStore", () => {
     expect(useJsonDataStore.getState().name).toBe("renamed demo");
     expect(getEditableFile("demo-id")?.name).toBe("renamed demo");
   });
+
+  it("undoes and redoes node edits in the active editable file", () => {
+    saveEditableFile(
+      { name: "demo", fileType: "twee", content: sample },
+      { createId: () => "demo-id" },
+    );
+    useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
+
+    useJsonDataStore.getState().setNode({
+      name: "Intro",
+      content: ["Stored edit"],
+      choices: [],
+      metadata: { visited: true },
+    });
+
+    expect(useJsonDataStore.getState().canUndo).toBe(true);
+    expect(useJsonDataStore.getState().canRedo).toBe(false);
+
+    useJsonDataStore.getState().undo();
+
+    expect(useJsonDataStore.getState().content).toEqual(sample);
+    expect(getEditableFile("demo-id")?.content).toEqual(sample);
+    expect(useJsonDataStore.getState().canUndo).toBe(false);
+    expect(useJsonDataStore.getState().canRedo).toBe(true);
+
+    useJsonDataStore.getState().redo();
+
+    expect(
+      useJsonDataStore
+        .getState()
+        .content.nodes.find((node) => node.name === "Intro")?.content,
+    ).toEqual(["Stored edit"]);
+    expect(
+      getEditableFile("demo-id")?.content.nodes.find(
+        (node) => node.name === "Intro",
+      )?.content,
+    ).toEqual(["Stored edit"]);
+    expect(useJsonDataStore.getState().canUndo).toBe(true);
+    expect(useJsonDataStore.getState().canRedo).toBe(false);
+  });
+
+  it("undoes file renames and clears redo when a new edit branches history", () => {
+    saveEditableFile(
+      { name: "demo", fileType: "twee", content: sample },
+      { createId: () => "demo-id" },
+    );
+    useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
+
+    useJsonDataStore.getState().setName("renamed demo");
+    useJsonDataStore.getState().undo();
+
+    expect(useJsonDataStore.getState().name).toBe("demo");
+    expect(getEditableFile("demo-id")?.name).toBe("demo");
+    expect(useJsonDataStore.getState().canRedo).toBe(true);
+
+    useJsonDataStore.getState().setName("branched demo");
+
+    expect(useJsonDataStore.getState().name).toBe("branched demo");
+    expect(useJsonDataStore.getState().canRedo).toBe(false);
+  });
+
+  it("clears edit history when a new file is loaded", () => {
+    useJsonDataStore.getState().setJson(sample, "demo");
+    useJsonDataStore.getState().setName("renamed demo");
+
+    useJsonDataStore.getState().setJson(
+      { title: "Other", start: null, nodes: [] },
+      "other",
+    );
+
+    expect(useJsonDataStore.getState().canUndo).toBe(false);
+    expect(useJsonDataStore.getState().canRedo).toBe(false);
+  });
 });
