@@ -79,17 +79,9 @@ export const DialogViewer = () => {
           highlight = "connected";
         }
 
-        if (!highlight) {
-          return {
-            ...node,
-            selected: false,
-            data: { ...node.data, highlight },
-          };
-        }
-
         return {
           ...node,
-          selected: true,
+          selected: isSelected,
           data: { ...node.data, highlight },
         };
       });

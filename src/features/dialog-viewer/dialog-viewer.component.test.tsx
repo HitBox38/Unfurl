@@ -135,6 +135,38 @@ describe("DialogViewer", () => {
       );
   });
 
+  it("does not select connected nodes when a story node is selected", () => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+    useNodeStore.getState().setNode(story.nodes[0]);
+
+    render(<DialogViewer />);
+
+    const latestReactFlowProps = reactFlow.mock.calls.at(-1)?.[0] as
+      | {
+          nodes: Array<{
+            id: string;
+            selected?: boolean;
+            data: { highlight?: string };
+          }>;
+        }
+      | undefined;
+
+    expect(latestReactFlowProps?.nodes.find((node) => node.id === "Intro"))
+      .toEqual(
+        expect.objectContaining({
+          selected: true,
+          data: expect.objectContaining({ highlight: "selected" }),
+        }),
+      );
+    expect(latestReactFlowProps?.nodes.find((node) => node.id === "Outro"))
+      .toEqual(
+        expect.objectContaining({
+          selected: false,
+          data: expect.objectContaining({ highlight: "connected" }),
+        }),
+      );
+  });
+
   it("creates a story choice when nodes are connected in the flow chart", () => {
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");
     useNodeStore.getState().setNode(story.nodes[0]);

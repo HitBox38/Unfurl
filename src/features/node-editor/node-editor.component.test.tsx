@@ -299,7 +299,7 @@ describe("NodeEditor", () => {
       );
       expect(outro).toEqual(
         expect.objectContaining({
-          selected: true,
+          selected: false,
           data: expect.objectContaining({ highlight: "preview" }),
         }),
       );
