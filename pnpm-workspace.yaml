@@ -1,6 +1,6 @@
 packages:
   - "."
-  
+
 onlyBuiltDependencies:
   - electron
   - electron-winstaller
@@ -8,6 +8,7 @@ onlyBuiltDependencies:
   - "@tailwindcss/oxide"
 allowBuilds:
   electron-winstaller: true
+  msw: false
 ignoredBuiltDependencies:
   - electron-winstaller
 minimumReleaseAgeExclude:
