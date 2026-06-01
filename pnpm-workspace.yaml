@@ -1,6 +1,9 @@
 packages:
   - "."
-
+  
+allow-scripts:
+  '@playwright/test': false
+  msw: true
 onlyBuiltDependencies:
   - electron
   - electron-winstaller
