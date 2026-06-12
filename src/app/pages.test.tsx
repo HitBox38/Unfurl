@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FilePage } from "@/app/pages";
-import { getEditableFile, saveEditableFile } from "@/features/recent-files";
+import { getEditableFile, saveEditableFile } from "@/shared/lib/editable-files-storage";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData } from "@/shared/types";
 
@@ -25,7 +25,7 @@ vi.mock("@tanstack/react-router", () => ({
   useParams: () => ({ fileId: routeState.fileId }),
 }));
 
-vi.mock("@/features/dialog-viewer", () => ({
+vi.mock("@/features/graph-node-toolbar", () => ({
   GraphNodeToolbar: () => (
     <div data-testid="graph-node-toolbar">
       <button type="button" aria-label="Add node" data-variant="secondary" data-size="icon-sm">
@@ -42,6 +42,9 @@ vi.mock("@/features/dialog-viewer", () => ({
       </button>
     </div>
   ),
+}));
+
+vi.mock("@/features/dialog-viewer", () => ({
   DialogViewer: () => <div data-testid="dialog-viewer" />,
 }));
 

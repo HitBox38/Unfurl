@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { getEditableFile, saveEditableFile } from "@/features/recent-files";
+import { getEditableFile, saveEditableFile } from "@/shared/lib/editable-files-storage";
 import { useJsonDataStore } from "@/shared/stores/json-data-store";
 import type { StoryData } from "@/shared/types";
 

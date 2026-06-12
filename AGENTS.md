@@ -47,16 +47,21 @@ src/
   app/                     # Bootstrap: providers, App shell, main entry
     app.tsx
     main.tsx
-  features/                # Feature folders with barrel `index.ts`
+  features/                # One folder per public export; root in `index.tsx`
     demo/
     dialog-viewer/
+    add-node-button/
     download/
     faq/
     file-upload/
     metadata-config/
+    metadata-config-form/
     node-editor/
+    recent-files-sidebar/
+    open-editable-file/
+    …
   shared/
-    components/            # Cross-feature composites (EveryWhereDialog, …)
+    components/            # Cross-feature composites (every-where-dialog/, …)
     hooks/                 # useStorage
     lib/
       cn.ts                # shadcn `cn` util
@@ -76,9 +81,13 @@ public/                    # Static files served at /
 - **Absolute imports**: always use the `@/` alias (`@/shared/...`,
   `@/features/<name>`, `@/app/...`). No `../../` paths crossing feature
   boundaries.
-- **Barrel exports**: every feature folder and every shared subpackage
-  exposes its public API via `index.ts`. Import via the barrel, not the
-  internal file.
+- **Feature folder layout**: each `src/features/<name>/` (and shared
+  component folders) uses `index.tsx` for the root component or hook —
+  not a re-export-only barrel. Optional siblings: `types.ts`,
+  `constants.ts`, `helpers.ts`, `hooks/`, `components/`, `__tests__/`.
+  Import via `@/features/<name>`; avoid deep paths into sibling features.
+  Split multi-export domains into sibling feature folders (e.g.
+  `metadata-config-form/` alongside `metadata-config/`).
 - **Imports at the top of the file.** No inline `await import()` for plain
   module imports; use `await import()` only when you need real lazy
   loading. Imports go above all other code.
@@ -87,7 +96,8 @@ public/                    # Static files served at /
 - **Tailwind utilities** + shadcn primitives + Lucide icons. No MUI, no
   emotion, no `tss-react`.
 - **Comments**: explain non-obvious *why* only. Don't narrate code.
-- **Tests live next to source**: `foo.ts` → `foo.test.ts`.
+- **Tests** live in `__tests__/` inside the feature folder (e.g.
+  `__tests__/demo-button.test.tsx`).
 
 ## Commands
 
@@ -125,14 +135,15 @@ opening a PR. CI in `.github/workflows/*.yaml` reruns them on every push to
 
 ## Adding a new feature
 
-1. Create `src/features/<feature>/` with the implementation files plus
-   an `index.ts` barrel that re-exports the public surface.
-2. If the feature owns a store, put it in the feature folder. Only store
-   data that's truly cross-cutting (Dialog/JsonData/Node) lives in
+1. Create `src/features/<feature>/` with `index.tsx` containing the root
+   component or hook. Add `types.ts`, `constants.ts`, `helpers.ts`,
+   `hooks/`, `components/`, and `__tests__/` as needed.
+2. If the feature owns a store, put it under `hooks/` in that folder.
+   Only cross-cutting stores (Dialog/JsonData/Node) live in
    `src/shared/stores/`.
-3. Co-locate tests as `*.test.ts(x)`.
-4. Wire the feature into `src/app/app.tsx` (or wherever it belongs) via its
-   barrel import.
+3. Put tests in `__tests__/`.
+4. Wire the feature into `src/app/app.tsx` (or wherever it belongs) via
+   `@/features/<feature>`.
 
 ## Adding a new shadcn primitive
 

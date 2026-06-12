@@ -5,15 +5,16 @@ import { useEffect, useRef, useState } from "react";
 import unfurlLogo from "@/assets/unfurl-logo.png";
 import ItchIoLogo from "@/assets/itchio-logo.svg";
 import { DemoButton } from "@/features/demo";
-import { DialogViewer, GraphNodeToolbar } from "@/features/dialog-viewer";
-import { useDialogViewerUiStore } from "@/features/dialog-viewer/dialog-viewer-ui-store";
+import { DialogViewer } from "@/features/dialog-viewer";
+import { useDialogViewerUiStore } from "@/features/dialog-viewer/hooks/use-dialog-viewer-ui-store";
+import { GraphNodeToolbar } from "@/features/graph-node-toolbar";
 import { DownloadButton } from "@/features/download";
 import { FileHistoryControls } from "@/features/file-history";
 import { FileUpload } from "@/features/file-upload";
 import { useFaqModal } from "@/features/faq";
 import { MetadataConfig } from "@/features/metadata-config";
 import { NodeEditor } from "@/features/node-editor";
-import { getEditableFile } from "@/features/recent-files";
+import { getEditableFile } from "@/shared/lib/editable-files-storage";
 import {
   useDialogStore,
   useJsonDataStore,

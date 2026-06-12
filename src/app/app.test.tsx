@@ -8,7 +8,7 @@ vi.mock("@tanstack/react-router", () => ({
   Outlet: () => <div data-testid="route-outlet" />,
 }));
 
-vi.mock("@/features/recent-files", () => ({
+vi.mock("@/features/recent-files-sidebar", () => ({
   RecentFilesSidebar: () => <nav aria-label="Editable files" />,
 }));
 
