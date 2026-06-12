@@ -13,10 +13,7 @@ const hotkeyOptions = {
 };
 
 export const FileHistoryControls = () => {
-  const canUndo = useJsonDataStore((state) => state.canUndo);
-  const canRedo = useJsonDataStore((state) => state.canRedo);
-  const undo = useJsonDataStore((state) => state.undo);
-  const redo = useJsonDataStore((state) => state.redo);
+  const { canUndo, canRedo, undo, redo } = useJsonDataStore();
 
   useHotkey("Mod+Z", undo, {
     ...hotkeyOptions,
