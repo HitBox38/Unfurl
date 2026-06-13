@@ -1,68 +1,21 @@
-import { STORAGE_EVENT } from "@/shared/hooks";
-import type { StoryData, SupportedFileType } from "@/shared/types";
+import type { StoryData } from "@/shared/types";
 
-export interface EditableFileRecord {
-  id: string;
-  name: string;
-  fileType: SupportedFileType;
-  content: StoryData;
-  updatedAt: number;
-}
+import {
+  createEditableFileId,
+  defaultTimestamp,
+  getStorage,
+  readFiles,
+  sortNewestFirst,
+  writeFiles,
+} from "./helpers";
+import type { EditableFileDraft, EditableFileRecord, StorageOptions } from "./types";
 
-export interface EditableFileDraft {
-  id?: string;
-  name: string;
-  fileType: SupportedFileType;
-  content: StoryData;
-}
-
-interface StorageOptions {
-  storage?: Storage;
-  now?: () => number;
-  createId?: () => string;
-}
-
-export const EDITABLE_FILES_STORAGE_KEY = "editableFiles";
-
-const defaultNow = () => Date.now();
-
-const createEditableFileId = () => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-};
-
-const getStorage = (storage?: Storage) => storage ?? localStorage;
-
-const readFiles = (storage: Storage): EditableFileRecord[] => {
-  const raw = storage.getItem(EDITABLE_FILES_STORAGE_KEY);
-  if (!raw) return [];
-  try {
-    const parsed = JSON.parse(raw) as unknown;
-    return Array.isArray(parsed) ? (parsed as EditableFileRecord[]) : [];
-  } catch {
-    storage.removeItem(EDITABLE_FILES_STORAGE_KEY);
-    return [];
-  }
-};
-
-const notifyStorageChange = (files: EditableFileRecord[]) => {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(
-    new CustomEvent(STORAGE_EVENT, {
-      detail: { key: EDITABLE_FILES_STORAGE_KEY, newValue: files },
-    }),
-  );
-};
-
-const writeFiles = (storage: Storage, files: EditableFileRecord[]) => {
-  storage.setItem(EDITABLE_FILES_STORAGE_KEY, JSON.stringify(files));
-  notifyStorageChange(files);
-};
-
-const sortNewestFirst = (files: EditableFileRecord[]) =>
-  [...files].sort((a, b) => b.updatedAt - a.updatedAt);
+export { EDITABLE_FILES_STORAGE_KEY } from "./constants";
+export type {
+  EditableFileDraft,
+  EditableFileRecord,
+  StorageOptions,
+} from "./types";
 
 export const listEditableFiles = (
   options: Pick<StorageOptions, "storage"> = {},
@@ -102,7 +55,7 @@ export const saveEditableFile = (
     name: draft.name,
     fileType: draft.fileType,
     content: draft.content,
-    updatedAt: options.now?.() ?? defaultNow(),
+    updatedAt: options.now?.() ?? defaultTimestamp(),
   };
   writeFiles(
     storage,
@@ -121,7 +74,7 @@ export const updateEditableFileContent = (
 ) => {
   const storage = getStorage(options.storage);
   const files = readFiles(storage);
-  const updatedAt = options.now?.() ?? defaultNow();
+  const updatedAt = options.now?.() ?? defaultTimestamp();
   writeFiles(
     storage,
     sortNewestFirst(
@@ -139,7 +92,7 @@ export const updateEditableFileName = (
 ) => {
   const storage = getStorage(options.storage);
   const files = readFiles(storage);
-  const updatedAt = options.now?.() ?? defaultNow();
+  const updatedAt = options.now?.() ?? defaultTimestamp();
   writeFiles(
     storage,
     sortNewestFirst(

@@ -1,42 +1,19 @@
 import { create } from "zustand";
 
+import type { StoryData } from "@/shared/types";
+
+import { emptyContent } from "./constants";
 import {
-  updateEditableFileContent,
-  updateEditableFileName,
-} from "@/shared/lib/editable-files-storage";
-import type { StoryData, StoryNode } from "@/shared/types";
+  cloneSnapshot,
+  persistActiveFileContent,
+  persistActiveFileName,
+  persistActiveFileSnapshot,
+  pushHistorySnapshot,
+  snapshotsAreEqual,
+} from "./helpers";
+import type { JsonDataState } from "./types";
 
-export interface FileHistorySnapshot {
-  name: string;
-  content: StoryData;
-}
-
-export interface JsonDataState {
-  name: string;
-  activeFileId: string | null;
-  content: StoryData;
-  isLoading: boolean;
-  past: FileHistorySnapshot[];
-  future: FileHistorySnapshot[];
-  canUndo: boolean;
-  canRedo: boolean;
-  setJson: (
-    newJson: StoryData,
-    newName: string,
-    activeFileId?: string | null,
-  ) => void;
-  setName: (name: string) => void;
-  setNode: (newNode: StoryNode, previousName?: string) => void;
-  addNode: (node: StoryNode) => void;
-  removeNode: (nodeName: string) => void;
-  undo: () => void;
-  redo: () => void;
-  setLoading: (isLoading: boolean) => void;
-  reset: () => void;
-}
-
-const emptyContent: StoryData = { nodes: [], start: null, title: null };
-const maxHistoryDepth = 50;
+export type { FileHistorySnapshot, JsonDataState } from "./types";
 
 export const useJsonDataStore = create<JsonDataState>((set) => ({
   name: "",
@@ -215,51 +192,3 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
       canRedo: false,
     }),
 }));
-
-const cloneValue = <T>(value: T): T =>
-  typeof structuredClone === "function"
-    ? structuredClone(value)
-    : (JSON.parse(JSON.stringify(value)) as T);
-
-const cloneSnapshot = ({
-  name,
-  content,
-}: Pick<JsonDataState, "name" | "content">): FileHistorySnapshot => ({
-  name,
-  content: cloneValue(content),
-});
-
-const pushHistorySnapshot = (state: JsonDataState) =>
-  [...state.past, cloneSnapshot(state)].slice(-maxHistoryDepth);
-
-const snapshotsAreEqual = (
-  next: FileHistorySnapshot,
-  current: Pick<JsonDataState, "name" | "content">,
-) =>
-  next.name === current.name &&
-  JSON.stringify(next.content) === JSON.stringify(current.content);
-
-const persistActiveFileContent = (
-  activeFileId: string | null,
-  content: StoryData,
-) => {
-  if (activeFileId) {
-    updateEditableFileContent(activeFileId, content);
-  }
-  return content;
-};
-
-const persistActiveFileName = (activeFileId: string | null, name: string) => {
-  if (activeFileId) {
-    updateEditableFileName(activeFileId, name);
-  }
-};
-
-const persistActiveFileSnapshot = (
-  activeFileId: string | null,
-  snapshot: FileHistorySnapshot,
-) => {
-  if (!activeFileId) return;
-  updateEditableFileContent(activeFileId, snapshot.content);
-  updateEditableFileName(activeFileId, snapshot.name);
-};

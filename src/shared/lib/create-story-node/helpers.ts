@@ -1,5 +1,3 @@
-import type { StoryNode } from "@/shared/types";
-
 export const uniqueStoryNodeName = (
   existingNames: readonly string[],
   base = "Node",
@@ -15,14 +13,3 @@ export const uniqueStoryNodeName = (
 
   return `${base} ${index}`;
 };
-
-export const createStoryNode = (
-  name: string,
-  position?: { x: number; y: number },
-): StoryNode => ({
-  name,
-  content: [],
-  choices: [],
-  metadata: {},
-  ...(position ? { position } : {}),
-});

@@ -2,30 +2,12 @@ import {
   loadMetadataConfigFromStorage,
   seedMetadataDefaults,
 } from "@/shared/lib/convertors/load-metadata-config";
-import type {
-  Choice,
-  MetadataConfigTemplate,
-  StoryData,
-  StoryNode,
-} from "@/shared/types";
+import type { StoryData, StoryNode } from "@/shared/types";
 
-export interface FromMdOptions {
-  config?: MetadataConfigTemplate | null;
-}
+import { parseChoiceLink, stripExtension } from "./helpers";
+import type { FromMdOptions, MarkdownEntry } from "./types";
 
-export interface MarkdownEntry {
-  name: string;
-  source: string;
-}
-
-const parseChoiceLink = (line: string): Choice => {
-  const inside = line.substring(2, line.length - 2);
-  const hasAlias = inside.includes("|");
-  return {
-    text: hasAlias ? inside.split("|")[1] : inside,
-    destination: hasAlias ? inside.split("|")[0] : inside,
-  };
-};
+export type { FromMdOptions, MarkdownEntry } from "./types";
 
 export const parseMarkdownEntries = (
   entries: MarkdownEntry[],
@@ -88,8 +70,6 @@ export const parseMarkdownEntries = (
 
   return { title, start, nodes };
 };
-
-const stripExtension = (filename: string) => filename.split(".")[0];
 
 export const fromMd = async (
   files: File[],

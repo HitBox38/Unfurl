@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import type { FieldValues, SubmitHandler } from "react-hook-form";
-import { create } from "zustand";
 
 import type { ButtonProps } from "@/shared/ui/button";
 
@@ -39,19 +38,3 @@ export interface DialogState extends DialogContent {
   setContent: (newContent: DialogContent) => void;
   reset: () => void;
 }
-
-const initialState: DialogContent = {
-  title: "",
-  isOpen: false,
-  content: null,
-};
-
-export const useDialogStore = create<DialogState>((set) => ({
-  ...initialState,
-  setOpen: (isOpen) =>
-    set((state) => ({
-      isOpen: typeof isOpen === "boolean" ? isOpen : !state.isOpen,
-    })),
-  setContent: (newContent) => set(() => ({ ...newContent })),
-  reset: () => set(() => ({ ...initialState })),
-}));

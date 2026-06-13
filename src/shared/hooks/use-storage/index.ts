@@ -1,17 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export const STORAGE_EVENT = "storage-change";
+import { STORAGE_EVENT } from "./constants";
+import { resolveDefault } from "./helpers";
+import type { StorageProps } from "./types";
 
-export interface StorageProps<T> {
-  key: string;
-  defaultValue: (() => T) | T;
-  storage?: Storage;
-  serialize?: (value: T) => string;
-  deserialize?: (str: string) => T;
-}
-
-const resolveDefault = <T>(value: StorageProps<T>["defaultValue"]) =>
-  typeof value === "function" ? (value as () => T)() : value;
+export { STORAGE_EVENT } from "./constants";
+export type { StorageProps } from "./types";
 
 /**
  * Two-way bind state to a Web Storage instance (default: localStorage). The

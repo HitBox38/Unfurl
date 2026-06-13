@@ -2,51 +2,12 @@ import {
   loadMetadataConfigFromStorage,
   seedMetadataDefaults,
 } from "@/shared/lib/convertors/load-metadata-config";
-import type {
-  Choice,
-  MetadataConfigTemplate,
-  StoryData,
-  StoryNode,
-} from "@/shared/types";
+import type { Choice, StoryData, StoryNode } from "@/shared/types";
 
-export interface FromTweeOptions {
-  config?: MetadataConfigTemplate | null;
-}
+import { parseDeclarationMetadata } from "./helpers";
+import type { FromTweeOptions } from "./types";
 
-interface TweeDeclarationMetadata {
-  position?: string;
-  size?: string;
-}
-
-const parseCoordinatePair = (value: string | undefined) => {
-  if (!value) return null;
-  const [first, second] = value.split(",").map((part) => Number(part.trim()));
-  if (!Number.isFinite(first) || !Number.isFinite(second)) return null;
-  return { first, second };
-};
-
-const parseDeclarationMetadata = (
-  declaration: string,
-): Pick<StoryNode, "position" | "size"> => {
-  const metadataStart = declaration.indexOf("{");
-  if (metadataStart === -1) return {};
-
-  try {
-    const metadata = JSON.parse(
-      declaration.slice(metadataStart),
-    ) as TweeDeclarationMetadata;
-    const position = parseCoordinatePair(metadata.position);
-    const size = parseCoordinatePair(metadata.size);
-    return {
-      ...(position
-        ? { position: { x: position.first, y: position.second } }
-        : {}),
-      ...(size ? { size: { width: size.first, height: size.second } } : {}),
-    };
-  } catch {
-    return {};
-  }
-};
+export type { FromTweeOptions } from "./types";
 
 export const parseTwee = (
   source: string,

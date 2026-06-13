@@ -62,11 +62,9 @@ src/
     …
   shared/
     components/            # Cross-feature composites (every-where-dialog/, …)
-    hooks/                 # useStorage
-    lib/
-      cn.ts                # shadcn `cn` util
-      convertors/          # from-twee, from-md, metadata helpers
-    stores/                # JsonData, Node, Dialog zustand stores
+    hooks/                 # use-storage/, use-mobile/, …
+    lib/                   # cn/, convertors/, editable-files-storage/, …
+    stores/                # dialog-store/, json-data-store/, node-store/
     types/                 # Choice, StoryNode, StoryData, MetadataConfigTemplate
     ui/                    # shadcn-generated primitives — DO NOT edit casually
   assets/                  # Static images, svg
@@ -81,13 +79,13 @@ public/                    # Static files served at /
 - **Absolute imports**: always use the `@/` alias (`@/shared/...`,
   `@/features/<name>`, `@/app/...`). No `../../` paths crossing feature
   boundaries.
-- **Feature folder layout**: each `src/features/<name>/` (and shared
-  component folders) uses `index.tsx` for the root component or hook —
-  not a re-export-only barrel. Optional siblings: `types.ts`,
-  `constants.ts`, `helpers.ts`, `hooks/`, `components/`, `__tests__/`.
-  Import via `@/features/<name>`; avoid deep paths into sibling features.
-  Split multi-export domains into sibling feature folders (e.g.
-  `metadata-config-form/` alongside `metadata-config/`).
+- **Module folder layout**: each `src/features/<name>/`, `src/shared/lib/<name>/`,
+  `src/shared/stores/<name>/`, and `src/shared/hooks/<name>/` uses
+  `index.ts` or `index.tsx` for the root export — not a re-export-only
+  barrel. Optional siblings: `types.ts`, `constants.ts`, `helpers.ts`,
+  `hooks/`, `components/`, `__tests__/`. Import via the package barrel
+  (`@/features/<name>`, `@/shared/lib`, `@/shared/stores`, `@/shared/hooks`)
+  or the module folder. Split multi-export domains into sibling folders.
 - **Imports at the top of the file.** No inline `await import()` for plain
   module imports; use `await import()` only when you need real lazy
   loading. Imports go above all other code.

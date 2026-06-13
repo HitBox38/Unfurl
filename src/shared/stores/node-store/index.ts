@@ -1,20 +1,8 @@
 import { create } from "zustand";
 
-import type { StoryNode } from "@/shared/types";
+import type { NodeState } from "./types";
 
-interface GraphPreview {
-  nodeName: string;
-  edgeId?: string;
-}
-
-export interface NodeState {
-  node: StoryNode | null;
-  previewNodeName: string | null;
-  previewEdgeId: string | null;
-  setNode: (newNode: StoryNode | null) => void;
-  setGraphPreview: (preview: GraphPreview | null) => void;
-  setPreviewNodeName: (nodeName: string | null) => void;
-}
+export type { NodeState } from "./types";
 
 export const useNodeStore = create<NodeState>((set) => ({
   node: null,
