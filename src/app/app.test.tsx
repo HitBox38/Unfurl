@@ -22,9 +22,6 @@ describe("App shell", () => {
     render(<App />);
 
     expect(screen.queryByRole("banner")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: /toggle editable files sidebar/i }),
-    ).toBeInTheDocument();
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(
       screen.getByRole("navigation", { name: /editable files/i }),

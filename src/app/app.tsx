@@ -9,7 +9,6 @@ import { useFaqModal } from "@/features/faq";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/shared/ui/sidebar";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 
@@ -26,9 +25,6 @@ const App = () => {
   const sidebarLayoutClassName = isElectron
     ? "electron-sidebar-layout min-h-0"
     : undefined;
-  const sidebarTriggerClassName = isElectron
-    ? "electron-sidebar-trigger fixed left-2 z-40"
-    : "fixed left-2 top-2 z-40";
 
   useHotkeySequence(["Control+C", "Control+F"], () => setContent(faqModal), {
     ignoreInputs: false,
@@ -53,9 +49,6 @@ const App = () => {
       >
         <RecentFilesSidebar />
         <SidebarInset className="min-h-0 min-w-0">
-          <div className={sidebarTriggerClassName}>
-            <SidebarTrigger aria-label="Toggle editable files sidebar" />
-          </div>
           <Outlet />
         </SidebarInset>
       </SidebarProvider>
