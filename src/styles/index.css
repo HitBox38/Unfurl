@@ -170,9 +170,22 @@
   background: var(--background);
 }
 
+.electron-app-shell::before {
+  background: var(--sidebar);
+  content: "";
+  height: var(--electron-titlebar-height);
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 40;
+}
+
 .electron-titlebar-drag-region {
   -webkit-app-region: drag;
-  background: var(--card);
+  background: var(--sidebar);
+  color: var(--sidebar-foreground);
   height: var(--electron-titlebar-height);
   left: env(titlebar-area-x, 0px);
   position: fixed;

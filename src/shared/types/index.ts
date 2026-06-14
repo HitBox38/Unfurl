@@ -16,3 +16,11 @@ export {
   SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
   type SpellcheckContextMenuPayload,
 } from "@/shared/types/spellcheck-context-menu";
+export {
+  TITLE_BAR_OVERLAY_BY_THEME,
+  TITLE_BAR_OVERLAY_CHANNEL,
+  TITLE_BAR_OVERLAY_HEIGHT,
+  getTitleBarOverlayForTheme,
+  isTitleBarOverlayOptions,
+  type TitleBarOverlayOptions,
+} from "@/shared/types/title-bar-overlay";

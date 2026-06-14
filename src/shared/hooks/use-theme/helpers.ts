@@ -1,10 +1,20 @@
+import { getTitleBarOverlayForTheme, TITLE_BAR_OVERLAY_CHANNEL } from "@/shared/types/title-bar-overlay";
+
 import { DEFAULT_THEME, THEME_STORAGE_KEY, type Theme } from "./constants";
 
 export const isTheme = (value: unknown): value is Theme =>
   value === "light" || value === "dark";
 
+export const syncTitleBarOverlay = (theme: Theme) => {
+  window.ipcRenderer?.send(
+    TITLE_BAR_OVERLAY_CHANNEL,
+    getTitleBarOverlayForTheme(theme),
+  );
+};
+
 export const applyTheme = (theme: Theme) => {
   document.documentElement.classList.toggle("dark", theme === "dark");
+  syncTitleBarOverlay(theme);
 };
 
 export const readStoredTheme = (): Theme => {

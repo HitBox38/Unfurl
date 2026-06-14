@@ -3,10 +3,13 @@ import path from "node:path";
 
 import { createMainWindowOptions } from "./main-window-options";
 import { resolveMainProcessPaths } from "./main-paths";
+import { applyTitleBarOverlay } from "./title-bar-overlay";
 import {
   SPELLCHECK_ADD_WORD_CHANNEL,
   SPELLCHECK_CONTEXT_MENU_CHANNEL,
   SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
+  TITLE_BAR_OVERLAY_CHANNEL,
+  isTitleBarOverlayOptions,
   type SpellcheckContextMenuPayload,
 } from "@/shared/types";
 
@@ -41,6 +44,14 @@ ipcMain.on(SPELLCHECK_ADD_WORD_CHANNEL, (_event, word) => {
   if (isNonEmptyString(word)) {
     win?.webContents.session.addWordToSpellCheckerDictionary(word);
   }
+});
+
+ipcMain.on(TITLE_BAR_OVERLAY_CHANNEL, (_event, options) => {
+  if (!win || !isTitleBarOverlayOptions(options)) {
+    return;
+  }
+
+  applyTitleBarOverlay(win, options);
 });
 
 function createWindow() {

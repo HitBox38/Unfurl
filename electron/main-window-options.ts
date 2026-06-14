@@ -1,12 +1,13 @@
 import type { BrowserWindowConstructorOptions } from "electron";
 
+import { DEFAULT_THEME } from "@/shared/hooks/use-theme/constants";
+
+import { getInitialTitleBarOverlay } from "./title-bar-overlay";
+
 type MainWindowOptionsInput = {
   preload: string;
   appIcon: string;
 };
-
-const TITLE_BAR_OVERLAY_HEIGHT = 32;
-const TITLE_BAR_OVERLAY_COLOR = "#3d3d3d";
 
 export const createMainWindowOptions = ({
   preload,
@@ -21,9 +22,5 @@ export const createMainWindowOptions = ({
   titleBarStyle: "hidden",
   minHeight: 500,
   minWidth: 800,
-  titleBarOverlay: {
-    color: TITLE_BAR_OVERLAY_COLOR,
-    symbolColor: "#fff",
-    height: TITLE_BAR_OVERLAY_HEIGHT,
-  },
+  titleBarOverlay: getInitialTitleBarOverlay(DEFAULT_THEME),
 });
