@@ -103,6 +103,22 @@ describe("RecentFilesSidebar", () => {
     ).toBeInTheDocument();
   });
 
+  it("toggles the app theme from the sidebar footer", async () => {
+    const user = userEvent.setup();
+    document.documentElement.classList.add("dark");
+    renderSidebar();
+
+    const toggle = screen.getByRole("button", { name: /switch to light mode/i });
+    expect(document.documentElement).toHaveClass("dark");
+
+    await user.click(toggle);
+
+    expect(document.documentElement).not.toHaveClass("dark");
+    expect(
+      screen.getByRole("button", { name: /switch to dark mode/i }),
+    ).toBeInTheDocument();
+  });
+
   it("shows collapse and expand sidebar triggers", () => {
     renderSidebar();
 

@@ -3,7 +3,10 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 
 import { router } from "@/app/router";
+import { initTheme } from "@/shared/hooks/use-theme";
 import "@/styles/index.css";
+
+initTheme();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

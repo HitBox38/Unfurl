@@ -11,6 +11,7 @@ import { STORAGE_EVENT } from "@/shared/hooks";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -23,6 +24,7 @@ import {
 } from "@/shared/ui/sidebar";
 
 import { RecentFileLink } from "./components/recent-file-link";
+import { ThemeToggleButton } from "./components/theme-toggle-button";
 import { sortFilesNewestFirst } from "./helpers";
 
 export const RecentFilesSidebar = () => {
@@ -160,6 +162,10 @@ export const RecentFilesSidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
+      <SidebarFooter className="group-data-[collapsible=icon]:p-1">
+        <ThemeToggleButton />
+      </SidebarFooter>
     </Sidebar>
   );
 };
