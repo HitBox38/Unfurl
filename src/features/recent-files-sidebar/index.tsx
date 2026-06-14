@@ -14,7 +14,6 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarInput,
   SidebarMenu,
@@ -121,9 +120,6 @@ export const RecentFilesSidebar = () => {
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
       <SidebarContent className="group-data-[collapsible=icon]:overflow-hidden">
         <SidebarGroup className="gap-2 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-1">
-          <SidebarGroupLabel>
-            Recent files{allFiles.length > 0 ? ` (${allFiles.length})` : ""}
-          </SidebarGroupLabel>
           <SidebarGroupContent>
             <nav aria-label="Editable files">
               <SidebarMenu className="gap-2 group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:items-center">

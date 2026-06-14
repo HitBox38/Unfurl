@@ -73,7 +73,6 @@ describe("RecentFilesSidebar", () => {
 
     expect(screen.getByText("Lorcan02.1")).toBeInTheDocument();
     expect(screen.getByText("short-dialog")).toBeInTheDocument();
-    expect(screen.getByText("Recent files (2)")).toBeInTheDocument();
   });
 
   it("filters the list by the search query and restores it on clear", async () => {
