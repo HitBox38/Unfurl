@@ -22,6 +22,7 @@ import {
   buildChoiceEdgeId,
   buildDialogGraph,
   clearQueuedDialogNodeFocus,
+  getChoicePreviewFitViewPadding,
   peekQueuedDialogNodeFocus,
   setDialogFlowInstance,
 } from "./helpers";
@@ -181,12 +182,24 @@ export const DialogViewer = () => {
     if (!previewNodeName || !flowInstanceRef.current) return;
     if (!nodes.some((node) => node.id === previewNodeName)) return;
 
+    const nodesToFit: Array<{ id: string }> = [{ id: previewNodeName }];
+    if (
+      previewEdgeId &&
+      selectedNode?.name &&
+      selectedNode.name !== previewNodeName &&
+      nodes.some((node) => node.id === selectedNode.name)
+    ) {
+      nodesToFit.unshift({ id: selectedNode.name });
+    }
+
     void flowInstanceRef.current.fitView({
-      nodes: [{ id: previewNodeName }],
+      nodes: nodesToFit,
       duration: 250,
-      padding: 0.6,
+      padding: getChoicePreviewFitViewPadding(
+        Boolean(previewEdgeId && selectedNode),
+      ),
     });
-  }, [nodes, previewNodeName]);
+  }, [nodes, previewEdgeId, previewNodeName, selectedNode]);
 
   useEffect(() => {
     const nodeName = peekQueuedDialogNodeFocus();

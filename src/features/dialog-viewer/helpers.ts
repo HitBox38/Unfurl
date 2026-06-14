@@ -4,7 +4,11 @@ import dagre from "dagre";
 import type { StoryData, StoryNode } from "@/shared/types";
 
 import {
+  CHOICE_PREVIEW_FIT_VIEW_PADDING,
   DIALOG_NODE_TYPE,
+  NODE_EDITOR_BREAKPOINT_PX,
+  NODE_EDITOR_RIGHT_OFFSET_REM,
+  NODE_EDITOR_WIDTH_REM,
   NODE_HEIGHT,
   NODE_WIDTH,
   NEW_NODE_OFFSET_X,
@@ -123,12 +127,33 @@ export const computeNewNodePosition = (
 
 interface DialogFlowViewport {
   getViewport: () => { x: number; y: number; zoom: number };
-  fitView: (options: {
-    nodes: Array<{ id: string }>;
-    duration: number;
-    padding: number;
-  }) => void | Promise<boolean>;
 }
+
+export const getChoicePreviewFitViewPadding = (
+  hasNodeEditorOpen: boolean,
+) => {
+  if (!hasNodeEditorOpen || typeof window === "undefined") {
+    return CHOICE_PREVIEW_FIT_VIEW_PADDING;
+  }
+
+  const rootFontSize =
+    Number.parseFloat(getComputedStyle(document.documentElement).fontSize) ||
+    16;
+  const panelWidthPx =
+    window.innerWidth >= NODE_EDITOR_BREAKPOINT_PX
+      ? NODE_EDITOR_WIDTH_REM * rootFontSize
+      : window.innerWidth - 2 * rootFontSize;
+  const rightPaddingPx = Math.ceil(
+    panelWidthPx + NODE_EDITOR_RIGHT_OFFSET_REM * rootFontSize,
+  );
+
+  return {
+    top: CHOICE_PREVIEW_FIT_VIEW_PADDING,
+    left: CHOICE_PREVIEW_FIT_VIEW_PADDING,
+    bottom: CHOICE_PREVIEW_FIT_VIEW_PADDING,
+    right: `${rightPaddingPx}px` as `${number}px`,
+  };
+};
 
 let flowInstance: DialogFlowViewport | null = null;
 let focusNodeName: string | null = null;

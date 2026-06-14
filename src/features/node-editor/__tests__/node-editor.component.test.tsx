@@ -6,6 +6,7 @@ import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData } from "@/shared/types";
 
 import { DialogViewer } from "@/features/dialog-viewer";
+import { getChoicePreviewFitViewPadding } from "@/features/dialog-viewer/helpers";
 import { NodeEditor } from "@/features/node-editor";
 
 const { flowInstance, reactFlow } = vi.hoisted(() => ({
@@ -234,12 +235,20 @@ describe("NodeEditor", () => {
               animated?: boolean;
               className?: string;
             }>;
+            onInit?: (instance: typeof flowInstance) => void;
           }
         | undefined;
+
+    latestReactFlowProps()?.onInit?.(flowInstance);
 
     await user.hover(screen.getByRole("region", { name: /choice 1 editor/i }));
 
     await waitFor(() => {
+      expect(flowInstance.fitView).toHaveBeenCalledWith({
+        nodes: [{ id: "Intro" }, { id: "Middle" }],
+        duration: 250,
+        padding: getChoicePreviewFitViewPadding(true),
+      });
       expect(useNodeStore.getState().previewNodeName).toBe("Middle");
       expect(useNodeStore.getState().previewEdgeId).toBe("eIntro-Middle-0");
       expect(
@@ -287,9 +296,9 @@ describe("NodeEditor", () => {
 
     await waitFor(() => {
       expect(flowInstance.fitView).toHaveBeenCalledWith({
-        nodes: [{ id: "Outro" }],
+        nodes: [{ id: "Intro" }, { id: "Outro" }],
         duration: 250,
-        padding: 0.6,
+        padding: getChoicePreviewFitViewPadding(true),
       });
     });
 
