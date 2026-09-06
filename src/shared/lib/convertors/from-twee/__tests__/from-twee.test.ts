@@ -53,6 +53,20 @@ Hello
     });
   });
 
+  it("ignores metadata signs when no config is passed, even if a legacy global config exists", () => {
+    localStorage.setItem(
+      "metadataConfig",
+      JSON.stringify({
+        config: [{ name: "hp", sign: "$hp", type: "number" }],
+      }),
+    );
+
+    const story = parseTwee(`:: Hero\n$hp 10\nA passage.\n`);
+
+    expect(story.nodes[0].metadata).toEqual({});
+    expect(story.nodes[0].content).toEqual(["$hp 10", "A passage."]);
+  });
+
   it("applies metadata sign matching when a config is provided", () => {
     const source = `:: Hero
 $hp 10

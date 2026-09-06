@@ -5,8 +5,10 @@ import {
 } from "@tanstack/react-router";
 
 import App from "@/app/app";
+import { FilePage } from "@/app/pages/file-page";
+import { HomePage } from "@/app/pages/home-page";
+import { ProjectPage } from "@/app/pages/project-page";
 import { createRuntimeHistory } from "@/app/router-history";
-import { FilePage, HomePage } from "@/app/pages";
 
 const isOnlineHost = () =>
   typeof location !== "undefined" &&
@@ -23,13 +25,19 @@ const indexRoute = createRoute({
   component: () => <HomePage isOnline={isOnlineHost()} />,
 });
 
+const projectRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/projects/$projectId",
+  component: ProjectPage,
+});
+
 const fileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/files/$fileId",
   component: FilePage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, fileRoute]);
+const routeTree = rootRoute.addChildren([indexRoute, projectRoute, fileRoute]);
 
 export const router = createRouter({
   routeTree,

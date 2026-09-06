@@ -1,7 +1,7 @@
 import { Controller, useFormContext } from "react-hook-form";
 
-import { useStorage } from "@/shared/hooks";
-import type { MetadataConfigTemplate } from "@/shared/types";
+import { useProject } from "@/shared/hooks";
+import { useJsonDataStore } from "@/shared/stores";
 import {
   AccordionContent,
   AccordionItem,
@@ -12,10 +12,8 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 
 export const NodeMetadataEditor = () => {
-  const [{ config }] = useStorage<MetadataConfigTemplate>({
-    key: "metadataConfig",
-    defaultValue: { config: [] },
-  });
+  const activeProjectId = useJsonDataStore((state) => state.activeProjectId);
+  const config = useProject(activeProjectId)?.metadataConfig.config ?? [];
 
   const { register, control } = useFormContext();
 

@@ -1,19 +1,6 @@
 import type { MetadataConfigTemplate } from "@/shared/types";
 
-export const loadMetadataConfigFromStorage = (
-  storage: Storage = localStorage,
-): MetadataConfigTemplate | null => {
-  const raw = storage.getItem("metadataConfig");
-  if (raw === null) {
-    return null;
-  }
-  try {
-    return JSON.parse(raw) as MetadataConfigTemplate;
-  } catch {
-    return null;
-  }
-};
-
+/** Builds a node's initial metadata: every configured field at its zero value. */
 export const seedMetadataDefaults = (
   config: MetadataConfigTemplate | null,
 ): Record<string, number | boolean> => {

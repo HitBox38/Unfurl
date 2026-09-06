@@ -2,6 +2,7 @@ import type { StoryData, SupportedFileType } from "@/shared/types";
 
 export interface EditableFileRecord {
   id: string;
+  projectId: string;
   name: string;
   fileType: SupportedFileType;
   content: StoryData;
@@ -10,6 +11,7 @@ export interface EditableFileRecord {
 
 export interface EditableFileDraft {
   id?: string;
+  projectId: string;
   name: string;
   fileType: SupportedFileType;
   content: StoryData;

@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { FilePage } from "@/app/pages";
+import { FilePage } from "@/app/pages/file-page";
 import { getEditableFile, saveEditableFile } from "@/shared/lib/editable-files-storage";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData } from "@/shared/types";
@@ -74,7 +74,7 @@ describe("FilePage", () => {
 
   it("renders a compact header without an upload-another-file action", async () => {
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
       { now: () => 100 },
     );
 
@@ -131,7 +131,7 @@ describe("FilePage", () => {
   it("saves header file name edits on blur", async () => {
     const user = userEvent.setup();
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
       { now: () => 100 },
     );
 
@@ -153,7 +153,7 @@ describe("FilePage", () => {
   it("saves header file name edits on Enter", async () => {
     const user = userEvent.setup();
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
       { now: () => 100 },
     );
 
@@ -173,7 +173,7 @@ describe("FilePage", () => {
 
   it("keeps the selected node aligned when undo restores file content", async () => {
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
       { now: () => 100 },
     );
 
@@ -206,7 +206,7 @@ describe("FilePage", () => {
 
   it("keeps the selected node aligned when undo and redo restore node renames", async () => {
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story },
+      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
       { now: () => 100 },
     );
 

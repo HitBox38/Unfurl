@@ -4,8 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getEditableFile } from "@/shared/lib/editable-files-storage";
 import { fromTwee } from "@/shared/lib/convertors";
+import { createProject } from "@/shared/lib/projects-storage";
 import { useJsonDataStore } from "@/shared/stores";
-import type { StoryData } from "@/shared/types";
+import type { MetadataConfigTemplate, StoryData } from "@/shared/types";
 
 import { DemoButton } from "@/features/demo";
 
@@ -51,9 +52,14 @@ const revealDemoButton = () => {
   }
 };
 
+const metadataConfig: MetadataConfigTemplate = {
+  config: [{ name: "gold", sign: "$gold", type: "number" }],
+};
+
 describe("DemoButton", () => {
   beforeEach(() => {
     navigate.mockReset();
+    vi.mocked(fromTwee).mockReset();
     vi.mocked(fromTwee).mockResolvedValue(demoStory);
     vi.stubGlobal(
       "fetch",
@@ -62,7 +68,10 @@ describe("DemoButton", () => {
     useJsonDataStore.getState().reset();
   });
 
-  it("loads the demo as an editable file route", async () => {
+  it("loads the demo into the first project as an editable file route", async () => {
+    const project = createProject({ name: "First", metadataConfig }, { now: () => 1 });
+    createProject({ name: "Second" }, { now: () => 2 });
+
     render(<DemoButton />);
     revealDemoButton();
 
@@ -71,9 +80,16 @@ describe("DemoButton", () => {
     );
 
     await waitFor(() => expect(navigate).toHaveBeenCalled());
-    const activeFileId = useJsonDataStore.getState().activeFileId;
+    const { activeFileId, activeProjectId } = useJsonDataStore.getState();
     expect(activeFileId).toEqual(expect.any(String));
-    expect(getEditableFile(activeFileId ?? "")?.content).toEqual(demoStory);
+    expect(activeProjectId).toBe(project.id);
+    expect(getEditableFile(activeFileId ?? "")).toMatchObject({
+      content: demoStory,
+      projectId: project.id,
+    });
+    expect(fromTwee).toHaveBeenCalledWith(expect.any(File), {
+      config: metadataConfig,
+    });
     expect(navigate).toHaveBeenCalledWith({
       to: "/files/$fileId",
       params: { fileId: activeFileId },

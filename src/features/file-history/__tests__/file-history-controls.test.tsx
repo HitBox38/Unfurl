@@ -35,7 +35,13 @@ describe("FileHistoryControls", () => {
   it("undoes and redoes edits from the header buttons", async () => {
     const user = userEvent.setup();
     saveEditableFile(
-      { id: "demo-id", name: "demo", fileType: "twee", content: story },
+      {
+        id: "demo-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "project-id",
+      },
       { now: () => 100 },
     );
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");
@@ -58,7 +64,13 @@ describe("FileHistoryControls", () => {
 
   it("supports undo and redo keyboard shortcuts outside text inputs", () => {
     saveEditableFile(
-      { id: "demo-id", name: "demo", fileType: "twee", content: story },
+      {
+        id: "demo-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "project-id",
+      },
       { now: () => 100 },
     );
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");
@@ -96,7 +108,13 @@ describe("FileHistoryControls", () => {
 
   it("keeps native text editing shortcuts inside text inputs", () => {
     saveEditableFile(
-      { id: "demo-id", name: "demo", fileType: "twee", content: story },
+      {
+        id: "demo-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "project-id",
+      },
       { now: () => 100 },
     );
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");

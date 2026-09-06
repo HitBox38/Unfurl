@@ -8,6 +8,8 @@ export interface FileHistorySnapshot {
 export interface JsonDataState {
   name: string;
   activeFileId: string | null;
+  /** Project of the open file; drives which Metadata Config the editor uses. */
+  activeProjectId: string | null;
   content: StoryData;
   isLoading: boolean;
   past: FileHistorySnapshot[];
@@ -18,6 +20,7 @@ export interface JsonDataState {
     newJson: StoryData,
     newName: string,
     activeFileId?: string | null,
+    activeProjectId?: string | null,
   ) => void;
   setName: (name: string) => void;
   setNode: (newNode: StoryNode, previousName?: string) => void;

@@ -1,7 +1,4 @@
-import {
-  loadMetadataConfigFromStorage,
-  seedMetadataDefaults,
-} from "@/shared/lib/convertors/load-metadata-config";
+import { seedMetadataDefaults } from "@/shared/lib/convertors/seed-metadata-defaults";
 import type { Choice, StoryData, StoryNode } from "@/shared/types";
 
 import { parseDeclarationMetadata } from "./helpers";
@@ -13,10 +10,7 @@ export const parseTwee = (
   source: string,
   options: FromTweeOptions = {},
 ): StoryData => {
-  const config =
-    options.config !== undefined
-      ? options.config
-      : loadMetadataConfigFromStorage();
+  const config = options.config ?? null;
 
   const lines = source.split("\n");
   const nodes: StoryNode[] = [];

@@ -24,6 +24,7 @@ export interface DialogClassNames {
 
 export interface DialogContent {
   title?: string;
+  description?: string;
   isOpen: boolean;
   content: ReactNode;
   functions?: DialogAction[];
