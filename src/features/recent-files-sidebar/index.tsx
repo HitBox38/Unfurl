@@ -1,100 +1,44 @@
 import { Link } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import {
-  EDITABLE_FILES_STORAGE_KEY,
-  listEditableFiles,
-  type EditableFileRecord,
-} from "@/shared/lib/editable-files-storage";
-import { STORAGE_EVENT } from "@/shared/hooks";
+import { useEditableFiles, useProjects } from "@/shared/hooks";
+import { groupFilesByProject } from "@/shared/lib/project-summary";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
   SidebarHeader,
   SidebarInput,
-  SidebarMenu,
-  SidebarMenuItem,
   SidebarSeparator,
-  SidebarTrigger,
 } from "@/shared/ui/sidebar";
 
-import { RecentFileLink } from "./components/recent-file-link";
+import { ProjectFilesGroup } from "./components/project-files-group";
 import { ThemeToggleButton } from "./components/theme-toggle-button";
-import { sortFilesNewestFirst } from "./helpers";
+import { buildSidebarGroups } from "./helpers";
 
 export const RecentFilesSidebar = () => {
+  const projects = useProjects();
+  const files = useEditableFiles();
   const [query, setQuery] = useState("");
-  const [allFiles, setAllFiles] = useState<EditableFileRecord[]>(() =>
-    listEditableFiles(),
+  const filesByProject = useMemo(
+    () => groupFilesByProject(projects, files),
+    [files, projects],
   );
-  const normalizedQuery = query.trim().toLowerCase();
-  const files = useMemo(() => {
-    if (!normalizedQuery) return allFiles;
-
-    return allFiles.filter((file) => {
-      const searchable = [file.name, file.content.title, file.fileType]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return searchable.includes(normalizedQuery);
-    });
-  }, [allFiles, normalizedQuery]);
-
-  const refreshFiles = useCallback(() => {
-    setAllFiles(listEditableFiles());
-  }, []);
-
-  useEffect(() => {
-    refreshFiles();
-  }, [refreshFiles]);
-
-  useEffect(() => {
-    const onStorageChange = (
-      event: CustomEvent<{ key: string; newValue: EditableFileRecord[] }>,
-    ) => {
-      if (event.detail.key === EDITABLE_FILES_STORAGE_KEY) {
-        setAllFiles(sortFilesNewestFirst(event.detail.newValue));
-      }
-    };
-    const onNativeStorage = (event: StorageEvent) => {
-      if (event.key === EDITABLE_FILES_STORAGE_KEY) {
-        refreshFiles();
-      }
-    };
-
-    window.addEventListener(STORAGE_EVENT, onStorageChange as EventListener);
-    window.addEventListener("storage", onNativeStorage);
-    return () => {
-      window.removeEventListener(STORAGE_EVENT, onStorageChange as EventListener);
-      window.removeEventListener("storage", onNativeStorage);
-    };
-  }, [refreshFiles]);
-
+  const groups = useMemo(
+    () => buildSidebarGroups(projects, filesByProject, query),
+    [filesByProject, projects, query],
+  );
   const hasQuery = query.trim().length > 0;
+  const showImportEmpty = !hasQuery && projects.length === 0;
+  const showSearchEmpty = hasQuery && groups.length === 0;
 
   return (
     <Sidebar collapsible="icon" aria-label="Editable files sidebar">
-      <SidebarHeader className="group-data-[collapsible=icon]:p-1">
-        <div className="flex items-center justify-between gap-2 px-2 py-1 group-data-[collapsible=icon]:hidden">
-          <Link
-            to="/"
-            aria-label="Go to home page"
-            className="rounded-md text-lg font-semibold transition-colors hover:text-sidebar-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-          >
-            Unfurl
-          </Link>
-          <SidebarTrigger aria-label="Collapse sidebar" />
-        </div>
-        <div className="hidden justify-center group-data-[collapsible=icon]:flex">
-          <SidebarTrigger aria-label="Expand sidebar" />
-        </div>
+      <SidebarHeader className="group-data-[collapsible=icon]:hidden">
         <label
           htmlFor="editable-files-search"
-          className="relative block px-2 group-data-[collapsible=icon]:hidden"
+          className="relative block px-2"
         >
           <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-sidebar-foreground/70" />
           <SidebarInput
@@ -119,44 +63,38 @@ export const RecentFilesSidebar = () => {
       </SidebarHeader>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
       <SidebarContent className="group-data-[collapsible=icon]:overflow-hidden">
-        <SidebarGroup className="gap-2 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-1">
-          <SidebarGroupContent>
-            <nav aria-label="Editable files">
-              <SidebarMenu className="gap-2 group-data-[collapsible=icon]:gap-1 group-data-[collapsible=icon]:items-center">
-                {files.length > 0 ? (
-                  files.map((file) => (
-                    <RecentFileLink key={file.id} file={file} />
-                  ))
-                ) : (
-                  <SidebarMenuItem className="group-data-[collapsible=icon]:hidden">
-                    {hasQuery ? (
-                      <div className="flex flex-col items-start gap-2 p-3 text-sm text-sidebar-foreground/70">
-                        <p>No files match your search.</p>
-                        <button
-                          type="button"
-                          onClick={() => setQuery("")}
-                          className="rounded-sm font-medium text-sidebar-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-                        >
-                          Clear search
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-start gap-1 rounded-lg border border-dashed p-3 text-sm text-sidebar-foreground/70">
-                        <p>No files yet.</p>
-                        <Link
-                          to="/"
-                          className="rounded-sm font-medium text-sidebar-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
-                        >
-                          Upload a file to get started
-                        </Link>
-                      </div>
-                    )}
-                  </SidebarMenuItem>
-                )}
-              </SidebarMenu>
-            </nav>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        <nav aria-label="Editable files">
+          {showImportEmpty ? (
+            <div className="flex flex-col items-start gap-1 rounded-lg border border-dashed p-3 text-sm text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+              <p>No files yet.</p>
+              <Link
+                to="/"
+                className="rounded-sm font-medium text-sidebar-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              >
+                Import a file to get started
+              </Link>
+            </div>
+          ) : null}
+          {showSearchEmpty ? (
+            <div className="flex flex-col items-start gap-2 p-3 text-sm text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+              <p>No files match your search.</p>
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="rounded-sm font-medium text-sidebar-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sidebar-ring"
+              >
+                Clear search
+              </button>
+            </div>
+          ) : null}
+          {groups.map((group) => (
+            <ProjectFilesGroup
+              key={group.project.id}
+              project={group.project}
+              files={group.files}
+            />
+          ))}
+        </nav>
       </SidebarContent>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
       <SidebarFooter className="group-data-[collapsible=icon]:p-1">

@@ -5,9 +5,10 @@ import { FaqContent } from "./components/faq-content";
 export const useFaqModal = (): DialogContent => ({
   isOpen: true,
   title: "FAQ",
+  description: "Import, edit, and export branching dialog.",
   functions: [],
   classNames: {
-    dialogContent: "max-w-[50vw] flex flex-col gap-4",
+    dialog: "sm:max-w-lg",
   },
   content: <FaqContent />,
 });

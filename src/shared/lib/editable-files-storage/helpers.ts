@@ -1,4 +1,4 @@
-import { STORAGE_EVENT } from "@/shared/hooks";
+import { STORAGE_EVENT } from "@/shared/hooks/use-storage";
 
 import { EDITABLE_FILES_STORAGE_KEY } from "./constants";
 import type { EditableFileRecord } from "./types";

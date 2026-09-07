@@ -9,12 +9,12 @@ import { DownloadButton } from "@/features/download";
 describe("DownloadButton", () => {
   const originalCreateElement = document.createElement.bind(document);
   const clickSpy = vi.fn();
-  const setAttributeSpy = vi.fn();
+  let createdAnchor: HTMLAnchorElement | null = null;
 
   beforeEach(() => {
     useJsonDataStore.getState().reset();
     clickSpy.mockReset();
-    setAttributeSpy.mockReset();
+    createdAnchor = null;
   });
 
   afterEach(() => {
@@ -29,40 +29,27 @@ describe("DownloadButton", () => {
     expect(button).toHaveTextContent("");
   });
 
-  it("creates a download anchor with the encoded JSON when clicked", async () => {
-    useJsonDataStore.getState().setJson(
-      {
-        title: "Demo",
-        start: null,
-        nodes: [],
-      },
-      "demo-story",
-    );
+  it("downloads the story as encoded JSON when clicked", async () => {
+    const story = { title: "Demo", start: null, nodes: [] };
+    useJsonDataStore.getState().setJson(story, "demo-story");
 
     document.createElement = ((tagName: string) => {
+      const element = originalCreateElement(tagName);
       if (tagName === "a") {
-        const anchor = originalCreateElement("a") as HTMLAnchorElement;
-        anchor.setAttribute = ((name: string, value: string) => {
-          setAttributeSpy(name, value);
-          return HTMLElement.prototype.setAttribute.call(anchor, name, value);
-        }) as HTMLAnchorElement["setAttribute"];
-        anchor.click = clickSpy;
-        return anchor;
+        createdAnchor = element as HTMLAnchorElement;
+        createdAnchor.click = clickSpy;
       }
-      return originalCreateElement(tagName);
+      return element;
     }) as typeof document.createElement;
 
     render(<DownloadButton />);
     await userEvent.click(screen.getByRole("button", { name: /download/i }));
 
     expect(clickSpy).toHaveBeenCalledTimes(1);
-    expect(setAttributeSpy).toHaveBeenCalledWith(
-      "download",
-      "demo-story.json",
+    expect(createdAnchor?.download).toBe("demo-story.json");
+    expect(createdAnchor?.href).toBe(
+      "data:application/json;charset=utf-8," +
+        encodeURIComponent(JSON.stringify(story, null, 2)),
     );
-    const hrefCall = setAttributeSpy.mock.calls.find(
-      (call) => call[0] === "href",
-    );
-    expect(hrefCall?.[1]).toMatch(/^data:text\/json;charset=utf-8,/);
   });
 });

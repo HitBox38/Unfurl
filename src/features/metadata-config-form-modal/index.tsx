@@ -1,27 +1,37 @@
 import type { SubmitHandler } from "react-hook-form";
 
-import { MetadataConfigForm } from "@/features/metadata-config-form";
-import { useStorage } from "@/shared/hooks";
 import {
-  useDialogStore,
-  type DialogContent as DialogContentValue,
-} from "@/shared/stores";
-import type { MetadataConfigTemplate } from "@/shared/types";
+  MetadataConfigForm,
+  METADATA_CONFIG_IMPORT_INPUT_ID,
+} from "@/features/metadata-config-form";
+import { downloadJsonFile } from "@/shared/lib/download-json-file";
+import {
+  getProject,
+  updateProjectMetadataConfig,
+} from "@/shared/lib/projects-storage";
+import type { DialogContent as DialogContentValue } from "@/shared/stores";
+import type { MetadataConfigTemplate, ProjectRecord } from "@/shared/types";
 
-export const useMetadataConfigFormModal = (): DialogContentValue => {
-  const isOpen = useDialogStore((state) => state.isOpen);
-  const [config, setConfig] = useStorage<MetadataConfigTemplate>({
-    key: "metadataConfig",
-    defaultValue: { config: [] },
-  });
+/** Dialog content for editing the Metadata Config of one project. */
+export const useMetadataConfigFormModal = (
+  project: ProjectRecord,
+): DialogContentValue => {
+  const hasFields = project.metadataConfig.config.length > 0;
 
   const submitConfig: SubmitHandler<MetadataConfigTemplate> = (data) =>
-    setConfig(data);
+    updateProjectMetadataConfig(project.id, data);
 
   return {
-    content: <MetadataConfigForm />,
-    isOpen: !isOpen,
-    title: "Metadata Configuration",
+    content: (
+      <MetadataConfigForm
+        projectId={project.id}
+        initialConfig={project.metadataConfig}
+      />
+    ),
+    isOpen: true,
+    title: "Metadata configuration",
+    description:
+      "Define custom data fields (like player stats, story flags, or game variables) that can be parsed from your story files using special symbols and edited in the node editor.",
     isForm: true,
     formName: "metadata-config",
     classNames: {
@@ -30,59 +40,29 @@ export const useMetadataConfigFormModal = (): DialogContentValue => {
     },
     functions: [
       {
+        name: "Import config",
+        variant: "secondary",
+        closeAfterwards: false,
+        action: () =>
+          document.getElementById(METADATA_CONFIG_IMPORT_INPUT_ID)?.click(),
+      },
+      {
+        name: "Export config",
+        variant: "secondary",
+        disabled: !hasFields,
+        action: () => {
+          const current =
+            getProject(project.id)?.metadataConfig ?? project.metadataConfig;
+          downloadJsonFile(`${project.name}-metadata-config.json`, current);
+        },
+      },
+      {
         isSubmit: true,
         name: "Save",
         variant: "default",
+        className: "sm:ml-auto",
         action: () => {
           /* form submit handles persistence via submitFunction */
-        },
-      },
-      {
-        name: "Export Config",
-        variant: "info",
-        disabled: config.config.length === 0,
-        action: () => {
-          const element = document.createElement("a");
-          const file = new Blob([JSON.stringify(config)], {
-            type: "application/json",
-          });
-          element.href = URL.createObjectURL(file);
-          element.download = "metadataConfig.json";
-          element.click();
-          element.remove();
-        },
-      },
-      {
-        name: "Import Config",
-        variant: "info",
-        disabled: config.config.length > 0,
-        closeAfterwards: false,
-        action: () => {
-          const element = document.createElement("input");
-          element.type = "file";
-          element.accept = ".json";
-          element.onchange = () => {
-            const file = element.files?.[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-              try {
-                const data = JSON.parse(
-                  reader.result as string,
-                ) as MetadataConfigTemplate;
-                if (!data.config) {
-                  alert("Invalid JSON file");
-                  return;
-                }
-                setConfig(data);
-              } catch {
-                alert("Invalid JSON file");
-              }
-            };
-            reader.readAsText(file);
-          };
-          element.click();
-          element.remove();
         },
       },
     ],

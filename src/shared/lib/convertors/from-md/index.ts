@@ -1,7 +1,4 @@
-import {
-  loadMetadataConfigFromStorage,
-  seedMetadataDefaults,
-} from "@/shared/lib/convertors/load-metadata-config";
+import { seedMetadataDefaults } from "@/shared/lib/convertors/seed-metadata-defaults";
 import type { StoryData, StoryNode } from "@/shared/types";
 
 import { parseChoiceLink, stripExtension } from "./helpers";
@@ -14,10 +11,7 @@ export const parseMarkdownEntries = (
   title: string,
   options: FromMdOptions = {},
 ): StoryData => {
-  const config =
-    options.config !== undefined
-      ? options.config
-      : loadMetadataConfigFromStorage();
+  const config = options.config ?? null;
 
   const nodes: StoryNode[] = entries.map((entry) => {
     const lines = entry.source.split("\n");

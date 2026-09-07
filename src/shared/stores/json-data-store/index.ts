@@ -18,16 +18,18 @@ export type { FileHistorySnapshot, JsonDataState } from "./types";
 export const useJsonDataStore = create<JsonDataState>((set) => ({
   name: "",
   activeFileId: null,
+  activeProjectId: null,
   content: emptyContent,
   isLoading: false,
   past: [],
   future: [],
   canUndo: false,
   canRedo: false,
-  setJson: (newJson, newName, activeFileId = null) =>
+  setJson: (newJson, newName, activeFileId = null, activeProjectId = null) =>
     set({
       name: newName,
       activeFileId,
+      activeProjectId,
       content: newJson,
       isLoading: false,
       past: [],
@@ -184,6 +186,7 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
     set({
       name: "",
       activeFileId: null,
+      activeProjectId: null,
       content: emptyContent,
       isLoading: false,
       past: [],

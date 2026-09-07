@@ -5,6 +5,7 @@ export type {
   MetadataFieldType,
 } from "@/shared/types/metadata-config-template";
 export type { StoryNode } from "@/shared/types/node";
+export type { ProjectRecord, ProjectSource } from "@/shared/types/project";
 export type { StoryData } from "@/shared/types/story-data";
 export {
   SUPPORTED_FILE_TYPES,

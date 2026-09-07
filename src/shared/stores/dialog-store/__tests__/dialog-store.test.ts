@@ -17,6 +17,25 @@ describe("useDialogStore", () => {
     expect(state.content).toBe("world");
   });
 
+  it("clears leftover optional fields when a new dialog opens", () => {
+    useDialogStore.getState().setContent({
+      isOpen: true,
+      title: "FAQ",
+      description: "About the app",
+      content: "faq",
+    });
+    useDialogStore.getState().setContent({
+      isOpen: true,
+      title: "Confirm",
+      content: "sure?",
+    });
+
+    const state = useDialogStore.getState();
+    expect(state.title).toBe("Confirm");
+    expect(state.description).toBeUndefined();
+    expect(state.content).toBe("sure?");
+  });
+
   it("setOpen() toggles the open state when called with no argument", () => {
     useDialogStore.getState().setContent({ isOpen: false, content: null });
     useDialogStore.getState().setOpen();

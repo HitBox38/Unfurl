@@ -44,6 +44,20 @@ describe("useJsonDataStore", () => {
     expect(state.isLoading).toBe(false);
   });
 
+  it("tracks the active file and project ids and clears them on reset", () => {
+    useJsonDataStore.getState().setJson(sample, "demo", "file-id", "project-id");
+    expect(useJsonDataStore.getState()).toMatchObject({
+      activeFileId: "file-id",
+      activeProjectId: "project-id",
+    });
+
+    useJsonDataStore.getState().reset();
+    expect(useJsonDataStore.getState()).toMatchObject({
+      activeFileId: null,
+      activeProjectId: null,
+    });
+  });
+
   it("setNode updates only the matching node by name", () => {
     useJsonDataStore.getState().setJson(sample, "demo");
     useJsonDataStore.getState().setNode({

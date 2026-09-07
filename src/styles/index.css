@@ -165,8 +165,13 @@
   opacity: 0.35;
 }
 
+.app-shell {
+  --app-bar-height: 2rem;
+}
+
 .electron-app-shell {
   --electron-titlebar-height: env(titlebar-area-height, 32px);
+  --app-bar-height: var(--electron-titlebar-height);
   background: var(--background);
 }
 
@@ -199,49 +204,14 @@
   margin-top: var(--electron-titlebar-height);
 }
 
-.electron-app-shell [data-slot="sidebar-container"] {
+.app-shell [data-slot="sidebar-container"] {
   bottom: 0;
   height: auto;
-  top: var(--electron-titlebar-height);
+  top: var(--app-bar-height);
 }
 
-.electron-sidebar-trigger {
-  top: calc(var(--electron-titlebar-height) + 0.5rem);
-}
-
-@keyframes rotate-words {
-  10% {
-    transform: translateY(-112%);
-  }
-  25% {
-    transform: translateY(-100%);
-  }
-  35% {
-    transform: translateY(-212%);
-  }
-  50% {
-    transform: translateY(-200%);
-  }
-  60% {
-    transform: translateY(-312%);
-  }
-  75% {
-    transform: translateY(-300%);
-  }
-  85% {
-    transform: translateY(-412%);
-  }
-  100% {
-    transform: translateY(-400%);
-  }
-}
-
-.rotator-span {
-  display: block;
-  height: 100%;
-  padding-right: 10px;
-  text-align: right;
-  animation: rotate-words 6s infinite;
+.electron-titlebar-no-drag {
+  -webkit-app-region: no-drag;
 }
 
 .dark {

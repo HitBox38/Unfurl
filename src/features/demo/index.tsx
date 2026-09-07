@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useOpenEditableFile } from "@/features/open-editable-file";
 import { fromTwee } from "@/shared/lib/convertors";
+import { listProjects } from "@/shared/lib/projects-storage";
 import { Button } from "@/shared/ui/button";
 
 import { KONAMI_SEQUENCE, RESET_DELAY_MS } from "./constants";
@@ -53,13 +54,18 @@ export const DemoButton = () => {
   }, []);
 
   const loadDemoFile = async () => {
+    // The migration guarantees a project exists; the demo lands in the oldest one.
+    const [project] = listProjects();
+    if (!project) {
+      throw new Error("No project available to import the demo file into");
+    }
     setIsLoading(true);
     try {
       const response = await fetch("/Lorcan02.1.twee");
       const blob = await response.blob();
       const file = new File([blob], "Lorcan02.1.twee");
-      const data = await fromTwee(file);
-      openEditableFile(data, "Lorcan02.1", "twee");
+      const data = await fromTwee(file, { config: project.metadataConfig });
+      openEditableFile(data, "Lorcan02.1", "twee", project.id);
     } finally {
       setIsLoading(false);
     }

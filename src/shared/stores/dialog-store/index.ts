@@ -22,6 +22,16 @@ export const useDialogStore = create<DialogState>((set) => ({
     set((state) => ({
       isOpen: typeof isOpen === "boolean" ? isOpen : !state.isOpen,
     })),
-  setContent: (newContent) => set(() => ({ ...newContent })),
+  setContent: (newContent) =>
+    set(() => ({
+      title: "",
+      description: undefined,
+      functions: undefined,
+      isForm: undefined,
+      formName: undefined,
+      submitFunction: undefined,
+      classNames: undefined,
+      ...newContent,
+    })),
   reset: () => set(() => ({ ...initialState })),
 }));

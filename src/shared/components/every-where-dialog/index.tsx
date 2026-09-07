@@ -19,6 +19,7 @@ export const EveryWhereDialog = () => {
     setOpen,
     submitFunction,
     title,
+    description,
     formName,
     functions,
     isForm,
@@ -34,7 +35,11 @@ export const EveryWhereDialog = () => {
       {title ? (
         <DialogHeader className={cn("p-6 pb-2", classNames?.dialogTitle)}>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="sr-only">{title}</DialogDescription>
+          <DialogDescription
+            className={description ? "text-sm text-muted-foreground" : "sr-only"}
+          >
+            {description ?? title}
+          </DialogDescription>
         </DialogHeader>
       ) : null}
       <div

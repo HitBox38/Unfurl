@@ -1,36 +1,32 @@
-import { CircleHelp } from "lucide-react";
+import { SlidersHorizontal } from "lucide-react";
 
 import { useMetadataConfigFormModal } from "@/features/metadata-config-form-modal";
 import { useDialogStore } from "@/shared/stores";
+import type { ProjectRecord } from "@/shared/types";
+import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/shared/ui/tooltip";
 
-export const MetadataConfig = () => {
+interface MetadataConfigProps {
+  project: ProjectRecord;
+}
+
+/** Opens the Metadata Config editor for `project`; shows the field count. */
+export const MetadataConfig = ({ project }: MetadataConfigProps) => {
   const setContent = useDialogStore((state) => state.setContent);
-  const content = useMetadataConfigFormModal();
+  const content = useMetadataConfigFormModal(project);
+  const fieldCount = project.metadataConfig.config.length;
 
   return (
-    <div className="flex flex-row items-center gap-2.5">
-      <Button onClick={() => setContent(content)}>Config Metadata</Button>
-      <TooltipProvider delayDuration={150}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <span className="inline-flex" aria-label="Metadata config help">
-              <CircleHelp className="size-5 text-muted-foreground" />
-            </span>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            Define custom data fields (like player stats, story flags, or game
-            variables) that can be parsed from your story files using special
-            symbols and edited in the node editor.
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    </div>
+    <Button variant="secondary" size="sm" onClick={() => setContent(content)}>
+      <SlidersHorizontal aria-hidden="true" />
+      Metadata config
+      <Badge
+        variant="outline"
+        className="h-4 min-w-4 px-1 font-mono text-[0.625rem]"
+        aria-label={`${fieldCount} metadata fields`}
+      >
+        {fieldCount}
+      </Badge>
+    </Button>
   );
 };
