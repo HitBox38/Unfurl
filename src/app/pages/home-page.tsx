@@ -8,6 +8,7 @@ import { FileImportDropzone } from "@/features/file-import";
 import { ProjectCard } from "@/features/project-card";
 import { RecentFilesStrip } from "@/features/recent-files-strip";
 import { useEditableFiles, useProjects } from "@/shared/hooks";
+import type { EditableFileRecord } from "@/shared/lib/editable-files-storage";
 import {
   groupFilesByProject,
   summarizeProject,
@@ -34,7 +35,7 @@ interface HomePageProps {
 
 const mostRecentlyEdited = (
   projects: readonly ProjectRecord[],
-  filesByProject: Map<string, { updatedAt: number }[]>,
+  filesByProject: Map<string, readonly EditableFileRecord[]>,
 ): ProjectRecord | undefined =>
   projects.reduce<ProjectRecord | undefined>((best, project) => {
     if (!best) return project;

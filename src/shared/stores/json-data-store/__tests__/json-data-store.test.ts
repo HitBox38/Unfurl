@@ -205,7 +205,7 @@ describe("useJsonDataStore", () => {
 
   it("persists node edits into the active editable file", () => {
     saveEditableFile(
-      { name: "demo", fileType: "twee", content: sample },
+      { name: "demo", fileType: "twee", content: sample, projectId: "project-id" },
       { createId: () => "demo-id" },
     );
     useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
@@ -226,7 +226,7 @@ describe("useJsonDataStore", () => {
 
   it("persists active editable file renames", () => {
     saveEditableFile(
-      { name: "demo", fileType: "twee", content: sample },
+      { name: "demo", fileType: "twee", content: sample, projectId: "project-id" },
       { createId: () => "demo-id" },
     );
     useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
@@ -239,7 +239,7 @@ describe("useJsonDataStore", () => {
 
   it("undoes and redoes node edits in the active editable file", () => {
     saveEditableFile(
-      { name: "demo", fileType: "twee", content: sample },
+      { name: "demo", fileType: "twee", content: sample, projectId: "project-id" },
       { createId: () => "demo-id" },
     );
     useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
@@ -279,7 +279,7 @@ describe("useJsonDataStore", () => {
 
   it("undoes file renames and clears redo when a new edit branches history", () => {
     saveEditableFile(
-      { name: "demo", fileType: "twee", content: sample },
+      { name: "demo", fileType: "twee", content: sample, projectId: "project-id" },
       { createId: () => "demo-id" },
     );
     useJsonDataStore.getState().setJson(sample, "demo", "demo-id");
