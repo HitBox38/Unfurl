@@ -33,6 +33,8 @@ jobs:
 
       - name: Build app
         run: pnpm build:mac
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
       - name: Set up butler
         uses: jdno/setup-butler@v1
