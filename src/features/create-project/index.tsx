@@ -13,7 +13,7 @@ import { CreateProjectForm } from "./components/create-project-form";
 import { CREATE_PROJECT_FORM_NAME } from "./constants";
 
 /** Returns a function that opens the "New project" dialog. */
-export const useCreateProjectModal = () => {
+const useCreateProjectModal = () => {
   const setContent = useDialogStore((state) => state.setContent);
   const navigate = useNavigate();
 

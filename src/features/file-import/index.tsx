@@ -24,7 +24,6 @@ import { useImportFiles } from "./hooks/use-import-files";
 import { usePageDropTarget } from "./hooks/use-page-drop-target";
 import type { ImportFilesResult } from "./types";
 
-export { importFiles, useImportFiles } from "./hooks/use-import-files";
 export type {
   ImportFailure,
   ImportFilesInput,

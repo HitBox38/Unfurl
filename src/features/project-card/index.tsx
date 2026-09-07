@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { useState, type DragEvent } from "react";
 
-import { useImportFiles, type ImportFilesResult } from "@/features/file-import";
+import type { ImportFilesResult } from "@/features/file-import";
+import { useImportFiles } from "@/features/file-import/hooks/use-import-files";
 import { cn } from "@/shared/lib/cn";
 import type { EditableFileRecord } from "@/shared/lib/editable-files-storage";
 import { formatRelativeTime } from "@/shared/lib/format-relative-time";
