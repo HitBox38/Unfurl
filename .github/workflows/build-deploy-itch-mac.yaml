@@ -37,7 +37,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
 
       - name: Set up butler
-        uses: jdno/setup-butler@v1
+        uses: jdno/setup-butler@v2.0.0
         with:
           version: latest
 
