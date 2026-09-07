@@ -98,6 +98,9 @@ export const RecentFilesSidebar = () => {
       </SidebarContent>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
       <SidebarFooter className="group-data-[collapsible=icon]:p-1">
+        <p className="px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+          v{__APP_VERSION__}
+        </p>
         <ThemeToggleButton />
       </SidebarFooter>
     </Sidebar>

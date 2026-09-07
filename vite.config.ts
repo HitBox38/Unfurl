@@ -1,4 +1,5 @@
 import path from "node:path";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 import react from "@vitejs/plugin-react";
@@ -22,6 +23,11 @@ const electronPreloadOutputCompat = (): Plugin => {
 }
 
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(
+      JSON.parse(readFileSync(path.join(projectRoot, "package.json"), "utf8")).version,
+    ),
+  },
   resolve: {
     alias: {
       "@": path.resolve(projectRoot, "src"),

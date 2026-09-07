@@ -43,7 +43,7 @@ jobs:
 
       - name: Push to itch.io
         shell: bash
-        run: butler push "$PACKAGE" "$ITCH_USER/$ITCH_GAME:$CHANNEL"
+        run: butler push "$PACKAGE" "$ITCH_USER/$ITCH_GAME:$CHANNEL" --userversion "$(jq -r .version package.json)"
         env:
           BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
           CHANNEL: windows
