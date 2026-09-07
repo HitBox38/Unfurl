@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Unfurl — Story Fold</title>
+  <desc id="desc">A page with a turned corner and the tail of a speech bubble.</desc>
+  <rect x="8" y="8" width="112" height="112" rx="26" fill="#4338ca"/>
+  <g transform="translate(16 16) rotate(-8 48 48)" fill="#fff">
+    <path d="M30 13h23v19a10 10 0 0 0 10 10h17v24a12 12 0 0 1-12 12H43L26 89V78h-1a9 9 0 0 1-9-9V27a14 14 0 0 1 14-14Z"/>
+    <path d="m59 14 20 22H65a6 6 0 0 1-6-6V14Z"/>
+  </g>
+</svg>

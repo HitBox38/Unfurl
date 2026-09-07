@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Unfurl — Unrolling Story</title>
+  <desc id="desc">An intact speech-shaped page unrolling from an open curl along its upper edge.</desc>
+  <rect x="8" y="8" width="112" height="112" rx="26" fill="#4338ca"/>
+  <g transform="translate(16 16) rotate(-8 48 48)" fill="#fff">
+    <path d="M31 14h34c-7 6-10 12-10 21v7h22v24a12 12 0 0 1-12 12H42L25 89V78h-1a9 9 0 0 1-9-9V30a16 16 0 0 1 16-16Z"/>
+    <path d="M61 36v-3c0-10 6-19 16-19 8 0 13 5 13 12 0 6-4 10-10 10H61Zm10-7h9a3 3 0 0 0 3-3c0-3-2-5-6-5-4 0-6 3-6 8Z" fill-rule="evenodd"/>
+  </g>
+</svg>

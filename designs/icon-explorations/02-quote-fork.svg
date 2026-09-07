@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Unfurl — Quote Fork</title>
+  <desc id="desc">Two rounded quotation marks sweep outward into different directions.</desc>
+  <rect x="8" y="8" width="112" height="112" rx="26" fill="#4338ca"/>
+  <g transform="translate(16 16)" fill="#fff">
+    <path d="M23 19h13a9 9 0 0 1 9 9v15c0 19-14 33-33 36V65c11-3 18-9 20-17h-9a9 9 0 0 1-9-9V28a9 9 0 0 1 9-9Z"/>
+    <path d="M60 12h13a9 9 0 0 1 9 9v11a9 9 0 0 1-9 9h-9c2 13 10 22 22 26v14C65 77 51 61 51 36V21a9 9 0 0 1 9-9Z"/>
+  </g>
+</svg>

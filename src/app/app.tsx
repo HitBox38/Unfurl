@@ -1,6 +1,7 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { useHotkeySequence } from "@tanstack/react-hotkeys";
 
+import UnfurlMark from "@/assets/unfurl-mark.svg?react";
 import { EveryWhereDialog } from "@/shared/components";
 import { useFaqModal } from "@/features/faq";
 import { RecentFilesSidebar } from "@/features/recent-files-sidebar";
@@ -33,10 +34,15 @@ const AppBar = ({ isElectron }: { isElectron: boolean }) => (
       to="/"
       aria-label="Go to home page"
       className={cn(
-        "rounded-md font-heading text-sm font-medium outline-none hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+        "inline-flex items-center gap-1.5 rounded-md font-heading text-sm font-medium outline-none hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
         isElectron && "electron-titlebar-no-drag",
       )}
     >
+      <UnfurlMark
+        aria-hidden="true"
+        focusable="false"
+        className="size-5 shrink-0 text-primary dark:text-chart-1"
+      />
       Unfurl
     </Link>
   </header>
