@@ -38,6 +38,32 @@ export const DialogViewer = () => {
   const flowInstanceRef =
     useRef<ReactFlowInstance<Node<DialogNodeData>, Edge> | null>(null);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let previousWidth = container.clientWidth;
+    let previousHeight = container.clientHeight;
+    let timeout: ReturnType<typeof setTimeout>;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (!width || !height || (width === previousWidth && height === previousHeight)) return;
+      previousWidth = width;
+      previousHeight = height;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const flow = flowInstanceRef.current;
+        if (!flow) return;
+        const selected = useNodeStore.getState().node;
+        const nodes = selected && flow.getNode(selected.name) ? [{ id: selected.name }] : undefined;
+        void flow.fitView({ nodes, padding: nodes ? 0.6 : 0.2, maxZoom: 1.2, duration: 200 });
+      }, 150);
+    });
+    observer.observe(container);
+    return () => { observer.disconnect(); clearTimeout(timeout); };
+  }, []);
+
   const initial = useMemo(
     () => buildDialogGraph(content),
     [content],
@@ -216,6 +242,7 @@ export const DialogViewer = () => {
 
   return (
     <div
+      ref={containerRef}
       aria-label="Dialog flow chart"
       className="dialog-flow-viewer h-full w-full bg-background"
       onKeyDownCapture={(event) => {
