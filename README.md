@@ -32,7 +32,7 @@ JSON stories contain a title, a starting node, and a list of nodes with content,
 3. Open a story to explore its graph and edit nodes, dialogue, choices, and metadata.
 4. Use **Download** to export the edited story as JSON.
 
-To try an existing story, import the bundled [Lorcan02.1.twee sample](public/Lorcan02.1.twee). You can also reveal the demo button on the home page by entering the Konami code: `↑ ↑ ↓ ↓ ← → ← → B A`.
+To try an existing story, choose **Try a sample** on the home page, or import the bundled [Lorcan02.1.twee sample](public/Lorcan02.1.twee).
 
 ### Where your work is saved
 

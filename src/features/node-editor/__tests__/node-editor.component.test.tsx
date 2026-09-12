@@ -75,6 +75,37 @@ const clearPreviewNode = () => {
 };
 
 describe("NodeEditor", () => {
+  it("keeps a dirty editor open until changes are explicitly discarded", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+    render(<NodeEditor />);
+    await user.type(screen.getByRole("textbox", { name: "Content" }), " draft");
+    await user.click(screen.getByRole("button", { name: "Close node editor" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Keep editing" }));
+    expect(screen.getByRole("textbox", { name: "Content" })).toHaveValue(
+      "Hi draft",
+    );
+    await user.click(screen.getByRole("button", { name: "Close node editor" }));
+    await user.click(screen.getByRole("button", { name: "Discard changes" }));
+    expect(useNodeStore.getState().node).toBeNull();
+    expect(useJsonDataStore.getState().content.nodes[0].content).toEqual([
+      "Hi",
+    ]);
+  });
+
+  it("can save a draft before closing", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+    render(<NodeEditor />);
+    await user.type(screen.getByRole("textbox", { name: "Content" }), " saved");
+    await user.click(screen.getByRole("button", { name: "Close node editor" }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(useNodeStore.getState().node).toBeNull());
+    expect(useJsonDataStore.getState().content.nodes[0].content).toEqual([
+      "Hi saved",
+    ]);
+  });
   afterEach(() => {
     reactFlow.mockClear();
     flowInstance.fitView.mockClear();
@@ -83,29 +114,25 @@ describe("NodeEditor", () => {
     clearPreviewNode();
   });
 
-  it(
-    "updates a choice destination from the available story nodes",
-    async () => {
-      const user = userEvent.setup();
-      selectIntroNode();
+  it("updates a choice destination from the available story nodes", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
 
-      render(<NodeEditor />);
+    render(<NodeEditor />);
 
-      await user.click(
-        screen.getByRole("combobox", { name: /destination for option next/i }),
-      );
-      await user.click(screen.getByRole("option", { name: "Outro" }));
-      await user.click(screen.getByRole("button", { name: /update node/i }));
+    await user.click(
+      screen.getByRole("combobox", { name: /destination for option next/i }),
+    );
+    await user.click(screen.getByRole("option", { name: "Outro" }));
+    await user.click(screen.getByRole("button", { name: /update node/i }));
 
-      expect(
-        useJsonDataStore
-          .getState()
-          .content.nodes.find((node) => node.name === "Intro")?.choices[0]
-          ?.destination,
-      ).toBe("Outro");
-    },
-    10_000,
-  );
+    expect(
+      useJsonDataStore
+        .getState()
+        .content.nodes.find((node) => node.name === "Intro")?.choices[0]
+        ?.destination,
+    ).toBe("Outro");
+  }, 10_000);
 
   it("adds a new choice and saves it to the selected node", async () => {
     const user = userEvent.setup();
@@ -160,13 +187,13 @@ describe("NodeEditor", () => {
     ).toBe(true);
   });
 
-  it("renders as a bounded floating inspector panel", () => {
+  it("renders as a bounded inspector panel", () => {
     selectIntroNode();
 
     const { container } = render(<NodeEditor />);
 
     expect(container.querySelector('[data-slot="card"]')).toHaveClass(
-      "max-h-[calc(100vh-8rem)]",
+      "h-full",
       "rounded-xl",
       "shadow-2xl",
     );

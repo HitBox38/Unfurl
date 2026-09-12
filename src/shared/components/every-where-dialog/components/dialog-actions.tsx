@@ -23,7 +23,7 @@ export const DialogActions = ({
   return (
     <DialogFooter
       className={cn(
-        "border-t border-border/40 bg-background/60 px-6 py-4",
+        "shrink-0 border-t border-border/40 bg-background/60 px-6 py-4",
         className,
       )}
     >
@@ -52,7 +52,7 @@ export const DialogActions = ({
                 e.preventDefault();
                 action(e);
               }
-              if (closeAfterwards) {
+              if (!isSubmit && closeAfterwards) {
                 onClose();
               }
             }}

@@ -23,10 +23,10 @@ describe("DownloadButton", () => {
 
   it("renders a Download button", () => {
     render(<DownloadButton />);
-    const button = screen.getByRole("button", { name: /download/i });
-    expect(button).toHaveAttribute("aria-label", "Download");
-    expect(button).toHaveAttribute("data-size", "icon-sm");
-    expect(button).toHaveTextContent("");
+    const button = screen.getByRole("button", { name: /export json/i });
+    expect(button).toHaveAttribute("aria-label", "Export JSON");
+    expect(button).toHaveAttribute("data-size", "sm");
+    expect(button).toHaveTextContent("Export JSON");
   });
 
   it("downloads the story as encoded JSON when clicked", async () => {
@@ -43,7 +43,7 @@ describe("DownloadButton", () => {
     }) as typeof document.createElement;
 
     render(<DownloadButton />);
-    await userEvent.click(screen.getByRole("button", { name: /download/i }));
+    await userEvent.click(screen.getByRole("button", { name: /export json/i }));
 
     expect(clickSpy).toHaveBeenCalledTimes(1);
     expect(createdAnchor?.download).toBe("demo-story.json");

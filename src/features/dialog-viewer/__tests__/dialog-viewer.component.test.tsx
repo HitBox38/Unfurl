@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
@@ -49,6 +49,16 @@ const story = {
 };
 
 describe("DialogViewer", () => {
+  it.each(["Enter", " "])("opens a focused node with %s", (key) => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+    render(<DialogViewer />);
+    const node = document.createElement("div");
+    node.className = "react-flow__node";
+    node.dataset.id = "Intro";
+    screen.getByLabelText("Dialog flow chart").appendChild(node);
+    fireEvent.keyDown(node, { key });
+    expect(useNodeStore.getState().node?.name).toBe("Intro");
+  });
   afterEach(() => {
     addEdge.mockClear();
     reactFlow.mockClear();
@@ -85,8 +95,9 @@ describe("DialogViewer", () => {
 
     expect(latestReactFlowProps).not.toHaveProperty("connectionLineType");
     expect(latestReactFlowProps).not.toHaveProperty("defaultEdgeOptions");
-    expect(latestReactFlowProps?.edges.find((edge) => edge.id === "eIntro-Outro-0"))
-      .toEqual(expect.not.objectContaining({ type: expect.any(String) }));
+    expect(
+      latestReactFlowProps?.edges.find((edge) => edge.id === "eIntro-Outro-0"),
+    ).toEqual(expect.not.objectContaining({ type: expect.any(String) }));
   });
 
   it("fills the available flow workspace", () => {
@@ -120,19 +131,21 @@ describe("DialogViewer", () => {
         }
       | undefined;
 
-    expect(latestReactFlowProps?.nodes.find((node) => node.id === "Intro"))
-      .toEqual(
-        expect.objectContaining({
-          selected: true,
-          data: expect.objectContaining({ highlight: "selected" }),
-        }),
-      );
-    expect(latestReactFlowProps?.edges.find((edge) => edge.id === "eIntro-Outro-0"))
-      .toEqual(
-        expect.objectContaining({
-          className: expect.stringContaining("dialog-edge-connected"),
-        }),
-      );
+    expect(
+      latestReactFlowProps?.nodes.find((node) => node.id === "Intro"),
+    ).toEqual(
+      expect.objectContaining({
+        selected: true,
+        data: expect.objectContaining({ highlight: "selected" }),
+      }),
+    );
+    expect(
+      latestReactFlowProps?.edges.find((edge) => edge.id === "eIntro-Outro-0"),
+    ).toEqual(
+      expect.objectContaining({
+        className: expect.stringContaining("dialog-edge-connected"),
+      }),
+    );
   });
 
   it("does not select connected nodes when a story node is selected", () => {
@@ -151,20 +164,22 @@ describe("DialogViewer", () => {
         }
       | undefined;
 
-    expect(latestReactFlowProps?.nodes.find((node) => node.id === "Intro"))
-      .toEqual(
-        expect.objectContaining({
-          selected: true,
-          data: expect.objectContaining({ highlight: "selected" }),
-        }),
-      );
-    expect(latestReactFlowProps?.nodes.find((node) => node.id === "Outro"))
-      .toEqual(
-        expect.objectContaining({
-          selected: false,
-          data: expect.objectContaining({ highlight: "connected" }),
-        }),
-      );
+    expect(
+      latestReactFlowProps?.nodes.find((node) => node.id === "Intro"),
+    ).toEqual(
+      expect.objectContaining({
+        selected: true,
+        data: expect.objectContaining({ highlight: "selected" }),
+      }),
+    );
+    expect(
+      latestReactFlowProps?.nodes.find((node) => node.id === "Outro"),
+    ).toEqual(
+      expect.objectContaining({
+        selected: false,
+        data: expect.objectContaining({ highlight: "connected" }),
+      }),
+    );
   });
 
   it("creates a story choice when nodes are connected in the flow chart", () => {

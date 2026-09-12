@@ -49,7 +49,12 @@ export const MetadataConfigForm = ({
   projectId,
   initialConfig,
 }: MetadataConfigFormProps) => {
-  const { control, register, reset } = useFormContext<MetadataConfigTemplate>();
+  const {
+    control,
+    register,
+    reset,
+    formState: { errors },
+  } = useFormContext<MetadataConfigTemplate>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "config",
@@ -93,11 +98,34 @@ export const MetadataConfigForm = ({
 
   return (
     <div className="flex flex-col gap-4 pt-2">
+      <details className="rounded-lg border bg-muted/30 p-3 text-sm">
+        <summary className="cursor-pointer font-medium">
+          How metadata fields work
+        </summary>
+        <div className="mt-2 space-y-2 text-muted-foreground">
+          <p>
+            <strong>Name</strong> is the JSON key, such as{" "}
+            <code>reputation</code>. <strong>Sign</strong> is the unique prefix
+            on a metadata line, such as <code>@@rep</code>. Both are required.
+          </p>
+          <p>
+            <strong>Type</strong> chooses a number or a Boolean flag.{" "}
+            <strong>Label</strong> is an optional friendly name in the editor;
+            it defaults to Name.
+          </p>
+          <p>
+            Example: Name <code>reputation</code>, Sign <code>@@rep</code>, Type
+            Number, Label Reputation. A line containing <code>@@rep 5</code> in
+            an imported story sets reputation to 5. For a Boolean field, a line
+            with its sign sets it to true.
+          </p>
+        </div>
+      </details>
       {hasRows ? (
         <div className="flex flex-col gap-1">
-          <div className={ROW_GRID_CLASS}>
-            <span className={COLUMN_HEADER_CLASS}>Name</span>
-            <span className={COLUMN_HEADER_CLASS}>Sign</span>
+          <div className={`${ROW_GRID_CLASS} hidden sm:grid`}>
+            <span className={COLUMN_HEADER_CLASS}>Name *</span>
+            <span className={COLUMN_HEADER_CLASS}>Sign *</span>
             <span className={COLUMN_HEADER_CLASS}>Type</span>
             <span className={COLUMN_HEADER_CLASS}>Label</span>
             <span aria-hidden />
@@ -109,40 +137,90 @@ export const MetadataConfigForm = ({
           <div className="flex flex-col divide-y divide-border/60">
             {fields.map((line, index) => (
               <div key={line.id} className={`${ROW_GRID_CLASS} py-3`}>
-                <Input
-                  id={`config.${index}.name`}
-                  aria-label="Name"
-                  {...register(`config.${index}.name`, { required: true })}
-                />
-                <Input
-                  id={`config.${index}.sign`}
-                  aria-label="Sign"
-                  {...register(`config.${index}.sign`, { required: true })}
-                />
-                <Controller
-                  name={`config.${index}.type`}
-                  control={control}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <SelectTrigger
-                        id={`config.${index}.type`}
-                        aria-label="Type"
+                <div className="min-w-0 space-y-1">
+                  <label
+                    className="text-sm sm:sr-only"
+                    htmlFor={`config.${index}.name`}
+                  >
+                    Name *
+                  </label>
+                  <Input
+                    id={`config.${index}.name`}
+                    aria-label="Name"
+                    placeholder="e.g. reputation"
+                    aria-required="true"
+                    aria-invalid={Boolean(errors.config?.[index]?.name)}
+                    aria-describedby={`config-${index}-errors`}
+                    {...register(`config.${index}.name`, {
+                      validate: (value) =>
+                        Boolean(value.trim()) || "Name is required",
+                    })}
+                  />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <label
+                    className="text-sm sm:sr-only"
+                    htmlFor={`config.${index}.sign`}
+                  >
+                    Sign *
+                  </label>
+                  <Input
+                    id={`config.${index}.sign`}
+                    aria-label="Sign"
+                    placeholder="e.g. @@rep"
+                    aria-required="true"
+                    aria-invalid={Boolean(errors.config?.[index]?.sign)}
+                    aria-describedby={`config-${index}-errors`}
+                    {...register(`config.${index}.sign`, {
+                      validate: (value) =>
+                        Boolean(value.trim()) || "Sign is required",
+                    })}
+                  />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <label
+                    className="text-sm sm:sr-only"
+                    htmlFor={`config.${index}.type`}
+                  >
+                    Type
+                  </label>
+                  <Controller
+                    name={`config.${index}.type`}
+                    control={control}
+                    rules={{ required: true }}
+                    render={({ field }) => (
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
                       >
-                        <SelectValue placeholder="Type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="number">Number</SelectItem>
-                        <SelectItem value="boolean">Boolean</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                <Input
-                  id={`config.${index}.label`}
-                  aria-label="Label"
-                  {...register(`config.${index}.label`)}
-                />
+                        <SelectTrigger
+                          id={`config.${index}.type`}
+                          aria-label="Type"
+                        >
+                          <SelectValue placeholder="Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="number">Number</SelectItem>
+                          <SelectItem value="boolean">Boolean</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <label
+                    className="text-sm sm:sr-only"
+                    htmlFor={`config.${index}.label`}
+                  >
+                    Label
+                  </label>
+                  <Input
+                    id={`config.${index}.label`}
+                    aria-label="Label"
+                    placeholder="Optional display name"
+                    {...register(`config.${index}.label`)}
+                  />
+                </div>
                 <Button
                   type="button"
                   variant="ghost"
@@ -153,6 +231,16 @@ export const MetadataConfigForm = ({
                 >
                   <Trash2 aria-hidden="true" />
                 </Button>
+                <div
+                  id={`config-${index}-errors`}
+                  className="col-span-full text-sm text-destructive"
+                  role="alert"
+                >
+                  {errors.config?.[index]?.name?.message}
+                  {errors.config?.[index]?.sign ? (
+                    <p>{errors.config[index].sign.message}</p>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>

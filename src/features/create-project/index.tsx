@@ -52,7 +52,7 @@ export const NewProjectButton = () => {
   const openCreateProject = useCreateProjectModal();
 
   return (
-    <Button type="button" variant="secondary" onClick={openCreateProject}>
+    <Button type="button" onClick={openCreateProject}>
       <Plus aria-hidden="true" />
       New project
     </Button>

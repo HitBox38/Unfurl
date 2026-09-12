@@ -10,10 +10,8 @@ import { HomePage } from "@/app/pages/home-page";
 import { ProjectPage } from "@/app/pages/project-page";
 import { createRuntimeHistory } from "@/app/router-history";
 
-const isOnlineHost = () =>
-  typeof location !== "undefined" &&
-  location.hostname.includes(".vercel.app") &&
-  location.hostname.includes("unfurl");
+const isBrowserRenderer = () =>
+  typeof window !== "undefined" && !window.ipcRenderer;
 
 const rootRoute = createRootRoute({
   component: App,
@@ -22,7 +20,7 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => <HomePage isOnline={isOnlineHost()} />,
+  component: () => <HomePage isOnline={isBrowserRenderer()} />,
 });
 
 const projectRoute = createRoute({

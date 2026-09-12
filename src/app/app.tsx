@@ -1,5 +1,6 @@
+import { useEffect, useState } from "react";
 import { Link, Outlet } from "@tanstack/react-router";
-import { useHotkeySequence } from "@tanstack/react-hotkeys";
+import { useHotkey } from "@tanstack/react-hotkeys";
 
 import UnfurlMark from "@/assets/unfurl-mark.svg?react";
 import { EveryWhereDialog } from "@/shared/components";
@@ -28,7 +29,10 @@ const AppBar = ({ isElectron }: { isElectron: boolean }) => (
   >
     <SidebarTrigger
       aria-label="Toggle sidebar"
-      className={cn("text-sidebar-foreground", isElectron && "electron-titlebar-no-drag")}
+      className={cn(
+        "text-sidebar-foreground",
+        isElectron && "electron-titlebar-no-drag",
+      )}
     />
     <Link
       to="/"
@@ -52,21 +56,34 @@ const App = () => {
   const setContent = useDialogStore((state) => state.setContent);
   const faqModal = useFaqModal();
   const isElectron = isElectronRenderer();
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => isElectron || window.innerWidth >= 1024,
+  );
+
+  useEffect(() => {
+    if (isElectron) return;
+    const wideScreen = window.matchMedia("(min-width: 1024px)");
+    const onChange = () => setSidebarOpen(wideScreen.matches);
+    wideScreen.addEventListener("change", onChange);
+    return () => wideScreen.removeEventListener("change", onChange);
+  }, [isElectron]);
   const shellClassName = isElectron
     ? "app-shell electron-app-shell h-svh overflow-hidden"
     : "app-shell h-svh overflow-hidden";
 
-  useHotkeySequence(["Control+C", "Control+F"], () => setContent(faqModal), {
+  useHotkey("F1", () => setContent(faqModal), {
     ignoreInputs: false,
-    preventDefault: false,
-    stopPropagation: false,
-    timeout: Number.POSITIVE_INFINITY,
+    preventDefault: true,
   });
 
   return (
     <TooltipProvider>
       <div className={shellClassName} data-testid="app-shell">
-        <SidebarProvider className="flex h-full min-h-0 flex-col">
+        <SidebarProvider
+          open={sidebarOpen}
+          onOpenChange={setSidebarOpen}
+          className="flex h-full min-h-0 flex-col"
+        >
           {isElectron ? (
             <div className="h-0 overflow-visible">
               <AppBar isElectron />
