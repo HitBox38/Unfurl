@@ -132,6 +132,7 @@ export const DialogViewer = () => {
 
         return {
           ...edge,
+          label: isConnected || isPreviewed ? edge.label : undefined,
           animated: isPreviewed || edge.animated,
           className: cn(
             edge.className,
