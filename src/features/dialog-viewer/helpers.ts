@@ -64,6 +64,7 @@ export const buildDialogGraph = (
   const nodes: Node<DialogNodeData>[] = json.nodes.map((node) => ({
     id: node.name,
     type: DIALOG_NODE_TYPE,
+    ariaLabel: `Edit node ${node.name}. Press Enter or Space to edit.`,
     data: { label: node.name, metadata: node },
     position: node.position ?? { x: 0, y: 0 },
   }));

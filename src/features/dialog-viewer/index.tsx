@@ -218,6 +218,17 @@ export const DialogViewer = () => {
     <div
       aria-label="Dialog flow chart"
       className="dialog-flow-viewer h-full w-full bg-background"
+      onKeyDownCapture={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const target = event.target;
+        if (!(target instanceof HTMLElement) || !target.classList.contains("react-flow__node")) return;
+        const storyNode = content.nodes.find((item) => item.name === target.dataset.id);
+        if (!storyNode) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setSelectedNode(storyNode);
+        requestAnimationFrame(() => document.getElementById("node-name")?.focus());
+      }}
     >
       <ReactFlow
         fitView
