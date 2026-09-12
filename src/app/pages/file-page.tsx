@@ -78,7 +78,8 @@ export const FilePage = () => {
           <CardHeader>
             <CardTitle>File not found</CardTitle>
             <CardDescription>
-              This editable file is no longer available in localStorage.
+              This file is not available in this browser. Return to projects to
+              import a saved copy.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -103,52 +104,67 @@ export const FilePage = () => {
     <div className="flex min-h-0 flex-1 flex-col">
       <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
         <header className="flex shrink-0 flex-col gap-2 border-b bg-background p-3">
-        <div
-          data-testid="file-page-header"
-          className="flex min-w-0 items-center rounded-lg bg-card px-2 py-1"
-        >
-          <InlineNameInput
-            key={name || "Untitled"}
-            id="file-name"
-            label="File name"
-            name={name}
-            onCommit={setFileName}
-            className="text-xl md:text-2xl"
-          />
-        </div>
-        <div
-          data-testid="file-toolbar"
-          className="flex flex-wrap items-center justify-end gap-2"
-        >
           <div
-            data-testid="file-history-bubble"
-            className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+            data-testid="file-page-header"
+            className="flex min-w-0 items-center rounded-lg bg-card px-2 py-1"
           >
-            <FileHistoryControls />
+            <InlineNameInput
+              key={name || "Untitled"}
+              id="file-name"
+              label="File name"
+              name={name}
+              onCommit={setFileName}
+              className="text-xl md:text-2xl"
+            />
           </div>
           <div
-            data-testid="file-add-node-bubble"
-            className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+            data-testid="file-toolbar"
+            className="flex flex-wrap items-center justify-end gap-2"
           >
-            <GraphNodeToolbar />
+            <div
+              data-testid="file-history-bubble"
+              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+            >
+              <FileHistoryControls />
+            </div>
+            <div
+              data-testid="file-add-node-bubble"
+              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+            >
+              <GraphNodeToolbar />
+            </div>
+            <div
+              data-testid="file-download-bubble"
+              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+            >
+              <DownloadButton />
+            </div>
           </div>
-          <div
-            data-testid="file-download-bubble"
-            className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
-          >
-            <DownloadButton />
-          </div>
-        </div>
+          {!window.ipcRenderer ? (
+            <p className="text-xs text-muted-foreground">
+              Applied edits are saved in this browser. Export JSON to keep a
+              backup.
+            </p>
+          ) : null}
         </header>
         <div className="file-workspace min-h-0 flex-1">
-        <div className={node ? "file-editor-layout has-editor" : "file-editor-layout"}>
-        <div className="file-graph-pane"><DialogViewer /></div>
-        {node ? (
-          <aside aria-label="Node editor" className="file-node-panel border-l bg-background p-3">
-            <NodeEditor />
-          </aside>
-        ) : null}
-        </div>
+          <div
+            className={
+              node ? "file-editor-layout has-editor" : "file-editor-layout"
+            }
+          >
+            <div className="file-graph-pane">
+              <DialogViewer />
+            </div>
+            {node ? (
+              <aside
+                aria-label="Node editor"
+                className="file-node-panel border-l bg-background p-3"
+              >
+                <NodeEditor />
+              </aside>
+            ) : null}
+          </div>
         </div>
       </section>
     </div>

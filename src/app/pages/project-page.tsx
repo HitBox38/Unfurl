@@ -22,7 +22,8 @@ const ProjectNotFound = () => (
       <CardHeader>
         <CardTitle>Project not found</CardTitle>
         <CardDescription>
-          This project is no longer available in localStorage.
+          This project is not available in this browser. Return to projects to
+          create one and import your saved files.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -70,15 +71,18 @@ export const ProjectPage = () => {
             projectId={project.id}
             pageDropTargetRef={pageRef}
           />
-          <section aria-labelledby="files-heading" className="flex flex-col gap-2">
+          <section
+            aria-labelledby="files-heading"
+            className="flex flex-col gap-2"
+          >
             <div className="flex items-center justify-between gap-3">
-            <h2
-              id="files-heading"
-              className="text-sm font-medium text-muted-foreground"
-            >
-              Files
-            </h2>
-            <NewStoryButton project={project} />
+              <h2
+                id="files-heading"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                Files
+              </h2>
+              <NewStoryButton project={project} />
             </div>
             {files.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -90,8 +94,8 @@ export const ProjectPage = () => {
               <div className="flex flex-col items-start gap-1 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">No files yet.</p>
                 <p>
-                  Create a new story, or drop .twee, .json or .md files here to add them
-                  to {project.name}.
+                  Create a new story, or drop .twee, .json or .md files here to
+                  add them to {project.name}.
                 </p>
               </div>
             )}

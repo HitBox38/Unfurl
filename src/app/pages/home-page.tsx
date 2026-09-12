@@ -98,6 +98,13 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
       </header>
 
       <div className="flex flex-col gap-6 px-6 py-5">
+        {isOnline ? (
+          <aside aria-label="Browser storage" className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
+            <p className="font-medium text-foreground">Your work stays in this browser</p>
+            <p>Applied changes are saved on this device, without account sync. Clearing site data removes local projects.</p>
+            <p>Export stories as JSON and export your project’s metadata config for backups. Import those files to continue in another browser.</p>
+          </aside>
+        ) : null}
         <section aria-labelledby="projects-heading" className="flex flex-col gap-1">
           <h2
             id="projects-heading"
