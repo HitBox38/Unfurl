@@ -28,40 +28,49 @@ export const NodeMetadataEditor = () => {
     >
       <AccordionTrigger>Metadata</AccordionTrigger>
       <AccordionContent className="flex flex-col gap-3 text-left">
-      {config.map((field, index) => {
-        if (field.type === "number") {
+        {config.map((field, index) => {
+          if (field.type === "number") {
+            return (
+              <div
+                key={`${field.name}-${index}`}
+                className="flex flex-col gap-1"
+              >
+                <Label htmlFor={`metadata.${field.name}`}>
+                  {field.label || field.name}
+                </Label>
+                <Input
+                  id={`metadata.${field.name}`}
+                  type="number"
+                  className="w-[150px]"
+                  {...register(`metadata.${field.name}`, {
+                    valueAsNumber: true,
+                  })}
+                />
+              </div>
+            );
+          }
           return (
-            <div key={`${field.name}-${index}`} className="flex flex-col gap-1">
-              <Label htmlFor={`metadata.${field.name}`}>{field.label}</Label>
-              <Input
-                id={`metadata.${field.name}`}
-                type="number"
-                className="w-[150px]"
-                {...register(`metadata.${field.name}`, { valueAsNumber: true })}
+            <div
+              key={`${field.name}-${index}`}
+              className="flex items-center gap-2"
+            >
+              <Controller
+                control={control}
+                name={`metadata.${field.name}`}
+                render={({ field: ctrl }) => (
+                  <Checkbox
+                    id={`metadata.${field.name}`}
+                    checked={!!ctrl.value}
+                    onCheckedChange={(checked) => ctrl.onChange(!!checked)}
+                  />
+                )}
               />
+              <Label htmlFor={`metadata.${field.name}`}>
+                {field.label || field.name}
+              </Label>
             </div>
           );
-        }
-        return (
-          <div
-            key={`${field.name}-${index}`}
-            className="flex items-center gap-2"
-          >
-            <Controller
-              control={control}
-              name={`metadata.${field.name}`}
-              render={({ field: ctrl }) => (
-                <Checkbox
-                  id={`metadata.${field.name}`}
-                  checked={!!ctrl.value}
-                  onCheckedChange={(checked) => ctrl.onChange(!!checked)}
-                />
-              )}
-            />
-            <Label htmlFor={`metadata.${field.name}`}>{field.label}</Label>
-          </div>
-        );
-      })}
+        })}
       </AccordionContent>
     </AccordionItem>
   );
