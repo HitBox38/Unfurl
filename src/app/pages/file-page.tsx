@@ -140,13 +140,15 @@ export const FilePage = () => {
           </div>
         </div>
         </header>
-        <div className="relative min-h-0 flex-1">
-        <DialogViewer />
+        <div className="file-workspace min-h-0 flex-1">
+        <div className={node ? "file-editor-layout has-editor" : "file-editor-layout"}>
+        <div className="file-graph-pane"><DialogViewer /></div>
         {node ? (
-          <aside className="absolute right-4 top-4 z-10 w-[calc(100%-2rem)] sm:w-[28rem]">
+          <aside aria-label="Node editor" className="file-node-panel border-l bg-background p-3">
             <NodeEditor />
           </aside>
         ) : null}
+        </div>
         </div>
       </section>
     </div>

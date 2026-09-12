@@ -6,9 +6,6 @@ import type { StoryData, StoryNode } from "@/shared/types";
 import {
   CHOICE_PREVIEW_FIT_VIEW_PADDING,
   DIALOG_NODE_TYPE,
-  NODE_EDITOR_BREAKPOINT_PX,
-  NODE_EDITOR_RIGHT_OFFSET_REM,
-  NODE_EDITOR_WIDTH_REM,
   NODE_HEIGHT,
   NODE_WIDTH,
   NEW_NODE_OFFSET_X,
@@ -77,7 +74,10 @@ export const buildDialogGraph = (
         id: buildChoiceEdgeId(node.name, choice.destination, choiceIndex),
         source: node.name,
         target: choice.destination,
-        markerEnd: { type: "arrowclosed" as MarkerType, color: "var(--muted-foreground)" },
+        markerEnd: {
+          type: "arrowclosed" as MarkerType,
+          color: "var(--muted-foreground)",
+        },
         label: choice.text || "Continue",
         ariaLabel: `${node.name} to ${choice.destination}: ${choice.text || "Continue"}`,
         labelStyle: { fill: "var(--foreground)", fontSize: 12 },
@@ -89,7 +89,10 @@ export const buildDialogGraph = (
   );
 
   const hasStoredPositions = nodes.every((node) => node.data.metadata.position);
-  return { nodes: hasStoredPositions ? nodes : layoutDagre(nodes, edges), edges };
+  return {
+    nodes: hasStoredPositions ? nodes : layoutDagre(nodes, edges),
+    edges,
+  };
 };
 
 interface FlowViewportReader {
@@ -137,31 +140,8 @@ interface DialogFlowViewport {
   getViewport: () => { x: number; y: number; zoom: number };
 }
 
-export const getChoicePreviewFitViewPadding = (
-  hasNodeEditorOpen: boolean,
-) => {
-  if (!hasNodeEditorOpen || typeof window === "undefined") {
-    return CHOICE_PREVIEW_FIT_VIEW_PADDING;
-  }
-
-  const rootFontSize =
-    Number.parseFloat(getComputedStyle(document.documentElement).fontSize) ||
-    16;
-  const panelWidthPx =
-    window.innerWidth >= NODE_EDITOR_BREAKPOINT_PX
-      ? NODE_EDITOR_WIDTH_REM * rootFontSize
-      : window.innerWidth - 2 * rootFontSize;
-  const rightPaddingPx = Math.ceil(
-    panelWidthPx + NODE_EDITOR_RIGHT_OFFSET_REM * rootFontSize,
-  );
-
-  return {
-    top: CHOICE_PREVIEW_FIT_VIEW_PADDING,
-    left: CHOICE_PREVIEW_FIT_VIEW_PADDING,
-    bottom: CHOICE_PREVIEW_FIT_VIEW_PADDING,
-    right: `${rightPaddingPx}px` as `${number}px`,
-  };
-};
+export const getChoicePreviewFitViewPadding = (_hasNodeEditorOpen: boolean) =>
+  CHOICE_PREVIEW_FIT_VIEW_PADDING;
 
 let flowInstance: DialogFlowViewport | null = null;
 let focusNodeName: string | null = null;
