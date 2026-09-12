@@ -75,6 +75,31 @@ const clearPreviewNode = () => {
 };
 
 describe("NodeEditor", () => {
+  it("keeps a dirty editor open until changes are explicitly discarded", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+    render(<NodeEditor />);
+    await user.type(screen.getByRole("textbox", { name: "Content" }), " draft");
+    await user.click(screen.getByRole("button", { name: "Close node editor" }));
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Keep editing" }));
+    expect(screen.getByRole("textbox", { name: "Content" })).toHaveValue("Hi draft");
+    await user.click(screen.getByRole("button", { name: "Close node editor" }));
+    await user.click(screen.getByRole("button", { name: "Discard changes" }));
+    expect(useNodeStore.getState().node).toBeNull();
+    expect(useJsonDataStore.getState().content.nodes[0].content).toEqual(["Hi"]);
+  });
+
+  it("can save a draft before closing", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+    render(<NodeEditor />);
+    await user.type(screen.getByRole("textbox", { name: "Content" }), " saved");
+    await user.click(screen.getByRole("button", { name: "Close node editor" }));
+    await user.click(screen.getByRole("button", { name: "Save changes" }));
+    await waitFor(() => expect(useNodeStore.getState().node).toBeNull());
+    expect(useJsonDataStore.getState().content.nodes[0].content).toEqual(["Hi saved"]);
+  });
   afterEach(() => {
     reactFlow.mockClear();
     flowInstance.fitView.mockClear();

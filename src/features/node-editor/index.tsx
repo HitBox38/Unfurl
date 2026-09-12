@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Controller,
   FormProvider,
@@ -26,6 +26,7 @@ import {
   CardHeader,
 } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 import { Label } from "@/shared/ui/label";
 import { Trash } from "lucide-react";
 import {
@@ -43,6 +44,7 @@ import { NodeMetadataEditor } from "@/features/node-metadata-editor";
 import type { StoryNodeForm } from "./types";
 
 export const NodeEditor = () => {
+  const [confirmClose, setConfirmClose] = useState(false);
   const node = useNodeStore((state) => state.node);
   const setNode = useNodeStore((state) => state.setNode);
   const setGraphPreview = useNodeStore((state) => state.setGraphPreview);
@@ -91,6 +93,23 @@ export const NodeEditor = () => {
   }, [node, methods]);
 
   useEffect(() => () => setGraphPreview(null), [setGraphPreview]);
+
+  useEffect(() => {
+    if (!methods.formState.isDirty) return;
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => event.preventDefault();
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [methods.formState.isDirty]);
+
+  const closeEditor = () => {
+    setConfirmClose(false);
+    setGraphPreview(null);
+    setNode(null);
+  };
+  const requestClose = () => {
+    if (methods.formState.isDirty) setConfirmClose(true);
+    else closeEditor();
+  };
 
   if (!node) {
     return null;
@@ -157,10 +176,7 @@ export const NodeEditor = () => {
               size="icon-sm"
               aria-label="Close node editor"
               className="shrink-0"
-              onClick={() => {
-                setGraphPreview(null);
-                setNode(null);
-              }}
+              onClick={requestClose}
             >
               <X />
             </Button>
@@ -324,10 +340,7 @@ export const NodeEditor = () => {
               <Button
                 type="button"
                 variant="warning"
-                onClick={() => {
-                  setGraphPreview(null);
-                  setNode(null);
-                }}
+                onClick={requestClose}
               >
                 Cancel
               </Button>
@@ -338,6 +351,25 @@ export const NodeEditor = () => {
           </CardFooter>
         </form>
       </Card>
+      <Dialog open={confirmClose} onOpenChange={setConfirmClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save changes to {node.name}?</DialogTitle>
+            <DialogDescription>Your edits have not been saved yet.</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setConfirmClose(false)}>Keep editing</Button>
+            <Button variant="destructive" onClick={closeEditor}>Discard changes</Button>
+            <Button onClick={() => {
+              setConfirmClose(false);
+              void methods.handleSubmit((data) => {
+                submitNode(data);
+                closeEditor();
+              })();
+            }}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </FormProvider>
   );
 };
