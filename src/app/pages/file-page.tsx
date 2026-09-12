@@ -101,10 +101,11 @@ export const FilePage = () => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <section className="relative min-h-0 flex-1 overflow-hidden">
+      <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        <header className="flex shrink-0 flex-col gap-2 border-b bg-background p-3">
         <div
           data-testid="file-page-header"
-          className="absolute left-4 top-4 z-10 flex max-w-[calc(100%-15rem)] items-center rounded-full border bg-card/90 px-2.5 py-1.5 shadow-lg backdrop-blur-md sm:max-w-[min(36rem,calc(100%-15rem))]"
+          className="flex min-w-0 items-center rounded-lg bg-card px-2 py-1"
         >
           <InlineNameInput
             key={name || "Untitled"}
@@ -112,12 +113,12 @@ export const FilePage = () => {
             label="File name"
             name={name}
             onCommit={setFileName}
-            className="text-3xl md:text-3xl"
+            className="text-xl md:text-2xl"
           />
         </div>
         <div
           data-testid="file-toolbar"
-          className="absolute right-4 top-4 z-10 flex items-center gap-2"
+          className="flex flex-wrap items-center justify-end gap-2"
         >
           <div
             data-testid="file-history-bubble"
@@ -138,12 +139,15 @@ export const FilePage = () => {
             <DownloadButton />
           </div>
         </div>
+        </header>
+        <div className="relative min-h-0 flex-1">
         <DialogViewer />
         {node ? (
-          <aside className="absolute right-4 top-16 z-10 w-[calc(100%-2rem)] sm:w-[28rem]">
+          <aside className="absolute right-4 top-4 z-10 w-[calc(100%-2rem)] sm:w-[28rem]">
             <NodeEditor />
           </aside>
         ) : null}
+        </div>
       </section>
     </div>
   );

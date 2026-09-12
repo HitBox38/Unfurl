@@ -86,17 +86,12 @@ describe("FilePage", () => {
     expect(
       container.querySelector('[data-testid="file-page-header"]'),
     ).toHaveClass(
-      "absolute",
-      "left-4",
-      "top-4",
-      "rounded-full",
-      "bg-card/90",
-      "shadow-lg",
-      "backdrop-blur-md",
+      "min-w-0",
+      "rounded-lg",
     );
     expect(
       container.querySelector('[data-testid="file-toolbar"]'),
-    ).toHaveClass("absolute", "right-4", "top-4", "gap-2");
+    ).toHaveClass("flex-wrap", "justify-end", "gap-2");
     expect(
       container.querySelector('[data-testid="file-download-bubble"]'),
     ).toHaveClass("rounded-full", "bg-card/90");
