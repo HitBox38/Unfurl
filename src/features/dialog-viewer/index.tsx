@@ -11,6 +11,8 @@ import {
   type NodeTypes,
   type ReactFlowInstance,
 } from "@xyflow/react";
+import { Maximize, Minus, Plus } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { appendChoice, cn, createChoice } from "@/shared/lib";
@@ -245,7 +247,7 @@ export const DialogViewer = () => {
     <div
       ref={containerRef}
       aria-label="Dialog flow chart"
-      className="dialog-flow-viewer h-full w-full bg-background"
+      className="dialog-flow-viewer relative h-full w-full bg-background"
       onKeyDownCapture={(event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
         const target = event.target;
@@ -259,6 +261,8 @@ export const DialogViewer = () => {
       }}
     >
       <ReactFlow
+        minZoom={0.05}
+        fitViewOptions={{ padding: 0.2, maxZoom: 1.2 }}
         fitView
         nodes={displayedNodes}
         edges={displayedEdges}
@@ -277,6 +281,11 @@ export const DialogViewer = () => {
       >
         <Background variant={BackgroundVariant.Dots} gap={18} size={1.3} />
       </ReactFlow>
+      <div role="toolbar" aria-label="Graph view" className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded-lg border bg-card p-1 shadow-md">
+        <Button variant="ghost" size="icon-sm" aria-label="Zoom out" title="Zoom out" onClick={() => void flowInstanceRef.current?.zoomOut({ duration: 150 })}><Minus /></Button>
+        <Button variant="ghost" size="icon-sm" aria-label="Zoom in" title="Zoom in" onClick={() => void flowInstanceRef.current?.zoomIn({ duration: 150 })}><Plus /></Button>
+        <Button variant="secondary" size="sm" onClick={() => void flowInstanceRef.current?.fitView({ padding: 0.2, duration: 200 })}><Maximize />Fit story</Button>
+      </div>
     </div>
   );
 };
