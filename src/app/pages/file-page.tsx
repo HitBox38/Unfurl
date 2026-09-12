@@ -29,6 +29,7 @@ export const FilePage = () => {
   const setFileName = useJsonDataStore((state) => state.setName);
   const resetJson = useJsonDataStore((state) => state.reset);
   const node = useNodeStore((state) => state.node);
+  const isNewNode = useNodeStore((state) => state.isNew);
   const setSelectedNode = useNodeStore((state) => state.setNode);
   const [isMissing, setIsMissing] = useState(false);
   const previousContentNodesRef = useRef(content.nodes);
@@ -52,7 +53,7 @@ export const FilePage = () => {
   useEffect(() => {
     const previousNodes = previousContentNodesRef.current;
     previousContentNodesRef.current = content.nodes;
-    if (!node) return;
+    if (!node || isNewNode) return;
 
     const matchingNode = content.nodes.find(
       (storyNode) => storyNode.name === node.name,
@@ -68,7 +69,7 @@ export const FilePage = () => {
     if (selectedNode !== node) {
       setSelectedNode(selectedNode);
     }
-  }, [content.nodes, node, setSelectedNode]);
+  }, [content.nodes, node, isNewNode, setSelectedNode]);
 
   if (isMissing) {
     return (

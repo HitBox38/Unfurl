@@ -38,7 +38,7 @@ import {
 } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 
-import { buildChoiceEdgeId } from "@/features/dialog-viewer/helpers";
+import { buildChoiceEdgeId, queueDialogNodeFocus } from "@/features/dialog-viewer/helpers";
 import { NodeMetadataEditor } from "@/features/node-metadata-editor";
 
 import type { StoryNodeForm } from "./types";
@@ -46,6 +46,8 @@ import type { StoryNodeForm } from "./types";
 export const NodeEditor = () => {
   const [confirmClose, setConfirmClose] = useState(false);
   const node = useNodeStore((state) => state.node);
+  const isNew = useNodeStore((state) => state.isNew);
+  const addNode = useJsonDataStore((state) => state.addNode);
   const setNode = useNodeStore((state) => state.setNode);
   const setGraphPreview = useNodeStore((state) => state.setGraphPreview);
   const content = useJsonDataStore((state) => state.content);
@@ -72,13 +74,19 @@ export const NodeEditor = () => {
   const submitNode: SubmitHandler<StoryNodeForm> = (data) => {
     if (!node) return;
     const updated: StoryNode = {
+      ...node,
       name: data.name.trim(),
       content: data.content.split("\n"),
       choices: data.choices,
       metadata: { ...data.metadata },
     };
     setNode(updated);
-    setJsonNode(updated, node.name);
+    if (isNew) {
+      queueDialogNodeFocus(updated.name);
+      addNode(updated);
+    } else {
+      setJsonNode(updated, node.name);
+    }
   };
 
   useEffect(() => {
@@ -145,7 +153,7 @@ export const NodeEditor = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 space-y-1">
               <CardDescription className="text-xs font-medium uppercase tracking-wide">
-                Edit node
+                {isNew ? "New node" : "Edit node"}
               </CardDescription>
               <Label htmlFor="node-name" className="sr-only">
                 Node name
@@ -158,7 +166,7 @@ export const NodeEditor = () => {
                   setValueAs: (value) =>
                     typeof value === "string" ? value.trim() : value,
                   validate: (value) =>
-                    value === node.name ||
+                    (!isNew && value === node.name) ||
                     !nodeNames.includes(value) ||
                     "Node name must be unique",
                 })}
@@ -344,8 +352,8 @@ export const NodeEditor = () => {
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={!methods.formState.isDirty}>
-                Update Node
+              <Button type="submit" disabled={!isNew && !methods.formState.isDirty}>
+                {isNew ? "Create node" : "Update Node"}
               </Button>
             </div>
           </CardFooter>
