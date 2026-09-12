@@ -33,10 +33,14 @@ export const EveryWhereDialog = () => {
   const body = (
     <>
       {title ? (
-        <DialogHeader className={cn("p-6 pb-2", classNames?.dialogTitle)}>
+        <DialogHeader
+          className={cn("shrink-0 p-6 pb-2", classNames?.dialogTitle)}
+        >
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription
-            className={description ? "text-sm text-muted-foreground" : "sr-only"}
+            className={
+              description ? "text-sm text-muted-foreground" : "sr-only"
+            }
           >
             {description ?? title}
           </DialogDescription>
@@ -44,7 +48,7 @@ export const EveryWhereDialog = () => {
       ) : null}
       <div
         className={cn(
-          "max-h-[70vh] overflow-y-auto px-6 pb-4",
+          "min-h-0 flex-1 overflow-y-auto px-6 pb-4",
           classNames?.dialogContent,
         )}
       >
@@ -63,7 +67,7 @@ export const EveryWhereDialog = () => {
     <Dialog open={isOpen} onOpenChange={(open) => setOpen(open)}>
       <DialogContent
         className={cn(
-          "max-w-2xl gap-0 overflow-hidden p-0",
+          "flex max-h-[calc(100dvh-2rem)] max-w-2xl flex-col gap-0 overflow-hidden p-0",
           classNames?.dialog,
         )}
       >
@@ -79,7 +83,7 @@ export const EveryWhereDialog = () => {
                     })
                   : undefined
               }
-              className="flex flex-col"
+              className="flex min-h-0 flex-1 flex-col"
             >
               {body}
             </form>

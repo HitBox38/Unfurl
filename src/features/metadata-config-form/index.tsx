@@ -95,7 +95,7 @@ export const MetadataConfigForm = ({
     <div className="flex flex-col gap-4 pt-2">
       {hasRows ? (
         <div className="flex flex-col gap-1">
-          <div className={ROW_GRID_CLASS}>
+          <div className={`${ROW_GRID_CLASS} hidden sm:grid`}>
             <span className={COLUMN_HEADER_CLASS}>Name</span>
             <span className={COLUMN_HEADER_CLASS}>Sign</span>
             <span className={COLUMN_HEADER_CLASS}>Type</span>
@@ -109,6 +109,8 @@ export const MetadataConfigForm = ({
           <div className="flex flex-col divide-y divide-border/60">
             {fields.map((line, index) => (
               <div key={line.id} className={`${ROW_GRID_CLASS} py-3`}>
+                <div className="min-w-0 space-y-1">
+                  <label className="text-sm sm:sr-only" htmlFor={`config.${index}.name`}>Name</label>
                 <Input
                   id={`config.${index}.name`}
                   aria-label="Name"
@@ -118,6 +120,9 @@ export const MetadataConfigForm = ({
                     validate: (value) => Boolean(value.trim()) || "Name is required",
                   })}
                 />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <label className="text-sm sm:sr-only" htmlFor={`config.${index}.sign`}>Sign</label>
                 <Input
                   id={`config.${index}.sign`}
                   aria-label="Sign"
@@ -127,6 +132,9 @@ export const MetadataConfigForm = ({
                     validate: (value) => Boolean(value.trim()) || "Sign is required",
                   })}
                 />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <label className="text-sm sm:sr-only" htmlFor={`config.${index}.type`}>Type</label>
                 <Controller
                   name={`config.${index}.type`}
                   control={control}
@@ -146,11 +154,15 @@ export const MetadataConfigForm = ({
                     </Select>
                   )}
                 />
+                </div>
+                <div className="min-w-0 space-y-1">
+                  <label className="text-sm sm:sr-only" htmlFor={`config.${index}.label`}>Label</label>
                 <Input
                   id={`config.${index}.label`}
                   aria-label="Label"
                   {...register(`config.${index}.label`)}
                 />
+                </div>
                 <Button
                   type="button"
                   variant="ghost"
