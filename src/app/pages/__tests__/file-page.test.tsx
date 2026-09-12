@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FilePage } from "@/app/pages/file-page";
-import { getEditableFile, saveEditableFile } from "@/shared/lib/editable-files-storage";
+import {
+  getEditableFile,
+  saveEditableFile,
+} from "@/shared/lib/editable-files-storage";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData } from "@/shared/types";
 
@@ -15,20 +18,21 @@ const { routeState } = vi.hoisted(() => ({
 }));
 
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({
-    children,
-    to,
-  }: {
-    children: ReactNode;
-    to: string;
-  }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
   useParams: () => ({ fileId: routeState.fileId }),
 }));
 
 vi.mock("@/features/graph-node-toolbar", () => ({
   GraphNodeToolbar: () => (
     <div data-testid="graph-node-toolbar">
-      <button type="button" aria-label="Add node" data-variant="secondary" data-size="icon-sm">
+      <button
+        type="button"
+        aria-label="Add node"
+        data-variant="secondary"
+        data-size="icon-sm"
+      >
         Add node
       </button>
       <button
@@ -74,7 +78,13 @@ describe("FilePage", () => {
 
   it("renders a compact header without an upload-another-file action", async () => {
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
+      {
+        id: "draft-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "p1",
+      },
       { now: () => 100 },
     );
 
@@ -85,13 +95,12 @@ describe("FilePage", () => {
     ).toHaveValue("demo");
     expect(
       container.querySelector('[data-testid="file-page-header"]'),
-    ).toHaveClass(
-      "min-w-0",
-      "rounded-lg",
+    ).toHaveClass("min-w-0", "rounded-lg");
+    expect(container.querySelector('[data-testid="file-toolbar"]')).toHaveClass(
+      "flex-wrap",
+      "justify-end",
+      "gap-2",
     );
-    expect(
-      container.querySelector('[data-testid="file-toolbar"]'),
-    ).toHaveClass("flex-wrap", "justify-end", "gap-2");
     expect(
       container.querySelector('[data-testid="file-download-bubble"]'),
     ).toHaveClass("rounded-full", "bg-card/90");
@@ -112,12 +121,9 @@ describe("FilePage", () => {
     expect(
       container.querySelector('[data-testid="file-add-node-bubble"]'),
     ).toContainElement(screen.getByTestId("graph-node-toolbar"));
-    const download = screen.getByRole("button", { name: /download/i });
-    expect(download).toHaveAttribute(
-      "data-variant",
-      "secondary",
-    );
-    expect(download).toHaveAttribute("data-size", "icon-sm");
+    const download = screen.getByRole("button", { name: /export json/i });
+    expect(download).toHaveAttribute("data-variant", "secondary");
+    expect(download).toHaveAttribute("data-size", "sm");
     expect(
       screen.queryByRole("link", { name: /upload another file/i }),
     ).not.toBeInTheDocument();
@@ -126,7 +132,13 @@ describe("FilePage", () => {
   it("saves header file name edits on blur", async () => {
     const user = userEvent.setup();
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
+      {
+        id: "draft-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "p1",
+      },
       { now: () => 100 },
     );
 
@@ -148,7 +160,13 @@ describe("FilePage", () => {
   it("saves header file name edits on Enter", async () => {
     const user = userEvent.setup();
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
+      {
+        id: "draft-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "p1",
+      },
       { now: () => 100 },
     );
 
@@ -168,7 +186,13 @@ describe("FilePage", () => {
 
   it("keeps the selected node aligned when undo restores file content", async () => {
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
+      {
+        id: "draft-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "p1",
+      },
       { now: () => 100 },
     );
 
@@ -201,7 +225,13 @@ describe("FilePage", () => {
 
   it("keeps the selected node aligned when undo and redo restore node renames", async () => {
     saveEditableFile(
-      { id: "draft-id", name: "demo", fileType: "twee", content: story, projectId: "p1" },
+      {
+        id: "draft-id",
+        name: "demo",
+        fileType: "twee",
+        content: story,
+        projectId: "p1",
+      },
       { now: () => 100 },
     );
 
