@@ -52,7 +52,7 @@ export const DialogActions = ({
                 e.preventDefault();
                 action(e);
               }
-              if (closeAfterwards) {
+              if (!isSubmit && closeAfterwards) {
                 onClose();
               }
             }}

@@ -49,7 +49,7 @@ export const MetadataConfigForm = ({
   projectId,
   initialConfig,
 }: MetadataConfigFormProps) => {
-  const { control, register, reset } = useFormContext<MetadataConfigTemplate>();
+  const { control, register, reset, formState: { errors } } = useFormContext<MetadataConfigTemplate>();
   const { fields, append, remove } = useFieldArray({
     control,
     name: "config",
@@ -112,12 +112,20 @@ export const MetadataConfigForm = ({
                 <Input
                   id={`config.${index}.name`}
                   aria-label="Name"
-                  {...register(`config.${index}.name`, { required: true })}
+                  aria-invalid={Boolean(errors.config?.[index]?.name)}
+                  aria-describedby={`config-${index}-errors`}
+                  {...register(`config.${index}.name`, {
+                    validate: (value) => Boolean(value.trim()) || "Name is required",
+                  })}
                 />
                 <Input
                   id={`config.${index}.sign`}
                   aria-label="Sign"
-                  {...register(`config.${index}.sign`, { required: true })}
+                  aria-invalid={Boolean(errors.config?.[index]?.sign)}
+                  aria-describedby={`config-${index}-errors`}
+                  {...register(`config.${index}.sign`, {
+                    validate: (value) => Boolean(value.trim()) || "Sign is required",
+                  })}
                 />
                 <Controller
                   name={`config.${index}.type`}
@@ -153,6 +161,10 @@ export const MetadataConfigForm = ({
                 >
                   <Trash2 aria-hidden="true" />
                 </Button>
+                <div id={`config-${index}-errors`} className="col-span-full text-sm text-destructive" role="alert">
+                  {errors.config?.[index]?.name?.message}
+                  {errors.config?.[index]?.sign ? <p>{errors.config[index].sign.message}</p> : null}
+                </div>
               </div>
             ))}
           </div>
