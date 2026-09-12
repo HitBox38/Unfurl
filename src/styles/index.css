@@ -128,7 +128,7 @@
     transparent
   );
   --xy-connectionline-stroke-default: var(--primary);
-  --xy-edge-stroke-default: var(--border);
+  --xy-edge-stroke-default: var(--muted-foreground);
   --xy-edge-stroke-selected-default: var(--primary);
   --xy-handle-background-color-default: var(--primary);
   --xy-handle-border-color-default: var(--background);
@@ -162,7 +162,7 @@
 }
 
 .dialog-flow-viewer .dialog-edge-dimmed .react-flow__edge-path {
-  opacity: 0.35;
+  stroke: var(--muted-foreground);
 }
 
 .app-shell {

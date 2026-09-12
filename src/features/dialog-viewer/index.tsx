@@ -141,7 +141,7 @@ export const DialogViewer = () => {
           ),
           style: {
             ...edge.style,
-            opacity: isDimmed ? 0.35 : 1,
+            opacity: isDimmed ? 0.65 : 1,
             strokeWidth: isPreviewed ? 3 : isConnected ? 2.5 : 1.5,
           },
           zIndex: isPreviewed ? 20 : isConnected ? 10 : edge.zIndex,
