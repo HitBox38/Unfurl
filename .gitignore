@@ -12,7 +12,12 @@ dist
 dist-ssr
 dist-electron
 release
+coverage
 *.local
+.vite
+
+# Build artifacts
+node_modules/.tmp
 
 # Editor directories and files
 .vscode/*

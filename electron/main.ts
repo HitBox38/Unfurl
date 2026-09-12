@@ -1,5 +1,17 @@
-import { app, BrowserWindow, Menu, MenuItem, shell } from "electron";
+import { app, BrowserWindow, ipcMain, shell } from "electron";
 import path from "node:path";
+
+import { createMainWindowOptions } from "./main-window-options";
+import { resolveMainProcessPaths } from "./main-paths";
+import { applyTitleBarOverlay } from "./title-bar-overlay";
+import {
+  SPELLCHECK_ADD_WORD_CHANNEL,
+  SPELLCHECK_CONTEXT_MENU_CHANNEL,
+  SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
+  TITLE_BAR_OVERLAY_CHANNEL,
+  isTitleBarOverlayOptions,
+  type SpellcheckContextMenuPayload,
+} from "@/shared/types";
 
 // The built directory structure
 //
@@ -8,67 +20,67 @@ import path from "node:path";
 // │ │
 // │ ├─┬ dist-electron
 // │ │ ├── main.js
-// │ │ └── preload.js
+// │ │ └── preload.mjs
 // │
-process.env.DIST = path.join(__dirname, "../dist");
-process.env.VITE_PUBLIC = app.isPackaged
-  ? process.env.DIST
-  : path.join(process.env.DIST, "../public");
+const mainProcessPaths = resolveMainProcessPaths(import.meta.url, app.isPackaged);
+
+process.env.DIST = mainProcessPaths.dist;
+process.env.VITE_PUBLIC = mainProcessPaths.vitePublic;
 
 let win: BrowserWindow | null;
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
-function createWindow() {
-  console.log(process.env.VITE_PUBLIC);
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.length > 0;
 
-  win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, "UnfurlLogo.ico"),
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-      spellcheck: true,
-    },
-    title: "Unfurl",
-    titleBarStyle: "hidden",
-    minHeight: 500,
-    minWidth: 800,
-    titleBarOverlay: {
-      color: "#3d3d3d",
-      symbolColor: "#fff",
-      height: 48,
-    },
-  });
+ipcMain.on(SPELLCHECK_REPLACE_MISSPELLING_CHANNEL, (_event, suggestion) => {
+  if (isNonEmptyString(suggestion)) {
+    win?.webContents.replaceMisspelling(suggestion);
+  }
+});
+
+ipcMain.on(SPELLCHECK_ADD_WORD_CHANNEL, (_event, word) => {
+  if (isNonEmptyString(word)) {
+    win?.webContents.session.addWordToSpellCheckerDictionary(word);
+  }
+});
+
+ipcMain.on(TITLE_BAR_OVERLAY_CHANNEL, (_event, options) => {
+  if (!win || !isTitleBarOverlayOptions(options)) {
+    return;
+  }
+
+  applyTitleBarOverlay(win, options);
+});
+
+function createWindow() {
+  win = new BrowserWindow(
+    createMainWindowOptions({
+      preload: mainProcessPaths.preload,
+      appIcon: mainProcessPaths.appIcon,
+    })
+  );
 
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());
   });
 
-  win.webContents.on("context-menu", (_e, params) => {
-    const menu = new Menu();
+  win.webContents.on("context-menu", (_event, params) => {
+    const payload: SpellcheckContextMenuPayload = {
+      dictionarySuggestions: [...params.dictionarySuggestions],
+      misspelledWord: params.misspelledWord || undefined,
+      x: params.x,
+      y: params.y,
+    };
 
-    // Add each spelling suggestion
-    for (const suggestion of params.dictionarySuggestions) {
-      menu.append(
-        new MenuItem({
-          label: suggestion,
-          click: () => win?.webContents.replaceMisspelling(suggestion),
-        })
-      );
+    if (
+      payload.dictionarySuggestions.length > 0 ||
+      payload.misspelledWord
+    ) {
+      win?.webContents.send(SPELLCHECK_CONTEXT_MENU_CHANNEL, payload);
     }
-
-    // Allow users to add the misspelled word to the dictionary
-    if (params.misspelledWord) {
-      menu.append(
-        new MenuItem({
-          label: "Add to dictionary",
-          click: () =>
-            win?.webContents.session.addWordToSpellCheckerDictionary(params.misspelledWord),
-        })
-      );
-    }
-
-    menu.popup();
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -109,4 +121,9 @@ app.on("activate", () => {
   }
 });
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (process.platform === "win32") {
+    app.setAppUserModelId("unfurl");
+  }
+  createWindow();
+});

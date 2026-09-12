@@ -1,18 +1,56 @@
-import { defineConfig } from "vite";
 import path from "node:path";
-import electron from "vite-plugin-electron/simple";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
+import { defineConfig, type Plugin } from "vite";
+import electron from "vite-plugin-electron/simple";
 import svgr from "vite-plugin-svgr";
 
-// https://vitejs.dev/config/
+const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
+const electronPreloadOutputCompat = (): Plugin => {
+  return {
+    name: "electron-preload-output-compat",
+    configResolved(config) {
+      const output = config.build.rollupOptions?.output;
+      if (output == null || Array.isArray(output)) return;
+      delete (output as { inlineDynamicImports?: boolean }).inlineDynamicImports;
+      output.codeSplitting = false;
+    },
+  };
+}
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(
+      JSON.parse(readFileSync(path.join(projectRoot, "package.json"), "utf8")).version,
+    ),
+  },
+  resolve: {
+    alias: {
+      "@": path.resolve(projectRoot, "src"),
+    },
+  },
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          reactflow: ["reactflow"],
-          materialUI: ["@mui/material"],
-          dagre: ["dagre"],
+        manualChunks: (id) => {
+          if (id.includes("@xyflow/react")) return "xyflow";
+          if (id.includes("/dagre/")) return "dagre";
+          if (id.includes("/lucide-react/")) return "lucide-react";
+          if (id.includes("/radix-ui/")) return "radix-ui";
+          if (id.includes("/@radix-ui/react-checkbox/")) return "radix-ui-react-checkbox";
+          if (id.includes("/@radix-ui/react-dialog/")) return "radix-ui-react-dialog";
+          if (id.includes("/@radix-ui/react-label/")) return "radix-ui-react-label";
+          if (id.includes("/@radix-ui/react-popover/")) return "radix-ui-react-popover";
+          if (id.includes("/@radix-ui/react-scroll-area/")) return "radix-ui-react-scroll-area";
+          if (id.includes("/@radix-ui/react-select/")) return "radix-ui-react-select";
+          if (id.includes("/@radix-ui/react-separator/")) return "radix-ui-react-separator";
+          if (id.includes("/@radix-ui/react-slot/")) return "radix-ui-react-slot";
+          if (id.includes("/@radix-ui/react-tooltip/")) return "radix-ui-react-tooltip";
+          return undefined;
         },
       },
     },
@@ -25,22 +63,20 @@ export default defineConfig({
         svgo: false,
         titleProp: true,
       },
-      include: "**/*.svg",
+      include: /\.svg(\?react)?$/,
     }),
     react(),
+    tailwindcss(),
     electron({
       main: {
-        // Shortcut of `build.lib.entry`.
         entry: "electron/main.ts",
       },
       preload: {
-        // Shortcut of `build.rollupOptions.input`.
-        // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-        input: path.join(__dirname, "electron/preload.ts"),
+        input: path.join(projectRoot, "electron/preload.ts"),
+        vite: {
+          plugins: [electronPreloadOutputCompat()],
+        },
       },
-      // Ployfill the Electron and Node.js built-in modules for Renderer process.
-      // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
-      renderer: {},
     }),
   ],
 });

@@ -1,0 +1,225 @@
+import { Plus, Trash2 } from "lucide-react";
+import { useEffect, useState, type ChangeEvent } from "react";
+import { Controller, useFieldArray, useFormContext } from "react-hook-form";
+
+import { isMetadataConfigTemplate } from "@/shared/lib/is-metadata-config-template";
+import { updateProjectMetadataConfig } from "@/shared/lib/projects-storage";
+import type { MetadataConfigTemplate } from "@/shared/types";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
+
+import {
+  COLUMN_HEADER_CLASS,
+  INVALID_CONFIG_FILE_REASON,
+  METADATA_CONFIG_IMPORT_INPUT_ID,
+  ROW_GRID_CLASS,
+} from "./constants";
+
+export { METADATA_CONFIG_IMPORT_INPUT_ID };
+
+interface MetadataConfigFormProps {
+  projectId: string;
+  initialConfig: MetadataConfigTemplate;
+}
+
+const readImportedConfig = (
+  file: File,
+): Promise<MetadataConfigTemplate | null> =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data: unknown = JSON.parse(reader.result as string);
+        resolve(isMetadataConfigTemplate(data) ? data : null);
+      } catch {
+        resolve(null);
+      }
+    };
+    reader.readAsText(file);
+  });
+
+export const MetadataConfigForm = ({
+  projectId,
+  initialConfig,
+}: MetadataConfigFormProps) => {
+  const { control, register, reset } = useFormContext<MetadataConfigTemplate>();
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "config",
+  });
+  const [importError, setImportError] = useState<string | null>(null);
+  const [pendingImport, setPendingImport] =
+    useState<MetadataConfigTemplate | null>(null);
+
+  useEffect(() => {
+    reset(initialConfig);
+  }, [initialConfig, reset]);
+
+  const applyImport = (imported: MetadataConfigTemplate) => {
+    updateProjectMetadataConfig(projectId, imported);
+    reset(imported);
+    setPendingImport(null);
+    setImportError(null);
+  };
+
+  const onPickImport = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const imported = await readImportedConfig(file);
+    if (!imported) {
+      setPendingImport(null);
+      setImportError(INVALID_CONFIG_FILE_REASON);
+      return;
+    }
+
+    setImportError(null);
+    if (fields.length > 0) {
+      setPendingImport(imported);
+      return;
+    }
+    applyImport(imported);
+  };
+
+  const hasRows = fields.length > 0;
+
+  return (
+    <div className="flex flex-col gap-4 pt-2">
+      {hasRows ? (
+        <div className="flex flex-col gap-1">
+          <div className={ROW_GRID_CLASS}>
+            <span className={COLUMN_HEADER_CLASS}>Name</span>
+            <span className={COLUMN_HEADER_CLASS}>Sign</span>
+            <span className={COLUMN_HEADER_CLASS}>Type</span>
+            <span className={COLUMN_HEADER_CLASS}>Label</span>
+            <span aria-hidden />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Use a set of symbols for the sign that won&apos;t repeat in the
+            dialog.
+          </p>
+          <div className="flex flex-col divide-y divide-border/60">
+            {fields.map((line, index) => (
+              <div key={line.id} className={`${ROW_GRID_CLASS} py-3`}>
+                <Input
+                  id={`config.${index}.name`}
+                  aria-label="Name"
+                  {...register(`config.${index}.name`, { required: true })}
+                />
+                <Input
+                  id={`config.${index}.sign`}
+                  aria-label="Sign"
+                  {...register(`config.${index}.sign`, { required: true })}
+                />
+                <Controller
+                  name={`config.${index}.type`}
+                  control={control}
+                  rules={{ required: true }}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger
+                        id={`config.${index}.type`}
+                        aria-label="Type"
+                      >
+                        <SelectValue placeholder="Type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="number">Number</SelectItem>
+                        <SelectItem value="boolean">Boolean</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <Input
+                  id={`config.${index}.label`}
+                  aria-label="Label"
+                  {...register(`config.${index}.label`)}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => remove(index)}
+                  aria-label={`Remove ${line.name || "field"}`}
+                  className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 aria-hidden="true" />
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className="flex flex-col items-start gap-1 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">No metadata fields yet.</p>
+          <p>Add a field or import a config file to get started.</p>
+        </div>
+      )}
+
+      <Button
+        type="button"
+        variant="secondary"
+        size="sm"
+        className="self-start"
+        onClick={() =>
+          append({ name: "", sign: "", type: "number", label: "" })
+        }
+      >
+        <Plus aria-hidden="true" />
+        Add field
+      </Button>
+
+      {pendingImport ? (
+        <div
+          role="status"
+          className="flex flex-col gap-2 rounded-lg border p-3 text-sm"
+        >
+          <p>
+            Replace {fields.length} {fields.length === 1 ? "field" : "fields"}{" "}
+            with this file?
+          </p>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setPendingImport(null)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => applyImport(pendingImport)}
+            >
+              Replace
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {importError ? (
+        <p role="alert" className="text-sm text-destructive">
+          {importError}
+        </p>
+      ) : null}
+
+      <input
+        id={METADATA_CONFIG_IMPORT_INPUT_ID}
+        type="file"
+        accept=".json"
+        aria-label="Import config file"
+        className="sr-only"
+        onChange={(event) => void onPickImport(event)}
+      />
+    </div>
+  );
+};

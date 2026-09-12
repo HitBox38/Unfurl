@@ -7,25 +7,45 @@ on:
 
 jobs:
   itchio-deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
 
-      - name: Build the Docker image
-        run: docker build -t unfurl:win -f docker/Dockerfile.windows .
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Run the Docker container to build the app
-        run: docker run --name unfurl_container unfurl:win
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: pnpm
 
-      - name: Copy artifact from Docker container
-        run: docker cp unfurl_container:/app/release/ .
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      - name: Deploy
-        uses: josephbmanley/butler-publish-itchio-action@v1.0.3
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build app
+        run: pnpm build:windows
         env:
-          BUTLER_CREDENTIALS: ${{ secrets.ITCH_API_KEY }}
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Set up butler
+        uses: jdno/setup-butler@v1
+        with:
+          version: latest
+
+      - name: Push to itch.io
+        shell: bash
+        run: butler push "$PACKAGE" "$ITCH_USER/$ITCH_GAME:$CHANNEL" --userversion "$(jq -r .version package.json)"
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
           CHANNEL: windows
           ITCH_GAME: unfurl
           ITCH_USER: hit-box38

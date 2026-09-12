@@ -5,7 +5,9 @@
   $schema: "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
   appId: "unfurl",
   asar: true,
+  asarUnpack: ["dist/UnfurlLogo.ico"],
   productName: "Unfurl",
+  icon: "public/UnfurlLogo.ico",
   directories: {
     output: "release/",
   },
@@ -13,6 +15,7 @@
   mac: {
     target: ["dmg"],
     artifactName: "${productName}-Mac-Installer.${ext}",
+    icon: "public/UnfurlLogo.png",
   },
   win: {
     target: [
@@ -32,5 +35,6 @@
   linux: {
     target: ["AppImage"],
     artifactName: "${productName}-Linux.${ext}",
+    icon: "public/UnfurlLogo.png",
   },
 }
