@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import ItchIoLogo from "@/assets/itchio-logo.svg";
+import { NewStoryButton } from "@/features/new-story";
 import { NewProjectButton } from "@/features/create-project";
 import { DemoButton } from "@/features/demo";
 import { useFaqModal } from "@/features/faq";
@@ -144,6 +145,7 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
                 </Select>
               </div>
             ) : null}
+            <div className="self-start"><NewStoryButton project={targetProject} /></div>
             <FileImportDropzone key={targetProject.id} projectId={targetProject.id} />
           </section>
         ) : null}
