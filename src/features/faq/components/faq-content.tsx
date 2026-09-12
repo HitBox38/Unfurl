@@ -38,8 +38,8 @@ const FAQ_ITEMS: { id: string; question: string; answer: ReactNode }[] = [
           lets you visualize, edit, and convert them to JSON for your game.
         </p>
         <p>
-          Open “Try a sample” on the home page to explore a complete story. Open this FAQ anytime with{" "}
-          <Kbd>Ctrl+C</Kbd> then <Kbd>Ctrl+F</Kbd>.
+          Open “Try a sample” on the home page to explore a complete story. Open
+          this FAQ anytime with <Kbd>F1</Kbd>.
         </p>
       </div>
     ),

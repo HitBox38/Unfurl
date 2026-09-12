@@ -8,14 +8,7 @@ import { useDialogStore } from "@/shared/stores";
 
 vi.mock("@tanstack/react-router", () => ({
   Outlet: () => <div data-testid="route-outlet" />,
-  Link: ({
-    children,
-    to,
-    ...props
-  }: {
-    children: ReactNode;
-    to: string;
-  }) => (
+  Link: ({ children, to, ...props }: { children: ReactNode; to: string }) => (
     <a href={to} {...props}>
       {children}
     </a>
@@ -63,9 +56,9 @@ describe("App shell", () => {
     expect(bar).toHaveTextContent("Unfurl");
     expect(bar).toHaveClass("electron-titlebar-drag-region");
     expect(bar).not.toHaveClass("draggable");
-    expect(
-      screen.getByRole("button", { name: /toggle sidebar/i }),
-    ).toHaveClass("electron-titlebar-no-drag");
+    expect(screen.getByRole("button", { name: /toggle sidebar/i })).toHaveClass(
+      "electron-titlebar-no-drag",
+    );
     expect(screen.getByRole("link", { name: /go to home page/i })).toHaveClass(
       "electron-titlebar-no-drag",
     );
@@ -93,28 +86,16 @@ describe("App shell", () => {
     ).toBeInTheDocument();
   });
 
-  it("opens the FAQ with the TanStack hotkey sequence", () => {
+  it("opens help with F1 and leaves copy/find alone", () => {
     render(<App />);
-
+    fireEvent.keyDown(document, { key: "c", code: "KeyC", ctrlKey: true });
+    fireEvent.keyDown(document, { key: "f", code: "KeyF", ctrlKey: true });
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     act(() => {
       document.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          code: "KeyC",
-          ctrlKey: true,
-          key: "C",
-          bubbles: true,
-        }),
-      );
-      document.dispatchEvent(
-        new KeyboardEvent("keydown", {
-          code: "KeyF",
-          ctrlKey: true,
-          key: "F",
-          bubbles: true,
-        }),
+        new KeyboardEvent("keydown", { key: "F1", code: "F1", bubbles: true }),
       );
     });
-
     expect(screen.getByRole("dialog", { name: "FAQ" })).toBeInTheDocument();
   });
 
