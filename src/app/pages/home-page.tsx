@@ -77,7 +77,7 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
           Unfurl{isOnline ? " Online" : ""}
         </h1>
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          <DemoButton />
+          <DemoButton project={targetProject} />
           {isOnline ? (
             <Button asChild variant="secondary">
               <a
