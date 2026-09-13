@@ -1,0 +1,222 @@
+{
+  "projectId": 273361,
+  "dashboardId": 949966,
+  "insights": [
+    {
+      "name": "Opted-in users by channel — all time",
+      "source": {
+        "kind": "TrendsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "app_opened",
+            "math": "dau"
+          }
+        ],
+        "dateRange": {
+          "date_from": "all"
+        },
+        "interval": "month",
+        "breakdownFilter": {
+          "breakdowns": [
+            {
+              "property": "distribution",
+              "type": "event"
+            }
+          ]
+        },
+        "trendsFilter": {
+          "display": "ActionsTable"
+        }
+      }
+    },
+    {
+      "name": "Weekly active opted-in users by channel",
+      "source": {
+        "kind": "TrendsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "app_opened",
+            "math": "weekly_active"
+          }
+        ],
+        "dateRange": {
+          "date_from": "-30d"
+        },
+        "interval": "day",
+        "breakdownFilter": {
+          "breakdowns": [
+            {
+              "property": "distribution",
+              "type": "event"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Activation funnel by channel",
+      "source": {
+        "kind": "FunnelsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "app_opened"
+          },
+          {
+            "kind": "GroupNode",
+            "operator": "OR",
+            "name": "Demo or import",
+            "nodes": [
+              {
+                "kind": "EventsNode",
+                "event": "demo_loaded"
+              },
+              {
+                "kind": "EventsNode",
+                "event": "import_succeeded"
+              }
+            ]
+          },
+          {
+            "kind": "EventsNode",
+            "event": "first_graph_edit"
+          },
+          {
+            "kind": "EventsNode",
+            "event": "export_succeeded"
+          }
+        ],
+        "dateRange": {
+          "date_from": "-30d"
+        },
+        "breakdownFilter": {
+          "breakdown": "distribution",
+          "breakdown_type": "event"
+        },
+        "funnelsFilter": {
+          "funnelWindowInterval": 14,
+          "funnelWindowIntervalUnit": "day"
+        }
+      }
+    },
+    {
+      "name": "Import and export format mix",
+      "source": {
+        "kind": "TrendsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "import_succeeded",
+            "math": "total"
+          },
+          {
+            "kind": "EventsNode",
+            "event": "export_succeeded",
+            "math": "total"
+          }
+        ],
+        "dateRange": {
+          "date_from": "-30d"
+        },
+        "interval": "week",
+        "breakdownFilter": {
+          "breakdowns": [
+            {
+              "property": "format",
+              "type": "event"
+            }
+          ]
+        },
+        "trendsFilter": {
+          "display": "ActionsTable"
+        }
+      }
+    },
+    {
+      "name": "First edit activation rate by channel",
+      "source": {
+        "kind": "FunnelsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "app_opened"
+          },
+          {
+            "kind": "EventsNode",
+            "event": "first_graph_edit"
+          }
+        ],
+        "dateRange": {
+          "date_from": "-30d"
+        },
+        "breakdownFilter": {
+          "breakdown": "distribution",
+          "breakdown_type": "event"
+        },
+        "funnelsFilter": {
+          "funnelWindowInterval": 14,
+          "funnelWindowIntervalUnit": "day"
+        }
+      }
+    },
+    {
+      "name": "Import and export failures by error class",
+      "source": {
+        "kind": "TrendsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "import_failed",
+            "math": "total"
+          },
+          {
+            "kind": "EventsNode",
+            "event": "export_failed",
+            "math": "total"
+          }
+        ],
+        "dateRange": {
+          "date_from": "-30d"
+        },
+        "interval": "week",
+        "breakdownFilter": {
+          "breakdowns": [
+            {
+              "property": "error_class",
+              "type": "event"
+            }
+          ]
+        },
+        "trendsFilter": {
+          "display": "ActionsTable"
+        }
+      }
+    },
+    {
+      "name": "Demo sessions reaching export",
+      "source": {
+        "kind": "FunnelsQuery",
+        "series": [
+          {
+            "kind": "EventsNode",
+            "event": "demo_loaded"
+          },
+          {
+            "kind": "EventsNode",
+            "event": "export_succeeded"
+          }
+        ],
+        "dateRange": {
+          "date_from": "-30d"
+        },
+        "funnelsFilter": {
+          "funnelAggregateByHogQL": "properties.$session_id",
+          "funnelWindowInterval": 1,
+          "funnelWindowIntervalUnit": "day"
+        }
+      }
+    }
+  ]
+}

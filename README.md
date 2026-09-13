@@ -40,6 +40,12 @@ Projects and story edits are saved in `localStorage` for the current browser ori
 
 Storage is separate between browsers and the desktop app, and clearing app or browser data can remove saved work. Download JSON copies to back up stories or move them between environments. No account, backend service, or database setup is required.
 
+### Optional analytics
+
+Analytics are **off by default** on web and desktop. Enable them in **Privacy & analytics** in the sidebar to share anonymous usage events with PostHog EU. This helps measure imports, exports, sample usage, activation, and distribution channels. Story text, titles, file names, paths, and raw JSON are never sent. Session replay and automatic event/error capture are disabled.
+
+Turn analytics off in the same settings to stop collection and remove the local analytics identifier. Previously sent events remain in PostHog. Re-enabling creates a new anonymous identifier. Analytics are separate from your locally stored projects; using the editor does not require analytics or a PostHog account. See [analytics setup and event definitions](docs/analytics.md).
+
 ## Development
 
 ### Prerequisites

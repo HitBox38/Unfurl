@@ -2,6 +2,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useState } from "react";
 
 import { fromMd, fromTwee } from "@/shared/lib/convertors";
+import { nodeCountBucket, trackEvent } from "@/shared/lib/analytics";
+import type { AnalyticsError } from "@/shared/lib/analytics/types";
 import {
   saveEditableFile,
   type EditableFileRecord,
@@ -24,6 +26,15 @@ import type { ImportFilesInput, ImportFilesResult } from "../types";
 
 const errorMessage = (error: unknown) =>
   error instanceof Error ? error.message : String(error);
+
+const analyticsError = (error: unknown, saving: boolean): AnalyticsError => {
+  if (saving) return "storage";
+  if (error instanceof Error && error.message === INVALID_JSON_REASON)
+    return "invalid_json";
+  if (error instanceof Error && error.message === NOT_A_STORY_REASON)
+    return "invalid_story";
+  return "conversion";
+};
 
 const parseStoryJson = (text: string): StoryData => {
   let parsed: unknown;
@@ -51,14 +62,23 @@ export const importFiles = async (
   const result: ImportFilesResult = { imported: [], failed: [], skipped };
   const convertOptions = { config: metadataConfig };
 
+  for (const _file of skipped) {
+    trackEvent("import_failed", {
+      format: "unknown",
+      error_class: "unsupported_format",
+    });
+  }
+
   for (const file of stories) {
     const fileType = toSupportedFileType(file.name);
     if (fileType === null || fileType === "md") continue;
+    let saving = false;
     try {
       const content =
         fileType === "twee"
           ? await fromTwee(file, convertOptions)
           : backfillMetadata(parseStoryJson(await file.text()), metadataConfig);
+      saving = true;
       result.imported.push(
         saveEditableFile({
           projectId,
@@ -67,7 +87,15 @@ export const importFiles = async (
           content,
         }),
       );
+      trackEvent("import_succeeded", {
+        format: fileType,
+        node_count_bucket: nodeCountBucket(content.nodes.length),
+      });
     } catch (error) {
+      trackEvent("import_failed", {
+        format: fileType,
+        error_class: analyticsError(error, saving),
+      });
       result.failed.push({ fileName: file.name, reason: errorMessage(error) });
     }
   }
@@ -75,6 +103,10 @@ export const importFiles = async (
   if (markdown.length > 0) {
     const title = input.markdownTitle?.trim() ?? "";
     if (!title) {
+      trackEvent("import_failed", {
+        format: "obsidian",
+        error_class: "missing_title",
+      });
       result.failed.push(
         ...markdown.map((file) => ({
           fileName: file.name,
@@ -82,12 +114,22 @@ export const importFiles = async (
         })),
       );
     } else {
+      let saving = false;
       try {
         const content = await fromMd(markdown, title, convertOptions);
+        saving = true;
         result.imported.push(
           saveEditableFile({ projectId, name: title, fileType: "md", content }),
         );
+        trackEvent("import_succeeded", {
+          format: "obsidian",
+          node_count_bucket: nodeCountBucket(content.nodes.length),
+        });
       } catch (error) {
+        trackEvent("import_failed", {
+          format: "obsidian",
+          error_class: analyticsError(error, saving),
+        });
         result.failed.push(
           ...markdown.map((file) => ({
             fileName: file.name,

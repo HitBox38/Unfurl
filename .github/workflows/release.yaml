@@ -14,11 +14,13 @@ concurrency:
 
 jobs:
   build:
-    name: Build ${{ matrix.platform }}
+    name: Build ${{ matrix.platform }} (${{ matrix.distribution }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        distribution: [desktop_github, desktop_itch]
+        platform: [linux, mac, windows]
         include:
           - platform: linux
             os: ubuntu-latest
@@ -56,11 +58,14 @@ jobs:
         run: pnpm build:${{ matrix.platform }}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          VITE_PUBLIC_POSTHOG_KEY: ${{ vars.VITE_PUBLIC_POSTHOG_KEY }}
+          VITE_PUBLIC_POSTHOG_HOST: ${{ vars.VITE_PUBLIC_POSTHOG_HOST }}
+          VITE_PUBLIC_DISTRIBUTION: ${{ matrix.distribution }}
 
       - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: installer-${{ matrix.platform }}
+          name: installer-${{ matrix.distribution }}-${{ matrix.platform }}
           path: release/${{ matrix.package }}
           if-no-files-found: error
           compression-level: 0
@@ -90,7 +95,7 @@ jobs:
       - name: Download installer
         uses: actions/download-artifact@v4
         with:
-          name: installer-${{ matrix.platform }}
+          name: installer-desktop_itch-${{ matrix.platform }}
           path: release
 
       - name: Set up butler
@@ -124,7 +129,7 @@ jobs:
       - name: Download installers
         uses: actions/download-artifact@v4
         with:
-          pattern: installer-*
+          pattern: installer-desktop_github-*
           path: release
           merge-multiple: true
 
