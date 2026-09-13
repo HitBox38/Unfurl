@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 
 import { useEditableFiles, useProjects } from "@/shared/hooks";
 import { groupFilesByProject } from "@/shared/lib/project-summary";
@@ -17,7 +17,7 @@ import { ProjectFilesGroup } from "./components/project-files-group";
 import { ThemeToggleButton } from "./components/theme-toggle-button";
 import { buildSidebarGroups } from "./helpers";
 
-export const RecentFilesSidebar = () => {
+export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) => {
   const projects = useProjects();
   const files = useEditableFiles();
   const [query, setQuery] = useState("");
@@ -35,6 +35,11 @@ export const RecentFilesSidebar = () => {
 
   return (
     <Sidebar collapsible="icon" aria-label="Editable files sidebar">
+      {navigation ? (
+        <SidebarHeader className="min-h-14 shrink-0 flex-row items-center gap-2 px-3 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:px-0">
+          {navigation}
+        </SidebarHeader>
+      ) : null}
       <SidebarHeader className="group-data-[collapsible=icon]:hidden">
         <label
           htmlFor="editable-files-search"

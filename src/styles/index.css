@@ -166,7 +166,7 @@
 }
 
 .app-shell {
-  --app-bar-height: 2rem;
+  --app-bar-height: 0px;
 }
 
 .electron-app-shell {
@@ -248,12 +248,6 @@
   --chart-5: oklch(0.398 0.195 277.366);
 }
 @media (max-width: 640px), (pointer: coarse) {
-  .app-shell:not(.electron-app-shell) {
-    --app-bar-height: 3rem;
-  }
-  .app-shell:not(.electron-app-shell) [data-slot="sidebar-wrapper"] > header {
-    height: 3rem;
-  }
   .app-shell:not(.electron-app-shell) button,
   body:has(.app-shell:not(.electron-app-shell))
     [data-slot="dialog-content"]
