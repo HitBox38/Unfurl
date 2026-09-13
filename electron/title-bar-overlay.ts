@@ -1,6 +1,6 @@
 import type { BrowserWindow, BrowserWindowConstructorOptions } from "electron";
 
-import type { Theme } from "@/shared/hooks/use-theme/constants";
+import type { ResolvedTheme } from "@/shared/hooks/use-theme/constants";
 import {
   TITLE_BAR_OVERLAY_HEIGHT,
   getTitleBarOverlayForTheme,
@@ -12,7 +12,7 @@ export const supportsMutableTitleBarOverlay = (
 ): boolean => platform === "win32" || platform === "linux";
 
 export const getInitialTitleBarOverlay = (
-  theme: Theme,
+  theme: ResolvedTheme,
   platform: NodeJS.Platform = process.platform,
 ): NonNullable<BrowserWindowConstructorOptions["titleBarOverlay"]> => {
   if (supportsMutableTitleBarOverlay(platform)) {

@@ -7,7 +7,14 @@ import App from "@/app/app";
 import { useDialogStore } from "@/shared/stores";
 
 vi.mock("@tanstack/react-router", () => ({
-  Outlet: () => <div data-testid="route-outlet" />,
+  Outlet: () => (
+    <div data-testid="route-outlet">
+      <textarea
+        aria-label="Unapplied story draft"
+        defaultValue="Original dialogue"
+      />
+    </div>
+  ),
   Link: ({ children, to, ...props }: { children: ReactNode; to: string }) => (
     <a href={to} {...props}>
       {children}
@@ -77,12 +84,16 @@ describe("App shell", () => {
     render(<App />);
 
     const sidebar = screen.getByLabelText("Editable files sidebar");
-    const toggle = within(sidebar).getByRole("button", { name: /toggle sidebar/i });
+    const toggle = within(sidebar).getByRole("button", {
+      name: /toggle sidebar/i,
+    });
     const sidebarState = sidebar.closest('[data-slot="sidebar"]');
     expect(sidebarState).toHaveAttribute("data-state", "expanded");
     await user.click(toggle);
     expect(sidebarState).toHaveAttribute("data-state", "collapsed");
-    expect(within(sidebar).getByRole("link", { name: /go to home page/i })).toHaveAttribute("href", "/");
+    expect(
+      within(sidebar).getByRole("link", { name: /go to home page/i }),
+    ).toHaveAttribute("href", "/");
     await user.click(toggle);
     expect(sidebarState).toHaveAttribute("data-state", "expanded");
   });
@@ -108,8 +119,12 @@ describe("App shell", () => {
       render(<App />);
       await user.click(screen.getByRole("button", { name: /toggle sidebar/i }));
       const drawer = screen.getByRole("dialog", { name: "Sidebar" });
-      await user.click(within(drawer).getByRole("link", { name: /go to home page/i }));
-      expect(screen.queryByRole("dialog", { name: "Sidebar" })).not.toBeInTheDocument();
+      await user.click(
+        within(drawer).getByRole("link", { name: /go to home page/i }),
+      );
+      expect(
+        screen.queryByRole("dialog", { name: "Sidebar" }),
+      ).not.toBeInTheDocument();
     } finally {
       window.innerWidth = originalWidth;
     }
@@ -121,5 +136,49 @@ describe("App shell", () => {
     fireEvent.contextMenu(screen.getByTestId("app-shell"));
 
     expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it("preserves the mounted editor draft and restores focus after closing Settings", async () => {
+    const user = userEvent.setup();
+    render(<App />);
+    const draft = screen.getByRole("textbox", {
+      name: "Unapplied story draft",
+    });
+    await user.clear(draft);
+    await user.type(draft, "Unsaved dialogue");
+    const trigger = screen.getByRole("button", { name: "Settings" });
+    await user.click(trigger);
+    await user.click(screen.getByRole("button", { name: "About" }));
+    await user.keyboard("{Escape}");
+    expect(
+      screen.queryByRole("dialog", { name: "Settings" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("textbox", { name: "Unapplied story draft" })).toBe(
+      draft,
+    );
+    expect(draft).toHaveValue("Unsaved dialogue");
+    expect(trigger).toHaveFocus();
+  });
+
+  it("opens Settings outside the mobile drawer and restores focus to the sidebar toggle", async () => {
+    const originalWidth = window.innerWidth;
+    window.innerWidth = 390;
+    try {
+      const user = userEvent.setup();
+      render(<App />);
+      const toggle = screen.getByRole("button", { name: /toggle sidebar/i });
+      await user.click(toggle);
+      await user.click(screen.getByRole("button", { name: "Settings" }));
+      expect(
+        screen.queryByRole("dialog", { name: "Sidebar" }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("dialog", { name: "Settings" }),
+      ).toBeInTheDocument();
+      await user.keyboard("{Escape}");
+      expect(toggle).toHaveFocus();
+    } finally {
+      window.innerWidth = originalWidth;
+    }
   });
 });

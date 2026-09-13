@@ -1,4 +1,4 @@
-import type { Theme } from "@/shared/hooks/use-theme/constants";
+import type { ResolvedTheme } from "@/shared/hooks/use-theme/constants";
 
 export const TITLE_BAR_OVERLAY_CHANNEL = "title-bar-overlay:set";
 
@@ -21,12 +21,12 @@ export const TITLE_BAR_OVERLAY_BY_THEME = {
     symbolColor: "#fafafa",
   },
 } as const satisfies Record<
-  Theme,
+  ResolvedTheme,
   Pick<TitleBarOverlayOptions, "color" | "symbolColor">
 >;
 
 export const getTitleBarOverlayForTheme = (
-  theme: Theme,
+  theme: ResolvedTheme,
 ): TitleBarOverlayOptions => ({
   ...TITLE_BAR_OVERLAY_BY_THEME[theme],
   height: TITLE_BAR_OVERLAY_HEIGHT,

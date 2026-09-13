@@ -1,12 +1,24 @@
 import { contextBridge, ipcRenderer } from "electron";
 
 import { withPrototype } from "./with-prototype";
+import {
+  SPELLCHECK_GET_PREFERENCES,
+  SPELLCHECK_SET_PREFERENCES,
+  type SpellcheckPreferencesApi,
+} from "@/shared/types/spellcheck-preferences";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld("ipcRenderer", withPrototype(ipcRenderer));
+contextBridge.exposeInMainWorld("spellcheckPreferences", {
+  get: () => ipcRenderer.invoke(SPELLCHECK_GET_PREFERENCES),
+  set: (preference) =>
+    ipcRenderer.invoke(SPELLCHECK_SET_PREFERENCES, preference),
+} satisfies SpellcheckPreferencesApi);
 
 // --------- Preload scripts loading ---------
-function domReady(condition: DocumentReadyState[] = ["complete", "interactive"]) {
+function domReady(
+  condition: DocumentReadyState[] = ["complete", "interactive"],
+) {
   return new Promise((resolve) => {
     if (condition.includes(document.readyState)) {
       resolve(true);
