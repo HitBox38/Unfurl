@@ -33,14 +33,12 @@ it("keeps analytics off until enabled and lets the user withdraw consent", async
       </SidebarProvider>
     </TooltipProvider>,
   );
-  await user.click(screen.getByRole("button", { name: "Privacy & analytics" }));
   expect(screen.getByRole("status")).toHaveTextContent("Analytics are off");
   expect(getAnalyticsConsent()).toBe("pending");
   await user.click(
     screen.getByRole("button", { name: "Enable anonymous analytics" }),
   );
   expect(getAnalyticsConsent()).toBe("granted");
-  await user.click(screen.getByRole("button", { name: "Privacy & analytics" }));
   expect(screen.getByRole("status")).toHaveTextContent("Analytics are on");
   await user.click(screen.getByRole("button", { name: "Turn analytics off" }));
   expect(getAnalyticsConsent()).toBe("denied");

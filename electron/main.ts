@@ -4,6 +4,11 @@ import path from "node:path";
 import { createMainWindowOptions } from "./main-window-options";
 import { resolveMainProcessPaths } from "./main-paths";
 import { applyTitleBarOverlay } from "./title-bar-overlay";
+import { createSpellcheckPreferences } from "./spellcheck-preferences";
+import {
+  SPELLCHECK_GET_PREFERENCES,
+  SPELLCHECK_SET_PREFERENCES,
+} from "@/shared/types/spellcheck-preferences";
 import {
   SPELLCHECK_ADD_WORD_CHANNEL,
   SPELLCHECK_CONTEXT_MENU_CHANNEL,
@@ -22,12 +27,36 @@ import {
 // │ │ ├── main.js
 // │ │ └── preload.mjs
 // │
-const mainProcessPaths = resolveMainProcessPaths(import.meta.url, app.isPackaged);
+const mainProcessPaths = resolveMainProcessPaths(
+  import.meta.url,
+  app.isPackaged,
+);
 
 process.env.DIST = mainProcessPaths.dist;
 process.env.VITE_PUBLIC = mainProcessPaths.vitePublic;
 
 let win: BrowserWindow | null;
+let spelling: ReturnType<typeof createSpellcheckPreferences>;
+
+for (const channel of [
+  SPELLCHECK_GET_PREFERENCES,
+  SPELLCHECK_SET_PREFERENCES,
+]) {
+  ipcMain.handle(channel, (event, value: unknown) => {
+    if (
+      !win ||
+      event.sender !== win.webContents ||
+      event.senderFrame !== win.webContents.mainFrame
+    ) {
+      throw new Error(
+        "Spelling preferences are only available to the app window.",
+      );
+    }
+    return channel === SPELLCHECK_GET_PREFERENCES
+      ? spelling.get()
+      : spelling.set(value);
+  });
+}
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
 
@@ -59,7 +88,12 @@ function createWindow() {
     createMainWindowOptions({
       preload: mainProcessPaths.preload,
       appIcon: mainProcessPaths.appIcon,
-    })
+    }),
+  );
+
+  spelling = createSpellcheckPreferences(
+    win.webContents.session,
+    path.join(app.getPath("userData"), "spellcheck-preferences.json"),
   );
 
   // Keep the shared web page's title from replacing the desktop app name.
@@ -80,6 +114,7 @@ function createWindow() {
   });
 
   win.webContents.on("context-menu", (_event, params) => {
+    if (!win?.webContents.session.isSpellCheckerEnabled()) return;
     const payload: SpellcheckContextMenuPayload = {
       dictionarySuggestions: [...params.dictionarySuggestions],
       misspelledWord: params.misspelledWord || undefined,
@@ -87,10 +122,7 @@ function createWindow() {
       y: params.y,
     };
 
-    if (
-      payload.dictionarySuggestions.length > 0 ||
-      payload.misspelledWord
-    ) {
+    if (payload.dictionarySuggestions.length > 0 || payload.misspelledWord) {
       win?.webContents.send(SPELLCHECK_CONTEXT_MENU_CHANNEL, payload);
     }
   });

@@ -42,9 +42,15 @@ Storage is separate between browsers and the desktop app, and clearing app or br
 
 ### Optional analytics
 
-Analytics are **off by default** on web and desktop. Enable them in **Privacy & analytics** in the sidebar to share anonymous usage events with PostHog EU. This helps measure imports, exports, sample usage, activation, and distribution channels. Story text, titles, file names, paths, and raw JSON are never sent. Session replay and automatic event/error capture are disabled.
+Analytics are **off by default** on web and desktop. Enable them in **Settings → Privacy** using the sidebar gear to share anonymous usage events with PostHog EU. This helps measure imports, exports, sample usage, activation, and distribution channels. Story text, titles, file names, paths, and raw JSON are never sent. Session replay and automatic event/error capture are disabled.
 
 Turn analytics off in the same settings to stop collection and remove the local analytics identifier. Previously sent events remain in PostHog. Re-enabling creates a new anonymous identifier. Analytics are separate from your locally stored projects; using the editor does not require analytics or a PostHog account.
+
+### Settings
+
+Open the sidebar gear to change preferences without leaving your story or losing unapplied edits. Choose Light, Dark, or System theme and an Automatic, Expanded, or Collapsed sidebar startup mode. Manual sidebar toggles last for the current session; the mobile drawer always starts closed.
+
+Settings also contains privacy controls, automatic and manual update checks, and version and product links. Desktop builds include Writing preferences for spellcheck and supported languages on Windows/Linux; macOS manages spelling languages through the OS. Changes apply immediately and survive restart. Spelling preferences are stored in the desktop app's user-data directory, separately from story data.
 
 ## Development
 
@@ -104,7 +110,7 @@ An already published GitHub version is skipped; bump the package version to publ
 
 ### Version checks
 
-Click the version in the sidebar to check for updates. Production builds also check on startup and hourly while visible, and check again when the app regains focus if the last check was at least an hour ago. Development builds only check manually. Failed checks stay in the update dialog and can be retried.
+Open **Settings → Updates** to check for updates. Automatic checks are on by default and can be disabled there. Production builds check on startup and hourly while visible, and check again when the app regains focus if the last check was at least an hour ago. Development builds only check manually. Failed checks stay in Settings and can be retried; an available update adds an indicator to the sidebar gear.
 
 Windows, macOS, and Linux check the latest stable GitHub Release and offer a link to its downloads. Updates are installed manually. The web app checks `version.json` from its own deployment and offers a reload when a newer version is available; save open edits before reloading. Vite generates this manifest from `package.json` for every build, so deploy it alongside the rest of `dist` and bump the package version for web releases too.
 
