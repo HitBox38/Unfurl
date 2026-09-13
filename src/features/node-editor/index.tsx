@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Controller,
   FormProvider,
@@ -26,6 +26,14 @@ import {
   CardHeader,
 } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
 import { Label } from "@/shared/ui/label";
 import { Trash } from "lucide-react";
 import {
@@ -37,13 +45,19 @@ import {
 } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 
-import { buildChoiceEdgeId } from "@/features/dialog-viewer/helpers";
+import {
+  buildChoiceEdgeId,
+  queueDialogNodeFocus,
+} from "@/features/dialog-viewer/helpers";
 import { NodeMetadataEditor } from "@/features/node-metadata-editor";
 
 import type { StoryNodeForm } from "./types";
 
 export const NodeEditor = () => {
+  const [confirmClose, setConfirmClose] = useState(false);
   const node = useNodeStore((state) => state.node);
+  const isNew = useNodeStore((state) => state.isNew);
+  const addNode = useJsonDataStore((state) => state.addNode);
   const setNode = useNodeStore((state) => state.setNode);
   const setGraphPreview = useNodeStore((state) => state.setGraphPreview);
   const content = useJsonDataStore((state) => state.content);
@@ -70,13 +84,19 @@ export const NodeEditor = () => {
   const submitNode: SubmitHandler<StoryNodeForm> = (data) => {
     if (!node) return;
     const updated: StoryNode = {
+      ...node,
       name: data.name.trim(),
       content: data.content.split("\n"),
       choices: data.choices,
       metadata: { ...data.metadata },
     };
     setNode(updated);
-    setJsonNode(updated, node.name);
+    if (isNew) {
+      queueDialogNodeFocus(updated.name);
+      addNode(updated);
+    } else {
+      setJsonNode(updated, node.name);
+    }
   };
 
   useEffect(() => {
@@ -91,6 +111,24 @@ export const NodeEditor = () => {
   }, [node, methods]);
 
   useEffect(() => () => setGraphPreview(null), [setGraphPreview]);
+
+  useEffect(() => {
+    if (!methods.formState.isDirty) return;
+    const warnBeforeUnload = (event: BeforeUnloadEvent) =>
+      event.preventDefault();
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [methods.formState.isDirty]);
+
+  const closeEditor = () => {
+    setConfirmClose(false);
+    setGraphPreview(null);
+    setNode(null);
+  };
+  const requestClose = () => {
+    if (methods.formState.isDirty) setConfirmClose(true);
+    else closeEditor();
+  };
 
   if (!node) {
     return null;
@@ -121,12 +159,12 @@ export const NodeEditor = () => {
 
   return (
     <FormProvider {...methods}>
-      <Card className="flex max-h-[calc(100vh-8rem)] min-h-0 w-full flex-col rounded-xl border bg-card/95 p-0 shadow-2xl backdrop-blur-sm">
+      <Card className="flex h-full min-h-0 w-full flex-col rounded-xl border bg-card/95 p-0 shadow-2xl backdrop-blur-sm">
         <CardHeader className="gap-3 border-b px-4 py-3 text-left">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 space-y-1">
               <CardDescription className="text-xs font-medium uppercase tracking-wide">
-                Edit node
+                {isNew ? "New node" : "Edit node"}
               </CardDescription>
               <Label htmlFor="node-name" className="sr-only">
                 Node name
@@ -139,7 +177,7 @@ export const NodeEditor = () => {
                   setValueAs: (value) =>
                     typeof value === "string" ? value.trim() : value,
                   validate: (value) =>
-                    value === node.name ||
+                    (!isNew && value === node.name) ||
                     !nodeNames.includes(value) ||
                     "Node name must be unique",
                 })}
@@ -157,10 +195,7 @@ export const NodeEditor = () => {
               size="icon-sm"
               aria-label="Close node editor"
               className="shrink-0"
-              onClick={() => {
-                setGraphPreview(null);
-                setNode(null);
-              }}
+              onClick={requestClose}
             >
               <X />
             </Button>
@@ -312,7 +347,7 @@ export const NodeEditor = () => {
               <NodeMetadataEditor />
             </Accordion>
           </CardContent>
-          <CardFooter className="flex items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
+          <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
             {methods.formState.isDirty ? (
               <span className="text-sm text-warning">Unsaved changes</span>
             ) : (
@@ -321,23 +356,48 @@ export const NodeEditor = () => {
               </span>
             )}
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="warning"
-                onClick={() => {
-                  setGraphPreview(null);
-                  setNode(null);
-                }}
-              >
+              <Button type="button" variant="warning" onClick={requestClose}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={!methods.formState.isDirty}>
-                Update Node
+              <Button
+                type="submit"
+                disabled={!isNew && !methods.formState.isDirty}
+              >
+                {isNew ? "Create node" : "Update Node"}
               </Button>
             </div>
           </CardFooter>
         </form>
       </Card>
+      <Dialog open={confirmClose} onOpenChange={setConfirmClose}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save changes to {node.name}?</DialogTitle>
+            <DialogDescription>
+              Your edits have not been saved yet.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setConfirmClose(false)}>
+              Keep editing
+            </Button>
+            <Button variant="destructive" onClick={closeEditor}>
+              Discard changes
+            </Button>
+            <Button
+              onClick={() => {
+                setConfirmClose(false);
+                void methods.handleSubmit((data) => {
+                  submitNode(data);
+                  closeEditor();
+                })();
+              }}
+            >
+              Save changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </FormProvider>
   );
 };

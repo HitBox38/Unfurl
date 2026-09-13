@@ -4,20 +4,15 @@ import { useCallback } from "react";
 import {
   computeNewNodePosition,
   getDialogFlowInstance,
-  queueDialogNodeFocus,
 } from "@/features/dialog-viewer/helpers";
-import {
-  createStoryNode,
-  uniqueStoryNodeName,
-} from "@/shared/lib";
+import { createStoryNode, uniqueStoryNodeName } from "@/shared/lib";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import { Button } from "@/shared/ui/button";
 
 export const AddNodeButton = () => {
   const content = useJsonDataStore((state) => state.content);
-  const addStoryNode = useJsonDataStore((state) => state.addNode);
   const selectedNode = useNodeStore((state) => state.node);
-  const setSelectedNode = useNodeStore((state) => state.setNode);
+  const startDraft = useNodeStore((state) => state.startDraft);
 
   const onAddNode = useCallback(() => {
     const name = uniqueStoryNodeName(content.nodes.map((node) => node.name));
@@ -28,10 +23,8 @@ export const AddNodeButton = () => {
     );
     const newNode = createStoryNode(name, position);
 
-    addStoryNode(newNode);
-    setSelectedNode(newNode);
-    queueDialogNodeFocus(name);
-  }, [addStoryNode, content, selectedNode, setSelectedNode]);
+    startDraft(newNode);
+  }, [content, selectedNode, startDraft]);
 
   return (
     <Button

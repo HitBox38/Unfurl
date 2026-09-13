@@ -62,6 +62,18 @@ function createWindow() {
     })
   );
 
+  // Keep the shared web page's title from replacing the desktop app name.
+  win.on("page-title-updated", (event) => {
+    event.preventDefault();
+  });
+
+  if (process.platform === "win32") {
+    win.setAppDetails({
+      appId: "unfurl",
+      appIconPath: mainProcessPaths.appIcon,
+    });
+  }
+
   // Test active push message to Renderer-process.
   win.webContents.on("did-finish-load", () => {
     win?.webContents.send("main-process-message", new Date().toLocaleString());

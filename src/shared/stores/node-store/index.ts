@@ -6,9 +6,11 @@ export type { NodeState } from "./types";
 
 export const useNodeStore = create<NodeState>((set) => ({
   node: null,
+  isNew: false,
+  startDraft: (node) => set({ node, isNew: true }),
   previewNodeName: null,
   previewEdgeId: null,
-  setNode: (newNode) => set({ node: newNode }),
+  setNode: (newNode) => set({ node: newNode, isNew: false }),
   setGraphPreview: (preview) =>
     set({
       previewNodeName: preview?.nodeName ?? null,

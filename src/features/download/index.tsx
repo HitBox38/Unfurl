@@ -11,11 +11,12 @@ export const DownloadButton = () => {
   return (
     <Button
       variant="secondary"
-      size="icon-sm"
-      aria-label="Download"
+      size="sm"
+      aria-label="Export JSON"
       onClick={() => downloadStoryAsJson(name, content)}
     >
       <Download aria-hidden="true" />
+      Export JSON
     </Button>
   );
 };

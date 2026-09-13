@@ -7,6 +7,8 @@ export interface GraphPreview {
 
 export interface NodeState {
   node: StoryNode | null;
+  isNew: boolean;
+  startDraft: (node: StoryNode) => void;
   previewNodeName: string | null;
   previewEdgeId: string | null;
   setNode: (newNode: StoryNode | null) => void;

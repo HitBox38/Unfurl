@@ -11,11 +11,14 @@ import {
   type NodeTypes,
   type ReactFlowInstance,
 } from "@xyflow/react";
+import { Maximize, Minus, Plus } from "lucide-react";
+import { Button } from "@/shared/ui/button";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 
 import { appendChoice, cn, createChoice } from "@/shared/lib";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 
+import { NodeSearch } from "./components/node-search";
 import { DialogFlowNode } from "./components/dialog-flow-node";
 import { DIALOG_NODE_TYPE } from "./constants";
 import {
@@ -35,13 +38,54 @@ export const DialogViewer = () => {
   const setSelectedNode = useNodeStore((state) => state.setNode);
   const previewNodeName = useNodeStore((state) => state.previewNodeName);
   const previewEdgeId = useNodeStore((state) => state.previewEdgeId);
-  const flowInstanceRef =
-    useRef<ReactFlowInstance<Node<DialogNodeData>, Edge> | null>(null);
+  const flowInstanceRef = useRef<ReactFlowInstance<
+    Node<DialogNodeData>,
+    Edge
+  > | null>(null);
 
-  const initial = useMemo(
-    () => buildDialogGraph(content),
-    [content],
-  );
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    let previousWidth = container.clientWidth;
+    let previousHeight = container.clientHeight;
+    let timeout: ReturnType<typeof setTimeout>;
+    const observer = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      if (
+        !width ||
+        !height ||
+        (width === previousWidth && height === previousHeight)
+      )
+        return;
+      previousWidth = width;
+      previousHeight = height;
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const flow = flowInstanceRef.current;
+        if (!flow) return;
+        const selected = useNodeStore.getState().node;
+        const nodes =
+          selected && flow.getNode(selected.name)
+            ? [{ id: selected.name }]
+            : undefined;
+        void flow.fitView({
+          nodes,
+          padding: nodes ? 0.6 : 0.2,
+          maxZoom: 1.2,
+          duration: 200,
+        });
+      }, 150);
+    });
+    observer.observe(container);
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
+  }, []);
+
+  const initial = useMemo(() => buildDialogGraph(content), [content]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<DialogNodeData>>(
     initial.nodes,
@@ -54,45 +98,42 @@ export const DialogViewer = () => {
       }) satisfies NodeTypes,
     [],
   );
-  const displayedNodes = useMemo<Node<DialogNodeData>[]>(
-    () => {
-      const connectedNodeIds = new Set<string>();
-      if (selectedNode) {
-        edges.forEach((edge) => {
-          if (
-            edge.source !== selectedNode.name &&
-            edge.target !== selectedNode.name
-          ) {
-            return;
-          }
-
-          connectedNodeIds.add(edge.source);
-          connectedNodeIds.add(edge.target);
-        });
-      }
-
-      return nodes.map((node) => {
-        const isPreviewed = node.id === previewNodeName;
-        const isSelected = node.id === selectedNode?.name;
-        const isConnected = connectedNodeIds.has(node.id);
-        let highlight: DialogNodeData["highlight"];
-        if (isPreviewed) {
-          highlight = "preview";
-        } else if (isSelected) {
-          highlight = "selected";
-        } else if (isConnected) {
-          highlight = "connected";
+  const displayedNodes = useMemo<Node<DialogNodeData>[]>(() => {
+    const connectedNodeIds = new Set<string>();
+    if (selectedNode) {
+      edges.forEach((edge) => {
+        if (
+          edge.source !== selectedNode.name &&
+          edge.target !== selectedNode.name
+        ) {
+          return;
         }
 
-        return {
-          ...node,
-          selected: isSelected,
-          data: { ...node.data, highlight },
-        };
+        connectedNodeIds.add(edge.source);
+        connectedNodeIds.add(edge.target);
       });
-    },
-    [edges, nodes, previewNodeName, selectedNode],
-  );
+    }
+
+    return nodes.map((node) => {
+      const isPreviewed = node.id === previewNodeName;
+      const isSelected = node.id === selectedNode?.name;
+      const isConnected = connectedNodeIds.has(node.id);
+      let highlight: DialogNodeData["highlight"];
+      if (isPreviewed) {
+        highlight = "preview";
+      } else if (isSelected) {
+        highlight = "selected";
+      } else if (isConnected) {
+        highlight = "connected";
+      }
+
+      return {
+        ...node,
+        selected: isSelected,
+        data: { ...node.data, highlight },
+      };
+    });
+  }, [edges, nodes, previewNodeName, selectedNode]);
   const displayedEdges = useMemo<Edge[]>(
     () =>
       edges.map((edge): Edge => {
@@ -102,10 +143,13 @@ export const DialogViewer = () => {
           (edge.source === selectedNode?.name ||
             edge.target === selectedNode?.name);
         const isDimmed =
-          Boolean(selectedNode || previewEdgeId) && !isPreviewed && !isConnected;
+          Boolean(selectedNode || previewEdgeId) &&
+          !isPreviewed &&
+          !isConnected;
 
         return {
           ...edge,
+          label: isConnected || isPreviewed ? edge.label : undefined,
           animated: isPreviewed || edge.animated,
           className: cn(
             edge.className,
@@ -115,7 +159,7 @@ export const DialogViewer = () => {
           ),
           style: {
             ...edge.style,
-            opacity: isDimmed ? 0.35 : 1,
+            opacity: isDimmed ? 0.65 : 1,
             strokeWidth: isPreviewed ? 3 : isConnected ? 2.5 : 1.5,
           },
           zIndex: isPreviewed ? 20 : isConnected ? 10 : edge.zIndex,
@@ -216,10 +260,32 @@ export const DialogViewer = () => {
 
   return (
     <div
+      ref={containerRef}
       aria-label="Dialog flow chart"
-      className="dialog-flow-viewer h-full w-full bg-background"
+      className="dialog-flow-viewer relative h-full w-full bg-background"
+      onKeyDownCapture={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        const target = event.target;
+        if (
+          !(target instanceof HTMLElement) ||
+          !target.classList.contains("react-flow__node")
+        )
+          return;
+        const storyNode = content.nodes.find(
+          (item) => item.name === target.dataset.id,
+        );
+        if (!storyNode) return;
+        event.preventDefault();
+        event.stopPropagation();
+        setSelectedNode(storyNode);
+        requestAnimationFrame(() =>
+          document.getElementById("node-name")?.focus(),
+        );
+      }}
     >
       <ReactFlow
+        minZoom={0.05}
+        fitViewOptions={{ padding: 0.2, maxZoom: 1.2 }}
         fitView
         nodes={displayedNodes}
         edges={displayedEdges}
@@ -238,6 +304,62 @@ export const DialogViewer = () => {
       >
         <Background variant={BackgroundVariant.Dots} gap={18} size={1.3} />
       </ReactFlow>
+      <NodeSearch
+        nodes={content.nodes}
+        onSelect={(storyNode) => {
+          setSelectedNode(storyNode);
+          void flowInstanceRef.current?.fitView({
+            nodes: [{ id: storyNode.name }],
+            padding: 0.6,
+            maxZoom: 1.5,
+            duration: 250,
+          });
+          requestAnimationFrame(() =>
+            document.getElementById("node-name")?.focus(),
+          );
+        }}
+      />
+      <div
+        role="toolbar"
+        aria-label="Graph view"
+        className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded-lg border bg-card p-1 shadow-md"
+      >
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Zoom out"
+          title="Zoom out"
+          onClick={() =>
+            void flowInstanceRef.current?.zoomOut({ duration: 150 })
+          }
+        >
+          <Minus />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label="Zoom in"
+          title="Zoom in"
+          onClick={() =>
+            void flowInstanceRef.current?.zoomIn({ duration: 150 })
+          }
+        >
+          <Plus />
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            void flowInstanceRef.current?.fitView({
+              padding: 0.2,
+              duration: 200,
+            })
+          }
+        >
+          <Maximize />
+          Fit story
+        </Button>
+      </div>
     </div>
   );
 };

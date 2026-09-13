@@ -1,7 +1,7 @@
 {
   "name": "unfurl",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "author": {
@@ -23,7 +23,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "typecheck": "tsc -b"
+    "typecheck": "tsc -b",
+    "build:web": "tsc -b && vite build --mode web"
   },
   "dependencies": {
     "@fontsource-variable/roboto": "^5.2.10",

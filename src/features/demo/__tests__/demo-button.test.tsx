@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -35,23 +35,6 @@ const demoStory: StoryData = {
   ],
 };
 
-const revealDemoButton = () => {
-  for (const code of [
-    "ArrowUp",
-    "ArrowUp",
-    "ArrowDown",
-    "ArrowDown",
-    "ArrowLeft",
-    "ArrowRight",
-    "ArrowLeft",
-    "ArrowRight",
-    "KeyB",
-    "KeyA",
-  ]) {
-    fireEvent.keyDown(window, { code });
-  }
-};
-
 const metadataConfig: MetadataConfigTemplate = {
   config: [{ name: "gold", sign: "$gold", type: "number" }],
 };
@@ -69,14 +52,16 @@ describe("DemoButton", () => {
   });
 
   it("loads the demo into the first project as an editable file route", async () => {
-    const project = createProject({ name: "First", metadataConfig }, { now: () => 1 });
+    const project = createProject(
+      { name: "First", metadataConfig },
+      { now: () => 1 },
+    );
     createProject({ name: "Second" }, { now: () => 2 });
 
     render(<DemoButton />);
-    revealDemoButton();
 
     await userEvent.click(
-      await screen.findByRole("button", { name: /load demo file/i }),
+      await screen.findByRole("button", { name: /try a sample/i }),
     );
 
     await waitFor(() => expect(navigate).toHaveBeenCalled());

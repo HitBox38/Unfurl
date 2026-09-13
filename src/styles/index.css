@@ -53,7 +53,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --font-heading: var(--font-sans);
-  --font-sans: 'Roboto Variable', sans-serif;
+  --font-sans: "Roboto Variable", sans-serif;
 }
 
 :root {
@@ -73,7 +73,7 @@
   --accent-foreground: oklch(0.21 0.006 285.885);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
-  --warning: oklch(0.769 0.188 70.0);
+  --warning: oklch(0.769 0.188 70);
   --warning-foreground: oklch(0.145 0 0);
   --info: oklch(0.685 0.182 247.4);
   --info-foreground: oklch(0.985 0 0);
@@ -128,7 +128,7 @@
     transparent
   );
   --xy-connectionline-stroke-default: var(--primary);
-  --xy-edge-stroke-default: var(--border);
+  --xy-edge-stroke-default: var(--muted-foreground);
   --xy-edge-stroke-selected-default: var(--primary);
   --xy-handle-background-color-default: var(--primary);
   --xy-handle-border-color-default: var(--background);
@@ -162,11 +162,11 @@
 }
 
 .dialog-flow-viewer .dialog-edge-dimmed .react-flow__edge-path {
-  opacity: 0.35;
+  stroke: var(--muted-foreground);
 }
 
 .app-shell {
-  --app-bar-height: 2rem;
+  --app-bar-height: 0px;
 }
 
 .electron-app-shell {
@@ -246,4 +246,41 @@
   --chart-3: oklch(0.511 0.262 276.966);
   --chart-4: oklch(0.457 0.24 277.023);
   --chart-5: oklch(0.398 0.195 277.366);
+}
+@media (max-width: 640px), (pointer: coarse) {
+  .app-shell:not(.electron-app-shell) button,
+  body:has(.app-shell:not(.electron-app-shell))
+    [data-slot="dialog-content"]
+    button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+.file-workspace {
+  container-type: inline-size;
+}
+.file-editor-layout {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+}
+.file-graph-pane {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.file-node-panel {
+  width: 28rem;
+  flex-shrink: 0;
+  min-height: 0;
+}
+@container (max-width: 899px) {
+  .file-editor-layout.has-editor .file-graph-pane {
+    display: none;
+  }
+  .file-node-panel {
+    width: 100%;
+    border-left: 0;
+  }
 }

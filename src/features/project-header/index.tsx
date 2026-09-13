@@ -7,11 +7,7 @@ import { useConfirmDialog } from "@/shared/hooks";
 import { deleteProject, renameProject } from "@/shared/lib/projects-storage";
 import type { ProjectRecord } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/shared/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/shared/ui/tooltip";
 
 interface ProjectHeaderProps {
   project: ProjectRecord;
@@ -51,7 +47,7 @@ export const ProjectHeader = ({
         <ChevronLeft className="size-4" aria-hidden="true" />
         Projects
       </Link>
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3 [&>div:first-child]:basis-full lg:[&>div:first-child]:basis-auto">
         <InlineNameInput
           key={project.id + project.name}
           id="project-name"

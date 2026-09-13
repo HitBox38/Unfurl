@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import ItchIoLogo from "@/assets/itchio-logo.svg";
+import { NewStoryButton } from "@/features/new-story";
 import { NewProjectButton } from "@/features/create-project";
 import { DemoButton } from "@/features/demo";
 import { useFaqModal } from "@/features/faq";
@@ -39,8 +40,14 @@ const mostRecentlyEdited = (
 ): ProjectRecord | undefined =>
   projects.reduce<ProjectRecord | undefined>((best, project) => {
     if (!best) return project;
-    const bestEdited = summarizeProject(best, filesByProject.get(best.id) ?? []);
-    const edited = summarizeProject(project, filesByProject.get(project.id) ?? []);
+    const bestEdited = summarizeProject(
+      best,
+      filesByProject.get(best.id) ?? [],
+    );
+    const edited = summarizeProject(
+      project,
+      filesByProject.get(project.id) ?? [],
+    );
     return edited.lastEditedAt > bestEdited.lastEditedAt ? project : best;
   }, undefined);
 
@@ -75,10 +82,20 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
         <h1 className="font-heading text-lg font-medium">
           Unfurl{isOnline ? " Online" : ""}
         </h1>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
-          <DemoButton />
+        <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+          <NewProjectButton />
+          <DemoButton project={targetProject} />
+
+          <Button variant="secondary" onClick={() => setContent(faqModal)}>
+            FAQ
+          </Button>
+
           {isOnline ? (
-            <Button asChild variant="secondary">
+            <Button
+              asChild
+              variant="link"
+              className="basis-full justify-start px-0 text-muted-foreground sm:basis-auto"
+            >
               <a
                 href="https://hit-box38.itch.io/unfurl"
                 target="_blank"
@@ -89,15 +106,32 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
               </a>
             </Button>
           ) : null}
-          <Button variant="secondary" onClick={() => setContent(faqModal)}>
-            FAQ
-          </Button>
-          <NewProjectButton />
         </div>
       </header>
 
       <div className="flex flex-col gap-6 px-6 py-5">
-        <section aria-labelledby="projects-heading" className="flex flex-col gap-1">
+        {isOnline ? (
+          <aside
+            aria-label="Browser storage"
+            className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground"
+          >
+            <p className="font-medium text-foreground">
+              Your work stays in this browser
+            </p>
+            <p>
+              Applied changes are saved on this device, without account sync.
+              Clearing site data removes local projects.
+            </p>
+            <p>
+              Export stories as JSON and export your project’s metadata config
+              for backups. Import those files to continue in another browser.
+            </p>
+          </aside>
+        ) : null}
+        <section
+          aria-labelledby="projects-heading"
+          className="flex flex-col gap-1"
+        >
           <h2
             id="projects-heading"
             className="text-sm font-medium text-muted-foreground"
@@ -117,16 +151,25 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
         </section>
 
         {targetProject ? (
-          <section aria-labelledby="import-heading" className="flex flex-col gap-2">
+          <section
+            aria-labelledby="import-heading"
+            className="flex flex-col gap-2"
+          >
             <h2 id="import-heading" className="sr-only">
               Import files
             </h2>
             {projects.length > 1 ? (
               <div className="flex items-center gap-2">
-                <Label htmlFor="import-target-project" className="text-muted-foreground">
+                <Label
+                  htmlFor="import-target-project"
+                  className="text-muted-foreground"
+                >
                   Into
                 </Label>
-                <Select value={targetProject.id} onValueChange={setPickedProjectId}>
+                <Select
+                  value={targetProject.id}
+                  onValueChange={setPickedProjectId}
+                >
                   <SelectTrigger
                     id="import-target-project"
                     aria-label="Import into project"
@@ -144,12 +187,21 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
                 </Select>
               </div>
             ) : null}
-            <FileImportDropzone key={targetProject.id} projectId={targetProject.id} />
+            <div className="self-start">
+              <NewStoryButton project={targetProject} />
+            </div>
+            <FileImportDropzone
+              key={targetProject.id}
+              projectId={targetProject.id}
+            />
           </section>
         ) : null}
 
         {files.length > 0 ? (
-          <section aria-labelledby="recent-heading" className="flex flex-col gap-2">
+          <section
+            aria-labelledby="recent-heading"
+            className="flex flex-col gap-2"
+          >
             <h2
               id="recent-heading"
               className="text-sm font-medium text-muted-foreground"

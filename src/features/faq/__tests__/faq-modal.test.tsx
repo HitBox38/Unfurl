@@ -16,7 +16,7 @@ describe("useFaqModal", () => {
     expect(result.current.classNames?.dialog).toBe("sm:max-w-lg");
   });
 
-  it("renders accordion questions, the Konami demo hint, and a GitHub link", async () => {
+  it("renders accordion questions, the visible sample hint, and a GitHub link", async () => {
     const user = userEvent.setup();
     const { result } = renderHook(() => useFaqModal());
     render(<div>{result.current.content}</div>);
@@ -27,7 +27,7 @@ describe("useFaqModal", () => {
     expect(
       screen.getByRole("button", { name: /what are the supported formats\?/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/konami/i)).toBeInTheDocument();
+    expect(screen.getByText(/try a sample/i)).toBeInTheDocument();
     expect(screen.queryByText(/control \+ t \+ n/i)).not.toBeInTheDocument();
 
     await user.click(
