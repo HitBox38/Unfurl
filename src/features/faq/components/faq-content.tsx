@@ -29,6 +29,20 @@ const FormatLine = ({
 
 const FAQ_ITEMS: { id: string; question: string; answer: ReactNode }[] = [
   {
+    id: "privacy",
+    question: "Does Unfurl collect analytics?",
+    answer: (
+      <p>
+        Analytics are off by default on both web and desktop. You can enable
+        anonymous usage analytics in Settings → Privacy and turn them off
+        anytime. PostHog receives app activity, formats, node-count ranges, app
+        version, and distribution channel. Story text, titles, file names, and
+        paths are never sent, and session recording is disabled. Your projects
+        and stories stay on this device; no account is required.
+      </p>
+    ),
+  },
+  {
     id: "what-is",
     question: "What is Unfurl?",
     answer: (

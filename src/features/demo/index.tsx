@@ -2,6 +2,7 @@ import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useOpenEditableFile } from "@/features/open-editable-file";
 import { fromTwee } from "@/shared/lib/convertors";
+import { trackEvent } from "@/shared/lib/analytics";
 import { listProjects } from "@/shared/lib/projects-storage";
 import type { ProjectRecord } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
@@ -25,6 +26,7 @@ export const DemoButton = ({
       const file = new File([await response.blob()], "Lorcan02.1.twee");
       const data = await fromTwee(file, { config: project.metadataConfig });
       openEditableFile(data, "Lorcan02.1", "twee", project.id);
+      trackEvent("demo_loaded", { source: "button" });
     } catch {
       setError("Could not load the sample. Please try again.");
     } finally {

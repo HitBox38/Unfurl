@@ -1,31 +1,36 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
 
-import { useStorage } from "@/shared/hooks/use-storage";
+import { usePreference } from "@/shared/hooks/use-preference";
 
-import { DEFAULT_THEME, THEME_STORAGE_KEY, type Theme } from "./constants";
-import { applyTheme } from "./helpers";
+import { applyTheme, resolveTheme, themePreference } from "./helpers";
 
 export { initTheme } from "./helpers";
-export type { Theme } from "./constants";
+export type { Theme, ResolvedTheme } from "./constants";
 
 export const useTheme = () => {
-  const [theme, setTheme] = useStorage<Theme>({
-    key: THEME_STORAGE_KEY,
-    defaultValue: DEFAULT_THEME,
-  });
-
-  useEffect(() => {
-    applyTheme(theme);
-  }, [theme]);
-
-  const toggleTheme = useCallback(() => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  }, [setTheme, theme]);
-
+  const [theme, setTheme, error] = usePreference(themePreference);
+  const subscribe = useCallback(
+    (listener: () => void) => {
+      if (theme !== "system") return () => {};
+      const media = window.matchMedia("(prefers-color-scheme: dark)");
+      media.addEventListener("change", listener);
+      return () => media.removeEventListener("change", listener);
+    },
+    [theme],
+  );
+  const resolvedTheme = useSyncExternalStore(subscribe, () =>
+    resolveTheme(theme),
+  );
   return {
     theme,
+    resolvedTheme,
     setTheme,
-    toggleTheme,
-    isDark: theme === "dark",
+    error,
+    isDark: resolvedTheme === "dark",
   };
+};
+
+export const useThemeSync = () => {
+  const { resolvedTheme } = useTheme();
+  useEffect(() => applyTheme(resolvedTheme), [resolvedTheme]);
 };

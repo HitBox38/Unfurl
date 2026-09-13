@@ -1,8 +1,10 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MouseEventHandler, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { Settings } from "@/features/settings";
+import { useThemeSync } from "@/shared/hooks/use-theme";
 import { RecentFilesSidebar } from "@/features/recent-files-sidebar";
 import { saveEditableFile } from "@/shared/lib/editable-files-storage";
 import { createProject } from "@/shared/lib/projects-storage";
@@ -58,16 +60,48 @@ const seedFiles = () => {
   });
 };
 
+const ThemeSync = () => {
+  useThemeSync();
+  return null;
+};
+
 const renderSidebar = () =>
   render(
     <TooltipProvider>
       <SidebarProvider>
-        <RecentFilesSidebar />
+        <ThemeSync />
+        <Settings>
+          <RecentFilesSidebar />
+        </Settings>
       </SidebarProvider>
     </TooltipProvider>,
   );
 
 describe("RecentFilesSidebar", () => {
+  it("checks for updates while the mobile sidebar is closed", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("DEV", false);
+    vi.stubGlobal("innerWidth", 400);
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ version: "99.0.0" }),
+    });
+    vi.stubGlobal("fetch", fetch);
+    const view = renderSidebar();
+    try {
+      expect(
+        screen.queryByRole("button", { name: /check for updates/i }),
+      ).not.toBeInTheDocument();
+      await act(() => vi.advanceTimersByTimeAsync(1));
+      expect(fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("does not repeat the app wordmark or sidebar toggle", () => {
     renderSidebar();
 
@@ -138,7 +172,9 @@ describe("RecentFilesSidebar", () => {
       "shop",
     );
 
-    expect(screen.getByRole("link", { name: "Shop dialogs" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Shop dialogs" }),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "RPG" })).not.toBeInTheDocument();
     expect(screen.queryByText("Lorcan02.1")).not.toBeInTheDocument();
   });
@@ -165,20 +201,16 @@ describe("RecentFilesSidebar", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("toggles the app theme from the sidebar footer", async () => {
+  it("opens appearance from the sidebar Settings gear", async () => {
     const user = userEvent.setup();
-    document.documentElement.classList.add("dark");
     renderSidebar();
-
-    const toggle = screen.getByRole("button", { name: /switch to light mode/i });
-    expect(document.documentElement).toHaveClass("dark");
-
-    await user.click(toggle);
-
-    expect(document.documentElement).not.toHaveClass("dark");
+    await user.click(screen.getByRole("button", { name: "Settings" }));
     expect(
-      screen.getByRole("button", { name: /switch to dark mode/i }),
+      screen.getByRole("dialog", { name: "Settings" }),
     ).toBeInTheDocument();
+    await user.click(screen.getByRole("combobox", { name: "Theme" }));
+    await user.click(screen.getByRole("option", { name: "Light" }));
+    expect(document.documentElement).not.toHaveClass("dark");
   });
 
   it("shows a search-specific empty state with a clear action", async () => {

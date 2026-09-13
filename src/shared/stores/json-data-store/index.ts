@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { trackFirstGraphEdit } from "@/shared/lib/analytics";
 
 import type { StoryData } from "@/shared/types";
 
@@ -74,6 +75,7 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
       }
 
       persistActiveFileContent(state.activeFileId, content);
+      trackFirstGraphEdit();
       const past = pushHistorySnapshot(state);
       return {
         content,
@@ -100,6 +102,7 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
       }
 
       persistActiveFileContent(state.activeFileId, content);
+      trackFirstGraphEdit();
       const past = pushHistorySnapshot(state);
       return {
         content,
@@ -138,6 +141,7 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
       }
 
       persistActiveFileContent(state.activeFileId, content);
+      trackFirstGraphEdit();
       const past = pushHistorySnapshot(state);
       return {
         content,

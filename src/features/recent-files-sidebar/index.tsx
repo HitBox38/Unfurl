@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { useEditableFiles, useProjects } from "@/shared/hooks";
+import { SettingsButton } from "@/features/settings";
 import { groupFilesByProject } from "@/shared/lib/project-summary";
 import {
   Sidebar,
@@ -14,10 +15,13 @@ import {
 } from "@/shared/ui/sidebar";
 
 import { ProjectFilesGroup } from "./components/project-files-group";
-import { ThemeToggleButton } from "./components/theme-toggle-button";
 import { buildSidebarGroups } from "./helpers";
 
-export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) => {
+export const RecentFilesSidebar = ({
+  navigation,
+}: {
+  navigation?: ReactNode;
+}) => {
   const projects = useProjects();
   const files = useEditableFiles();
   const [query, setQuery] = useState("");
@@ -41,10 +45,7 @@ export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) =
         </SidebarHeader>
       ) : null}
       <SidebarHeader className="group-data-[collapsible=icon]:hidden">
-        <label
-          htmlFor="editable-files-search"
-          className="relative block px-2"
-        >
+        <label htmlFor="editable-files-search" className="relative block px-2">
           <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-sidebar-foreground/70" />
           <SidebarInput
             id="editable-files-search"
@@ -103,10 +104,7 @@ export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) =
       </SidebarContent>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
       <SidebarFooter className="group-data-[collapsible=icon]:p-1">
-        <p className="px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
-          v{__APP_VERSION__}
-        </p>
-        <ThemeToggleButton />
+        <SettingsButton />
       </SidebarFooter>
     </Sidebar>
   );

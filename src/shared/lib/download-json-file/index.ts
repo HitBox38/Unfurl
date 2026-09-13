@@ -10,6 +10,9 @@ export const downloadJsonFile = (fileName: string, data: unknown) => {
     encodeURIComponent(JSON.stringify(data, null, 2));
   anchor.download = fileName;
   document.body.appendChild(anchor);
-  anchor.click();
-  anchor.remove();
+  try {
+    anchor.click();
+  } finally {
+    anchor.remove();
+  }
 };
