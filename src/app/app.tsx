@@ -13,44 +13,54 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/shared/ui/sidebar";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 
 const isElectronRenderer = () =>
   typeof window !== "undefined" && Boolean(window.ipcRenderer);
 
-const AppBar = ({ isElectron }: { isElectron: boolean }) => (
-  <header
-    className={
-      isElectron
-        ? "electron-titlebar-drag-region z-50 flex items-center gap-1 px-2"
-        : "relative z-20 flex h-8 shrink-0 items-center gap-1 border-b bg-sidebar px-2 text-sidebar-foreground"
-    }
-  >
-    <SidebarTrigger
-      aria-label="Toggle sidebar"
-      className={cn(
-        "text-sidebar-foreground",
-        isElectron && "electron-titlebar-no-drag",
-      )}
-    />
-    <Link
-      to="/"
-      aria-label="Go to home page"
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-md font-heading text-sm font-medium outline-none hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
-        isElectron && "electron-titlebar-no-drag",
-      )}
-    >
-      <UnfurlMark
-        aria-hidden="true"
-        focusable="false"
-        className="size-5 shrink-0 text-primary dark:text-chart-1"
+const AppNavigation = ({
+  isElectron = false,
+  inSidebar = false,
+}: {
+  isElectron?: boolean;
+  inSidebar?: boolean;
+}) => {
+  const { setOpenMobile } = useSidebar();
+
+  return (
+    <>
+      <SidebarTrigger
+        aria-label="Toggle sidebar"
+        className={cn(
+          "text-sidebar-foreground",
+          inSidebar && "shrink-0",
+          isElectron && "electron-titlebar-no-drag",
+        )}
       />
-      Unfurl
-    </Link>
-  </header>
-);
+      <Link
+        to="/"
+        aria-label="Go to home page"
+        onClick={() => setOpenMobile(false)}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-md font-heading text-sm font-medium outline-none hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+          inSidebar && "min-h-7 shrink-0 justify-center",
+          isElectron && "electron-titlebar-no-drag",
+        )}
+      >
+        <UnfurlMark
+          aria-hidden="true"
+          focusable="false"
+          className="size-5 shrink-0 text-primary dark:text-chart-1"
+        />
+        <span className={cn(inSidebar && "group-data-[collapsible=icon]:hidden")}>
+          Unfurl
+        </span>
+      </Link>
+    </>
+  );
+};
 
 const App = () => {
   const setContent = useDialogStore((state) => state.setContent);
@@ -86,10 +96,14 @@ const App = () => {
         >
           {isElectron ? (
             <div className="h-0 overflow-visible">
-              <AppBar isElectron />
+              <header className="electron-titlebar-drag-region z-50 flex items-center gap-1 px-2">
+                <AppNavigation isElectron />
+              </header>
             </div>
           ) : (
-            <AppBar isElectron={false} />
+            <header className="relative z-20 flex h-12 shrink-0 items-center gap-1 border-b bg-sidebar px-2 text-sidebar-foreground md:hidden">
+              <AppNavigation />
+            </header>
           )}
           <div
             className={
@@ -99,7 +113,11 @@ const App = () => {
             }
             data-testid="app-sidebar-layout"
           >
-            <RecentFilesSidebar />
+            <RecentFilesSidebar
+              navigation={
+                !isElectron ? <AppNavigation inSidebar /> : undefined
+              }
+            />
             <SidebarInset className="min-h-0 min-w-0">
               <Outlet />
             </SidebarInset>

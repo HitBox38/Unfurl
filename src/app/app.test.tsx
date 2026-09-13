@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -15,28 +15,26 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }));
 
-vi.mock("@/features/recent-files-sidebar", () => ({
-  RecentFilesSidebar: () => <nav aria-label="Editable files" />,
-}));
-
 describe("App shell", () => {
   afterEach(() => {
     Reflect.deleteProperty(window, "ipcRenderer");
     useDialogStore.getState().reset();
   });
 
-  it("renders a web app bar with the sidebar toggle and home link", () => {
+  it("puts web navigation in the sidebar and limits the top bar to mobile", () => {
     render(<App />);
 
     const bar = screen.getByRole("banner");
     expect(bar).toHaveTextContent("Unfurl");
     expect(bar).not.toHaveClass("electron-titlebar-drag-region");
+    expect(bar).toHaveClass("md:hidden");
+    const sidebar = screen.getByLabelText("Editable files sidebar");
     expect(screen.getByTestId("app-shell")).toHaveClass("app-shell");
     expect(
-      screen.getByRole("button", { name: /toggle sidebar/i }),
+      within(sidebar).getByRole("button", { name: /toggle sidebar/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /go to home page/i }),
+      within(sidebar).getByRole("link", { name: /go to home page/i }),
     ).toHaveAttribute("href", "/");
     expect(screen.getAllByRole("main")).toHaveLength(1);
     expect(
@@ -74,16 +72,19 @@ describe("App shell", () => {
     );
   });
 
-  it("toggles the sidebar from the app bar", async () => {
+  it("collapses and reopens the web sidebar using its own navigation", async () => {
     const user = userEvent.setup();
     render(<App />);
 
-    await user.click(screen.getByRole("button", { name: /toggle sidebar/i }));
-    await user.click(screen.getByRole("button", { name: /toggle sidebar/i }));
-
-    expect(
-      screen.getByRole("button", { name: /toggle sidebar/i }),
-    ).toBeInTheDocument();
+    const sidebar = screen.getByLabelText("Editable files sidebar");
+    const toggle = within(sidebar).getByRole("button", { name: /toggle sidebar/i });
+    const sidebarState = sidebar.closest('[data-slot="sidebar"]');
+    expect(sidebarState).toHaveAttribute("data-state", "expanded");
+    await user.click(toggle);
+    expect(sidebarState).toHaveAttribute("data-state", "collapsed");
+    expect(within(sidebar).getByRole("link", { name: /go to home page/i })).toHaveAttribute("href", "/");
+    await user.click(toggle);
+    expect(sidebarState).toHaveAttribute("data-state", "expanded");
   });
 
   it("opens help with F1 and leaves copy/find alone", () => {
@@ -97,6 +98,21 @@ describe("App shell", () => {
       );
     });
     expect(screen.getByRole("dialog", { name: "FAQ" })).toBeInTheDocument();
+  });
+
+  it("opens mobile navigation and closes the drawer when going home", async () => {
+    const originalWidth = window.innerWidth;
+    window.innerWidth = 390;
+    try {
+      const user = userEvent.setup();
+      render(<App />);
+      await user.click(screen.getByRole("button", { name: /toggle sidebar/i }));
+      const drawer = screen.getByRole("dialog", { name: "Sidebar" });
+      await user.click(within(drawer).getByRole("link", { name: /go to home page/i }));
+      expect(screen.queryByRole("dialog", { name: "Sidebar" })).not.toBeInTheDocument();
+    } finally {
+      window.innerWidth = originalWidth;
+    }
   });
 
   it("does not open an edit menu from a normal renderer right click", () => {
