@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { FileTypeBadge, FileTypeIcon } from "@/shared/components";
 import { useEditableFiles, useProjects } from "@/shared/hooks";
 import { formatRelativeTime } from "@/shared/lib/format-relative-time";
+import { trackEvent } from "@/shared/lib/analytics";
 
 import { DEFAULT_RECENT_FILES_LIMIT } from "./constants";
 
@@ -32,6 +33,7 @@ export const RecentFilesStrip = ({
           <Link
             to="/files/$fileId"
             params={{ fileId: file.id }}
+            onClick={() => trackEvent("recent_file_opened", {})}
             className="-mx-2 flex items-center gap-3 rounded-lg px-2 py-1.5 outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
           >
             <FileTypeIcon

@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { FileTypeBadge, FileTypeIcon } from "@/shared/components";
 import type { EditableFileRecord } from "@/shared/lib/editable-files-storage";
 import { formatRelativeTime } from "@/shared/lib/format-relative-time";
+import { trackEvent } from "@/shared/lib/analytics";
 import type { ProjectRecord } from "@/shared/types";
 import { Card, CardContent, CardHeader } from "@/shared/ui/card";
 
@@ -33,6 +34,7 @@ export const FileCard = ({ file, projects }: FileCardProps) => {
           <Link
             to="/files/$fileId"
             params={{ fileId: file.id }}
+            onClick={() => trackEvent("recent_file_opened", {})}
             className="truncate font-heading text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
             title={file.name}
           >

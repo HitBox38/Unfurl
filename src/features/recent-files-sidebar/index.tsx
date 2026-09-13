@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 
 import { useEditableFiles, useProjects } from "@/shared/hooks";
+import { AnalyticsPreferences } from "@/features/analytics-preferences";
 import { groupFilesByProject } from "@/shared/lib/project-summary";
 import {
   Sidebar,
@@ -107,6 +108,7 @@ export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) =
           v{__APP_VERSION__}
         </p>
         <ThemeToggleButton />
+        <AnalyticsPreferences />
       </SidebarFooter>
     </Sidebar>
   );

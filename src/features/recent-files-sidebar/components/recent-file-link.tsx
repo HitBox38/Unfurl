@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { FileTypeBadge, FileTypeIcon } from "@/shared/components";
 import type { EditableFileRecord } from "@/shared/lib/editable-files-storage";
 import { formatRelativeTime } from "@/shared/lib/format-relative-time";
+import { trackEvent } from "@/shared/lib/analytics";
 import {
   SidebarMenuButton,
   SidebarMenuItem,
@@ -27,6 +28,7 @@ export const RecentFileLink = ({ file }: Props) => {
           to="/files/$fileId"
           params={{ fileId: file.id }}
           onClick={() => {
+            trackEvent("recent_file_opened", {});
             if (isMobile) setOpenMobile(false);
           }}
           activeProps={{

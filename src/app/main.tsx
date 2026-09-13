@@ -3,12 +3,14 @@ import ReactDOM from "react-dom/client";
 import { RouterProvider } from "@tanstack/react-router";
 
 import { router } from "@/app/router";
+import { initAnalytics } from "@/shared/lib/analytics";
 import { initTheme } from "@/shared/hooks/use-theme";
 import { migrateStorage } from "@/shared/lib/projects-storage";
 import "@/styles/index.css";
 
 initTheme();
 migrateStorage();
+initAnalytics();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

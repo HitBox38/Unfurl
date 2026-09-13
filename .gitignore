@@ -8,12 +8,16 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.pnpm-store/
 dist
 dist-ssr
 dist-electron
 release
 coverage
 *.local
+.env
+.env.*
+!.env.example
 .vite
 
 # Build artifacts
