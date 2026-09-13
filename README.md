@@ -86,7 +86,15 @@ Open the URL printed by the preview server. This is also useful in headless envi
 | `pnpm build:mac` | Build and package `release/Unfurl-Mac-Installer.dmg`. |
 | `pnpm build:linux` | Build and package `release/Unfurl-Linux.AppImage`. |
 
-Packaging uses Electron Builder. Use the matching operating system for platform builds, as the repository's CI workflows do. Packaging scripts build locally without publishing; the GitHub Actions workflows publish desktop builds to itch.io on pushes to `master`.
+Packaging uses Electron Builder. Use the matching operating system for platform builds, as the repository's CI workflow does. Packaging scripts build locally without publishing.
+
+### Releasing a new version
+
+Update `version` in `package.json` before merging a release into `master`. On every push to `master`, the [release workflow](.github/workflows/release.yaml) checks and builds all three desktop installers, then publishes them to itch.io and [GitHub Releases](https://github.com/HitBox38/Unfurl/releases).
+
+GitHub Releases use the package version as the tag (for example, `v2.0.1`), point to the built commit, and include automatically generated release notes plus the Windows `.exe`, macOS `.dmg`, and Linux `.AppImage` downloads. Versions containing a prerelease suffix are marked as prereleases.
+
+An already published GitHub version is skipped; bump the package version to publish another release. Releases stay in draft until all three installers are uploaded, and rerunning the same commit can resume an interrupted draft. GitHub and itch.io publishing run independently after successful builds, so an itch.io upload failure does not block GitHub publishing. GitHub publishing uses the workflow's built-in `GITHUB_TOKEN`; itch.io continues to use the `ITCH_API_KEY` repository secret.
 
 ## Architecture
 

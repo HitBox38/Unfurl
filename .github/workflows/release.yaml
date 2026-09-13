@@ -1,0 +1,197 @@
+name: Build and publish desktop releases
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            os: ubuntu-latest
+            package: Unfurl-Linux.AppImage
+          - platform: mac
+            os: macos-latest
+            package: Unfurl-Mac-Installer.dmg
+          - platform: windows
+            os: windows-latest
+            package: Unfurl-Windows-Setup.exe
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Build app
+        run: pnpm build:${{ matrix.platform }}
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.platform }}
+          path: release/${{ matrix.package }}
+          if-no-files-found: error
+          compression-level: 0
+
+  itchio-deploy:
+    name: Publish itch.io ${{ matrix.channel }}
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            channel: linux
+            package: Unfurl-Linux.AppImage
+          - platform: mac
+            channel: osx
+            package: Unfurl-Mac-Installer.dmg
+          - platform: windows
+            channel: windows
+            package: Unfurl-Windows-Setup.exe
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Download installer
+        uses: actions/download-artifact@v4
+        with:
+          name: installer-${{ matrix.platform }}
+          path: release
+
+      - name: Set up butler
+        uses: jdno/setup-butler@v2.0.0
+        with:
+          version: latest
+
+      - name: Push to itch.io
+        run: |
+          # Artifact downloads do not preserve the AppImage's executable permission.
+          if [ "$CHANNEL" = linux ]; then chmod +x "$PACKAGE"; fi
+          butler push "$PACKAGE" "$ITCH_USER/$ITCH_GAME:$CHANNEL" --userversion "$(jq -r .version package.json)"
+        env:
+          BUTLER_API_KEY: ${{ secrets.ITCH_API_KEY }}
+          CHANNEL: ${{ matrix.channel }}
+          ITCH_GAME: unfurl
+          ITCH_USER: hit-box38
+          PACKAGE: release/${{ matrix.package }}
+
+  github-release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Download installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: installer-*
+          path: release
+          merge-multiple: true
+
+      - name: Prepare versioned release
+        id: release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { version } = require('./package.json');
+            const tag = `v${version}`;
+            const repo = context.repo;
+            let release;
+            try {
+              ({ data: release } = await github.rest.repos.getReleaseByTag({ ...repo, tag }));
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+
+            if (release && !release.draft) {
+              core.info(`${tag} is already published; bump package.json to release a new version.`);
+              core.setOutput('publish', 'false');
+              return;
+            }
+
+            if (release && release.target_commitish !== context.sha) {
+              throw new Error(`Draft ${tag} belongs to another commit. Resolve it before reusing this version.`);
+            }
+
+            // An existing tag must match the commit used to build the installers.
+            let tagRef;
+            try {
+              ({ data: tagRef } = await github.rest.git.getRef({ ...repo, ref: `tags/${tag}` }));
+            } catch (error) {
+              if (error.status !== 404) throw error;
+            }
+            if (tagRef) {
+              const { data: commit } = await github.rest.repos.getCommit({ ...repo, ref: tag });
+              if (commit.sha !== context.sha) {
+                throw new Error(`${tag} already points to a different commit.`);
+              }
+            }
+
+            if (!release) {
+              await github.rest.repos.createRelease({
+                ...repo,
+                tag_name: tag,
+                target_commitish: context.sha,
+                name: `Unfurl ${tag}`,
+                generate_release_notes: true,
+                prerelease: version.includes('-'),
+                draft: true,
+              });
+            }
+
+            core.setOutput('tag', tag);
+            core.setOutput('publish', 'true');
+
+      - name: Upload installers and publish release
+        if: steps.release.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          gh release upload "$TAG" \
+            release/Unfurl-Linux.AppImage \
+            release/Unfurl-Mac-Installer.dmg \
+            release/Unfurl-Windows-Setup.exe \
+            --clobber
+          gh release edit "$TAG" --draft=false
