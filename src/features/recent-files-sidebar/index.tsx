@@ -4,6 +4,8 @@ import { useMemo, useState, type ReactNode } from "react";
 
 import { useEditableFiles, useProjects } from "@/shared/hooks";
 import { AnalyticsPreferences } from "@/features/analytics-preferences";
+import { VersionCheck } from "@/features/version-check";
+import { useVersionCheck } from "@/features/version-check/hooks/use-version-check";
 import { groupFilesByProject } from "@/shared/lib/project-summary";
 import {
   Sidebar,
@@ -19,6 +21,7 @@ import { ThemeToggleButton } from "./components/theme-toggle-button";
 import { buildSidebarGroups } from "./helpers";
 
 export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) => {
+  const versionCheck = useVersionCheck(Boolean(window.ipcRenderer));
   const projects = useProjects();
   const files = useEditableFiles();
   const [query, setQuery] = useState("");
@@ -104,9 +107,7 @@ export const RecentFilesSidebar = ({ navigation }: { navigation?: ReactNode }) =
       </SidebarContent>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
       <SidebarFooter className="group-data-[collapsible=icon]:p-1">
-        <p className="px-2 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
-          v{__APP_VERSION__}
-        </p>
+        <VersionCheck {...versionCheck} />
         <ThemeToggleButton />
         <AnalyticsPreferences />
       </SidebarFooter>

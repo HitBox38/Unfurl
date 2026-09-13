@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { MouseEventHandler, ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
@@ -68,6 +68,28 @@ const renderSidebar = () =>
   );
 
 describe("RecentFilesSidebar", () => {
+  it("checks for updates while the mobile sidebar is closed", async () => {
+    vi.useFakeTimers();
+    vi.stubEnv("DEV", false);
+    vi.stubGlobal("innerWidth", 400);
+    const fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ version: "99.0.0" }),
+    });
+    vi.stubGlobal("fetch", fetch);
+    const view = renderSidebar();
+    try {
+      expect(screen.queryByRole("button", { name: /check for updates/i })).not.toBeInTheDocument();
+      await act(() => vi.advanceTimersByTimeAsync(1));
+      expect(fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      view.unmount();
+      vi.useRealTimers();
+      vi.unstubAllEnvs();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("does not repeat the app wordmark or sidebar toggle", () => {
     renderSidebar();
 

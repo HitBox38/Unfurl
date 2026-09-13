@@ -102,6 +102,12 @@ GitHub Releases use the package version as the tag (for example, `v2.0.1`), poin
 
 An already published GitHub version is skipped; bump the package version to publish another release. Releases stay in draft until all three installers are uploaded, and rerunning the same commit can resume an interrupted draft. GitHub and itch.io publishing run independently after successful builds, so an itch.io upload failure does not block GitHub publishing. GitHub publishing uses the workflow's built-in `GITHUB_TOKEN`; itch.io continues to use the `ITCH_API_KEY` repository secret.
 
+### Version checks
+
+Click the version in the sidebar to check for updates. Production builds also check on startup and hourly while visible, and check again when the app regains focus if the last check was at least an hour ago. Development builds only check manually. Failed checks stay in the update dialog and can be retried.
+
+Windows, macOS, and Linux check the latest stable GitHub Release and offer a link to its downloads. Updates are installed manually. The web app checks `version.json` from its own deployment and offers a reload when a newer version is available; save open edits before reloading. Vite generates this manifest from `package.json` for every build, so deploy it alongside the rest of `dist` and bump the package version for web releases too.
+
 ## Architecture
 
 Unfurl uses React 19 and TypeScript 6 with Vite 8 and Electron 42. Zustand manages shared state, TanStack Router handles navigation, and React Flow (`@xyflow/react`) with Dagre powers the graph. The UI uses Tailwind CSS 4, shadcn/ui primitives, and Lucide icons. Tests use Vitest and Testing Library.
