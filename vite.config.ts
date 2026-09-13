@@ -9,6 +9,27 @@ import electron from "vite-plugin-electron/simple";
 import svgr from "vite-plugin-svgr";
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+const appVersion: string = JSON.parse(
+  readFileSync(path.join(projectRoot, "package.json"), "utf8"),
+).version;
+
+const versionManifest = (): Plugin => ({
+  name: "version-manifest",
+  generateBundle() {
+    this.emitFile({
+      type: "asset",
+      fileName: "version.json",
+      source: JSON.stringify({ version: appVersion }),
+    });
+  },
+  configureServer(server) {
+    server.middlewares.use("/version.json", (_request, response) => {
+      response.setHeader("Content-Type", "application/json");
+      response.setHeader("Cache-Control", "no-store");
+      response.end(JSON.stringify({ version: appVersion }));
+    });
+  },
+});
 
 const electronPreloadOutputCompat = (): Plugin => {
   return {
@@ -41,10 +62,7 @@ export default defineConfig(({ mode }) => {
     base: mode === "web" ? "/" : "./",
     define: {
       "import.meta.env.VITE_PUBLIC_DISTRIBUTION": JSON.stringify(distribution),
-      __APP_VERSION__: JSON.stringify(
-        JSON.parse(readFileSync(path.join(projectRoot, "package.json"), "utf8"))
-          .version,
-      ),
+      __APP_VERSION__: JSON.stringify(appVersion),
     },
     resolve: {
       alias: {
@@ -83,6 +101,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
+      versionManifest(),
       svgr({
         svgrOptions: {
           exportType: "default",
