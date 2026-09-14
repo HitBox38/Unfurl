@@ -348,7 +348,7 @@ export const NodeEditor = () => {
           </CardContent>
           <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
             {methods.formState.isDirty ? (
-              <span className="text-sm font-medium text-primary">
+              <span className="text-sm font-medium text-primary dark:text-chart-1">
                 Unsaved changes
               </span>
             ) : (
