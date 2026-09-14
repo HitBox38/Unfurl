@@ -8,6 +8,7 @@ import { useFaqModal } from "@/features/faq";
 import { FileImportDropzone } from "@/features/file-import";
 import { ProjectCard } from "@/features/project-card";
 import { RecentFilesStrip } from "@/features/recent-files-strip";
+import { StoryCard } from "@/features/story-card";
 import { useEditableFiles, useProjects } from "@/shared/hooks";
 import type { EditableFileRecord } from "@/shared/lib/editable-files-storage";
 import {
@@ -64,6 +65,11 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
     () => groupFilesByProject(projects, files),
     [files, projects],
   );
+  const projectsById = useMemo(
+    () => new Map(projects.map((project) => [project.id, project])),
+    [projects],
+  );
+  const storyCards = files.slice(0, 2);
 
   // Fall back to the most recently edited project until the user picks one
   // (or if the picked one has since been deleted).
@@ -78,11 +84,16 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
 
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-y-auto text-left">
-      <header className="sticky top-0 z-10 flex flex-wrap items-center gap-3 border-b bg-background/80 px-6 py-3 backdrop-blur">
-        <h1 className="font-heading text-lg font-medium">
-          Unfurl{isOnline ? " Online" : ""}
-        </h1>
-        <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+      <header className="library-header">
+        <div className="min-w-0 flex-1 space-y-2">
+          <h1 className="font-heading text-3xl font-medium tracking-tight">
+            Unfurl{isOnline ? " Online" : ""}
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            A place for your stories to take shape.
+          </p>
+        </div>
+        <div className="workspace-bubble workspace-toolbar flex-wrap">
           <NewProjectButton />
           <DemoButton project={targetProject} />
 
@@ -109,36 +120,45 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
         </div>
       </header>
 
-      <div className="flex flex-col gap-6 px-6 py-5">
-        {isOnline ? (
-          <aside
-            aria-label="Browser storage"
-            className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground"
+      <div className="library-content">
+        {storyCards.length > 0 ? (
+          <section
+            aria-labelledby="story-cards-heading"
+            className="flex flex-col gap-5"
           >
-            <p className="font-medium text-foreground">
-              Your work stays in this browser
-            </p>
-            <p>
-              Applied changes are saved on this device, without account sync.
-              Clearing site data removes local projects.
-            </p>
-            <p>
-              Export stories as JSON and export your project’s metadata config
-              for backups. Import those files to continue in another browser.
-            </p>
-          </aside>
+            <div>
+              <h2
+                id="story-cards-heading"
+                className="text-lg font-medium"
+              >
+                Continue writing
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Pick up where you left off.
+              </p>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              {storyCards.map((file) => (
+                <StoryCard
+                  key={file.id}
+                  file={file}
+                  project={projectsById.get(file.projectId)}
+                />
+              ))}
+            </div>
+          </section>
         ) : null}
         <section
           aria-labelledby="projects-heading"
-          className="flex flex-col gap-1"
+          className="flex flex-col gap-5"
         >
           <h2
             id="projects-heading"
-            className="text-sm font-medium text-muted-foreground"
+            className="text-lg font-medium"
           >
             Projects
           </h2>
-          <ul className="flex flex-col">
+          <ul className="grid gap-4 xl:grid-cols-2">
             {projects.map((project) => (
               <li key={project.id}>
                 <ProjectCard
@@ -153,11 +173,19 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
         {targetProject ? (
           <section
             aria-labelledby="import-heading"
-            className="flex flex-col gap-2"
+            className="workspace-bubble flex flex-col gap-5 p-5 sm:p-7"
           >
-            <h2 id="import-heading" className="sr-only">
-              Import files
-            </h2>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="space-y-1">
+                <h2 id="import-heading" className="text-lg font-medium">
+                  Start a story
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Begin with a blank page or import an existing story.
+                </p>
+              </div>
+              <NewStoryButton project={targetProject} />
+            </div>
             {projects.length > 1 ? (
               <div className="flex items-center gap-2">
                 <Label
@@ -187,9 +215,6 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
                 </Select>
               </div>
             ) : null}
-            <div className="self-start">
-              <NewStoryButton project={targetProject} />
-            </div>
             <FileImportDropzone
               key={targetProject.id}
               projectId={targetProject.id}
@@ -200,7 +225,7 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
         {files.length > 0 ? (
           <section
             aria-labelledby="recent-heading"
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-4"
           >
             <h2
               id="recent-heading"
@@ -210,6 +235,24 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
             </h2>
             <RecentFilesStrip />
           </section>
+        ) : null}
+        {isOnline ? (
+          <aside
+            aria-label="Browser storage"
+            className="rounded-2xl bg-muted/50 p-5 text-xs leading-relaxed text-muted-foreground"
+          >
+            <p className="mb-1 text-sm font-medium text-foreground">
+              Your work stays in this browser
+            </p>
+            <p>
+              Applied changes are saved on this device, without account sync.
+              Clearing site data removes local projects.
+            </p>
+            <p>
+              Export stories as JSON and export your project’s metadata config
+              for backups. Import those files to continue in another browser.
+            </p>
+          </aside>
         ) : null}
       </div>
     </div>

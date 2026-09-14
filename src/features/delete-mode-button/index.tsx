@@ -12,9 +12,10 @@ export const DeleteModeButton = () => {
   return (
     <Button
       type="button"
-      variant={isDeleteMode ? "destructive" : "secondary"}
-      size="icon-sm"
+      variant={isDeleteMode ? "destructive" : "ghost"}
+      size="icon"
       aria-label="Delete nodes"
+      title={isDeleteMode ? "Exit delete mode" : "Delete nodes"}
       aria-pressed={isDeleteMode}
       onClick={toggleDeleteMode}
     >

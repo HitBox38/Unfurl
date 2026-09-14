@@ -10,12 +10,13 @@ export const DownloadButton = () => {
 
   return (
     <Button
-      variant="secondary"
+      variant="outline"
       size="sm"
+      className="h-10 gap-2 rounded-2xl border-border/70 bg-card/95 px-4 shadow-sm dark:bg-card/95"
       aria-label="Export JSON"
       onClick={() => downloadStoryAsJson(name, content)}
     >
-      <Download aria-hidden="true" />
+      <Download className="size-4" aria-hidden="true" />
       Export JSON
     </Button>
   );

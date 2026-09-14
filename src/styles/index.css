@@ -57,7 +57,8 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  color-scheme: light;
+  --background: oklch(0.975 0.003 285.823);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.141 0.005 285.823);
@@ -82,7 +83,7 @@
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
-  --radius: 0.45rem;
+  --radius: 0.75rem;
 
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
@@ -102,6 +103,7 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
   }
   body {
     margin: 0;
@@ -169,6 +171,38 @@
   --app-bar-height: 0px;
 }
 
+@layer components {
+  .workspace-bubble {
+    @apply rounded-2xl border border-border/70 bg-card/95 text-card-foreground shadow-[0_4px_20px_-8px_rgb(0_0_0/0.18)] backdrop-blur-xl;
+  }
+
+  .workspace-toolbar {
+    @apply flex items-center gap-1.5 p-2;
+  }
+
+  .workspace-toolbar [data-slot="button"] {
+    @apply min-h-9 rounded-xl;
+  }
+
+  .library-content {
+    @apply mx-auto flex w-full max-w-6xl flex-col gap-10 px-5 py-8 sm:px-8 lg:px-12;
+  }
+
+  .library-header {
+    @apply mx-auto flex w-full max-w-6xl flex-wrap items-center gap-5 px-5 pb-2 pt-8 sm:px-8 lg:px-12 lg:pt-12;
+  }
+}
+
+.app-shell .workspace-sidebar {
+  padding: 16px 8px 16px 16px;
+}
+
+.workspace-sidebar [data-slot="sidebar-inner"] {
+  border-radius: 20px;
+  box-shadow: 0 4px 24px -12px rgb(0 0 0 / 18%);
+  overflow: hidden;
+}
+
 .electron-app-shell {
   --electron-titlebar-height: env(titlebar-area-height, 32px);
   --app-bar-height: var(--electron-titlebar-height);
@@ -215,6 +249,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --sidebar: oklch(0.21 0.006 285.885);
   --sidebar-foreground: oklch(0.985 0 0);
   --sidebar-primary: oklch(0.585 0.233 277.117);
@@ -223,7 +258,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
-  --background: oklch(0.141 0.005 285.823);
+  --background: oklch(0.165 0.006 285.823);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.21 0.006 285.885);
   --card-foreground: oklch(0.985 0 0);
@@ -260,27 +295,74 @@
 .file-workspace {
   container-type: inline-size;
 }
-.file-editor-layout {
+.file-header {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+}
+.file-title-bubble {
+  flex: 1 1 16rem;
+}
+.file-header .workspace-toolbar {
+  padding: 3px;
+}
+@media (min-width: 641px) and (pointer: fine) {
+  .file-header .workspace-toolbar [data-slot="button"] {
+    min-height: 32px;
+  }
+}
+.file-editor-layout {
+  position: relative;
+  display: flex;
+  gap: 16px;
   height: 100%;
   min-height: 0;
+  padding: 0 16px 16px;
 }
 .file-graph-pane {
   flex: 1;
   min-width: 0;
   min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--background);
 }
 .file-node-panel {
-  width: 28rem;
+  width: 29rem;
   flex-shrink: 0;
   min-height: 0;
 }
 @container (max-width: 899px) {
   .file-editor-layout.has-editor .file-graph-pane {
-    display: none;
+    /* Keep dimensions valid while a graph zoom finishes behind the editor. */
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .file-editor-layout.has-editor .file-graph-pane * {
+    visibility: hidden !important;
   }
   .file-node-panel {
     width: 100%;
-    border-left: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  .file-header {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .file-editor-layout {
+    padding: 0 10px 10px;
+  }
+  .file-header [data-testid="file-toolbar"] {
+    gap: 6px;
+  }
+  .file-header .workspace-toolbar {
+    padding: 4px;
   }
 }

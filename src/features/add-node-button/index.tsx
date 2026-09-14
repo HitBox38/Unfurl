@@ -29,9 +29,10 @@ export const AddNodeButton = () => {
   return (
     <Button
       type="button"
-      variant="secondary"
-      size="icon-sm"
+      variant="ghost"
+      size="icon"
       aria-label="Add node"
+      title="Add node"
       onClick={onAddNode}
     >
       <Plus aria-hidden="true" />

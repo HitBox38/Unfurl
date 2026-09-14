@@ -17,7 +17,7 @@ interface Props {
 }
 
 export const ProjectFilesGroup = ({ project, files }: Props) => (
-  <SidebarGroup className="gap-0 py-1 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-1">
+  <SidebarGroup className="gap-2 py-3 group-data-[collapsible=icon]:gap-0 group-data-[collapsible=icon]:p-1">
     <SidebarGroupLabel asChild>
       <Link
         to="/projects/$projectId"
@@ -28,7 +28,7 @@ export const ProjectFilesGroup = ({ project, files }: Props) => (
       </Link>
     </SidebarGroupLabel>
     <SidebarGroupContent>
-      <SidebarMenu className="gap-0.5 group-data-[collapsible=icon]:items-center">
+      <SidebarMenu className="gap-1.5 group-data-[collapsible=icon]:items-center">
         {files.map((file) => (
           <RecentFileLink key={file.id} file={file} />
         ))}

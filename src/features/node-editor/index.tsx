@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Trash, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Controller,
@@ -35,7 +35,6 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { Label } from "@/shared/ui/label";
-import { Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -159,8 +158,8 @@ export const NodeEditor = () => {
 
   return (
     <FormProvider {...methods}>
-      <Card className="flex h-full min-h-0 w-full flex-col rounded-xl border bg-card/95 p-0 shadow-2xl backdrop-blur-sm">
-        <CardHeader className="gap-3 border-b px-4 py-3 text-left">
+      <Card className="workspace-bubble flex h-full min-h-0 w-full flex-col gap-0 overflow-clip rounded-3xl p-0">
+        <CardHeader className="shrink-0 gap-3 border-b border-border/60 px-6 py-5 text-left">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1 space-y-1">
               <CardDescription className="text-xs font-medium uppercase tracking-wide">
@@ -205,11 +204,11 @@ export const NodeEditor = () => {
           className="flex min-h-0 flex-1 flex-col"
           onSubmit={methods.handleSubmit(submitNode)}
         >
-          <CardContent className="min-h-0 flex-1 overflow-y-auto">
+          <CardContent className="min-h-0 flex-1 overflow-y-auto px-6 py-2 text-left">
             <Accordion
               type="multiple"
               defaultValue={["content", "choices", "metadata"]}
-              className="flex flex-col gap-3"
+              className="flex flex-col gap-4"
             >
               <AccordionItem value="content">
                 <AccordionTrigger>Content</AccordionTrigger>
@@ -220,7 +219,7 @@ export const NodeEditor = () => {
                   <Textarea
                     id="node-content"
                     {...methods.register("content")}
-                    className="min-h-[140px] w-full resize-y bg-background/80"
+                    className="field-sizing-fixed h-56 min-h-44 w-full resize-y rounded-xl bg-background/60 p-4 text-sm leading-relaxed"
                     defaultValue={node.content.join("\n")}
                   />
                 </AccordionContent>
@@ -228,12 +227,12 @@ export const NodeEditor = () => {
 
               <AccordionItem value="choices">
                 <AccordionTrigger>Choices</AccordionTrigger>
-                <AccordionContent className="space-y-3">
+                <AccordionContent className="space-y-4">
                   {fields.map((field, index) => (
                     <section
                       key={field.id}
                       aria-label={`Choice ${index + 1} editor`}
-                      className="space-y-3 rounded-xl border bg-background/80 p-3 shadow-sm"
+                      className="space-y-4 rounded-2xl border border-border/70 bg-background/60 p-4"
                       onMouseEnter={() =>
                         previewChoice(
                           methods.getValues(`choices.${index}.destination`),
@@ -242,14 +241,15 @@ export const NodeEditor = () => {
                       }
                       onMouseLeave={() => setGraphPreview(null)}
                     >
-                      <div className="flex items-center justify-between gap-2 border-b pb-2">
+                      <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-semibold tracking-wide text-muted-foreground">
                           Choice {index + 1}
                         </span>
                         <Button
                           type="button"
-                          variant="destructive"
+                          variant="ghost"
                           size="icon-xs"
+                          className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                           aria-label="Delete choice"
                           onClick={() => remove(index)}
                         >
@@ -347,16 +347,18 @@ export const NodeEditor = () => {
               <NodeMetadataEditor />
             </Accordion>
           </CardContent>
-          <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
+          <CardFooter className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-t border-border/60 px-6 py-4">
             {methods.formState.isDirty ? (
-              <span className="text-sm text-warning">Unsaved changes</span>
+              <span className="text-sm font-medium text-primary dark:text-chart-1">
+                Unsaved changes
+              </span>
             ) : (
               <span className="text-sm text-muted-foreground">
                 No unsaved changes
               </span>
             )}
             <div className="flex items-center gap-2">
-              <Button type="button" variant="warning" onClick={requestClose}>
+              <Button type="button" variant="secondary" onClick={requestClose}>
                 Cancel
               </Button>
               <Button

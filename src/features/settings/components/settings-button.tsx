@@ -18,6 +18,7 @@ export const SettingsButton = () => {
       <SidebarMenuItem>
         <SidebarMenuButton
           data-settings-trigger
+          className="h-10 rounded-xl group-data-[collapsible=icon]:size-8!"
           aria-label={label}
           tooltip={label}
           onClick={(event) => {
