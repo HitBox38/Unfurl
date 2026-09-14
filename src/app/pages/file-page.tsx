@@ -1,5 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { DialogViewer } from "@/features/dialog-viewer";
@@ -11,6 +11,7 @@ import { NodeEditor } from "@/features/node-editor";
 import { InlineNameInput } from "@/shared/components";
 import { getEditableFile } from "@/shared/lib/editable-files-storage";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
+import type { StoryData } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -19,6 +20,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
+
+class FilePageState {
+  static isBlankStory(content: StoryData) {
+    const [startNode] = content.nodes;
+
+    return (
+      content.nodes.length === 1 &&
+      content.start === startNode?.name &&
+      startNode.content.every((line) => line.trim() === "") &&
+      startNode.choices.length === 0
+    );
+  }
+}
 
 export const FilePage = () => {
   const { fileId } = useParams({ strict: false }) as { fileId?: string };
@@ -100,13 +114,15 @@ export const FilePage = () => {
     );
   }
 
+  const showBlankStoryCue = FilePageState.isBlankStory(content);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-        <header className="flex shrink-0 flex-col gap-2 border-b bg-background p-3">
+        <header className="file-header shrink-0 text-left">
           <div
             data-testid="file-page-header"
-            className="flex min-w-0 items-center rounded-lg bg-card px-2 py-1"
+            className="file-title-bubble workspace-bubble flex min-h-10 min-w-0 items-center px-3 py-1"
           >
             <InlineNameInput
               key={name || "Untitled"}
@@ -114,38 +130,32 @@ export const FilePage = () => {
               label="File name"
               name={name}
               onCommit={setFileName}
-              className="text-xl md:text-2xl"
+              className="text-base md:text-base"
             />
           </div>
           <div
             data-testid="file-toolbar"
-            className="flex flex-wrap items-center justify-end gap-2"
+            className="flex flex-wrap items-center gap-3"
           >
             <div
               data-testid="file-history-bubble"
-              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+              className="workspace-bubble workspace-toolbar"
             >
               <FileHistoryControls />
             </div>
             <div
               data-testid="file-add-node-bubble"
-              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+              className="workspace-bubble workspace-toolbar"
             >
               <GraphNodeToolbar />
             </div>
             <div
               data-testid="file-download-bubble"
-              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+              className="flex"
             >
               <DownloadButton />
             </div>
           </div>
-          {!window.ipcRenderer ? (
-            <p className="text-xs text-muted-foreground">
-              Applied edits are saved in this browser. Export JSON to keep a
-              backup.
-            </p>
-          ) : null}
         </header>
         <div className="file-workspace min-h-0 flex-1">
           <div
@@ -153,13 +163,27 @@ export const FilePage = () => {
               node ? "file-editor-layout has-editor" : "file-editor-layout"
             }
           >
-            <div className="file-graph-pane">
+            <div className="file-graph-pane relative">
               <DialogViewer />
+              {showBlankStoryCue ? (
+                <aside
+                  aria-label="Blank story prompt"
+                  className="workspace-bubble pointer-events-none absolute bottom-24 left-4 right-4 z-10 max-w-xs p-4 text-left text-sm"
+                >
+                  <p className="flex items-center gap-2 font-medium text-foreground">
+                    <Sparkles className="size-4 text-primary" />
+                    Give Start a first line.
+                  </p>
+                  <p className="mt-1 text-muted-foreground">
+                    Then add a choice when the path branches.
+                  </p>
+                </aside>
+              ) : null}
             </div>
             {node ? (
               <aside
                 aria-label="Node editor"
-                className="file-node-panel border-l bg-background p-3"
+                className="file-node-panel"
               >
                 <NodeEditor />
               </aside>

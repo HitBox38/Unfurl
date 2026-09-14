@@ -30,9 +30,10 @@ export const FileHistoryControls = () => {
     <div className="flex items-center gap-1">
       <Button
         type="button"
-        variant="secondary"
-        size="icon-sm"
+        variant="ghost"
+        size="icon"
         aria-label="Undo edit"
+        title="Undo edit"
         disabled={!canUndo}
         onClick={undo}
       >
@@ -40,9 +41,10 @@ export const FileHistoryControls = () => {
       </Button>
       <Button
         type="button"
-        variant="secondary"
-        size="icon-sm"
+        variant="ghost"
+        size="icon"
         aria-label="Redo edit"
+        title="Redo edit"
         disabled={!canRedo}
         onClick={redo}
       >

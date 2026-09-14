@@ -194,8 +194,8 @@ describe("NodeEditor", () => {
 
     expect(container.querySelector('[data-slot="card"]')).toHaveClass(
       "h-full",
-      "rounded-xl",
-      "shadow-2xl",
+      "min-h-0",
+      "overflow-clip",
     );
     expect(container.querySelector('[data-slot="card-content"]')).toHaveClass(
       "flex-1",
@@ -241,6 +241,21 @@ describe("NodeEditor", () => {
     expect(
       screen.getByRole("combobox", { name: /destination for option next/i }),
     ).toBeInTheDocument();
+  });
+
+  it("uses purple or neutral controls for dirty state actions", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+
+    render(<NodeEditor />);
+
+    await user.type(screen.getByRole("textbox", { name: "Content" }), " draft");
+
+    expect(screen.getByText("Unsaved changes")).toHaveClass("text-primary");
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveAttribute(
+      "data-variant",
+      "secondary",
+    );
   });
 
   it("highlights the current choice edge while its editor card is hovered", async () => {

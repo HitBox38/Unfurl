@@ -38,13 +38,13 @@ export const RecentFilesSidebar = ({
   const showSearchEmpty = hasQuery && groups.length === 0;
 
   return (
-    <Sidebar collapsible="icon" aria-label="Editable files sidebar">
+    <Sidebar variant="floating" collapsible="icon" aria-label="Editable files sidebar" className="workspace-sidebar">
       {navigation ? (
-        <SidebarHeader className="min-h-14 shrink-0 flex-row items-center gap-2 px-3 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:px-0">
+        <SidebarHeader className="min-h-20 shrink-0 flex-row items-center gap-3 px-5 group-data-[collapsible=icon]:flex-col group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-4">
           {navigation}
         </SidebarHeader>
       ) : null}
-      <SidebarHeader className="group-data-[collapsible=icon]:hidden">
+      <SidebarHeader className="px-3 pb-4 group-data-[collapsible=icon]:hidden">
         <label htmlFor="editable-files-search" className="relative block px-2">
           <Search className="pointer-events-none absolute left-5 top-1/2 size-4 -translate-y-1/2 text-sidebar-foreground/70" />
           <SidebarInput
@@ -53,7 +53,7 @@ export const RecentFilesSidebar = ({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search files"
-            className="px-9"
+            className="h-10 rounded-xl bg-muted/60 px-9"
           />
           {hasQuery ? (
             <button
@@ -68,7 +68,7 @@ export const RecentFilesSidebar = ({
         </label>
       </SidebarHeader>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
-      <SidebarContent className="group-data-[collapsible=icon]:overflow-hidden">
+      <SidebarContent className="px-2 py-3 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:overflow-hidden">
         <nav aria-label="Editable files">
           {showImportEmpty ? (
             <div className="flex flex-col items-start gap-1 rounded-lg border border-dashed p-3 text-sm text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
@@ -103,7 +103,7 @@ export const RecentFilesSidebar = ({
         </nav>
       </SidebarContent>
       <SidebarSeparator className="group-data-[collapsible=icon]:hidden" />
-      <SidebarFooter className="group-data-[collapsible=icon]:p-1">
+      <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-1">
         <SettingsButton />
       </SidebarFooter>
     </Sidebar>

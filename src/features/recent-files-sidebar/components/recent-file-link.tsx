@@ -22,18 +22,19 @@ export const RecentFileLink = ({ file }: Props) => {
       <SidebarMenuButton
         asChild
         tooltip={file.name}
-        className="group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
+        className="h-auto min-h-11 rounded-xl px-3 py-2.5 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-h-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0!"
       >
         <Link
           to="/files/$fileId"
           params={{ fileId: file.id }}
+          aria-label={file.name}
           onClick={() => {
             trackEvent("recent_file_opened", {});
             if (isMobile) setOpenMobile(false);
           }}
           activeProps={{
             className:
-              "bg-sidebar-accent font-medium text-sidebar-accent-foreground",
+              "bg-primary/10 font-medium text-primary dark:text-chart-1",
           }}
         >
           <FileTypeIcon fileType={file.fileType} />
@@ -44,7 +45,7 @@ export const RecentFileLink = ({ file }: Props) => {
             fileType={file.fileType}
             className="group-data-[collapsible=icon]:hidden"
           />
-          <span className="shrink-0 text-xs text-sidebar-foreground/70 group-data-[collapsible=icon]:hidden">
+          <span className="sr-only">
             {formatRelativeTime(file.updatedAt)}
           </span>
         </Link>

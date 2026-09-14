@@ -33,6 +33,24 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 const story: StoryData = { title: null, start: null, nodes: [] };
+const branchingStory: StoryData = {
+  title: "Quest",
+  start: "Intro",
+  nodes: [
+    {
+      name: "Intro",
+      content: ["Hi"],
+      choices: [{ text: "Go", destination: "Forest" }],
+      metadata: {},
+    },
+    {
+      name: "Forest",
+      content: ["Trees"],
+      choices: [],
+      metadata: {},
+    },
+  ],
+};
 
 const renderHome = (isOnline = false) =>
   render(
@@ -108,6 +126,30 @@ describe("HomePage", () => {
         name: /quest/i,
       }),
     ).toBeInTheDocument();
+  });
+
+  it("surfaces recent stories as cards with mini graph thumbnails", () => {
+    saveEditableFile({
+      name: "quest",
+      fileType: "twee",
+      content: branchingStory,
+      projectId: "newer",
+    });
+    saveEditableFile({
+      name: "side quest",
+      fileType: "json",
+      content: branchingStory,
+      projectId: "older",
+    });
+
+    renderHome();
+
+    const stories = screen.getByRole("region", { name: /continue writing/i });
+    expect(within(stories).getAllByRole("link")).toHaveLength(2);
+    expect(
+      within(stories).getByRole("img", { name: /mini graph preview for quest/i }),
+    ).toBeInTheDocument();
+    expect(within(stories).getByText(/newer/i)).toBeInTheDocument();
   });
 
   it("clears any open file when visited", () => {

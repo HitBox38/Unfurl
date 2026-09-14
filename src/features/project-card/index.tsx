@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ArrowUpRight, FolderOpen } from "lucide-react";
 import { useState, type DragEvent } from "react";
 
 import type { ImportFilesResult } from "@/features/file-import";
@@ -28,10 +29,6 @@ const describeDropOutcome = (result: ImportFilesResult) => {
   return parts.join(" · ");
 };
 
-/**
- * Overview row for one project. The whole row links to the project page
- * and doubles as a drop target that imports straight into that project.
- */
 export const ProjectCard = ({ project, files }: ProjectCardProps) => {
   const { importFiles } = useImportFiles();
   const [isDragging, setIsDragging] = useState(false);
@@ -65,23 +62,29 @@ export const ProjectCard = ({ project, files }: ProjectCardProps) => {
         onDragLeave={() => setIsDragging(false)}
         onDrop={(event) => void onDrop(event)}
         className={cn(
-          "-mx-2 flex items-baseline gap-3 rounded-lg px-2 py-2 outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50",
+          "workspace-bubble group flex min-w-0 items-center gap-4 p-5 outline-none transition-[border-color,box-shadow] hover:border-primary/30 hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50",
           isDragging && "bg-primary/5 ring-1 ring-primary",
         )}
       >
-        <span className="min-w-0 flex-1 truncate font-medium">{project.name}</span>
-        <span className="hidden text-sm text-muted-foreground sm:inline">
-          {pluralize(fileCount, "file")}
-          {fieldCount > 0 ? (
-            <>
-              <span aria-hidden="true"> · </span>
-              {pluralize(fieldCount, "metadata field")}
-            </>
-          ) : null}
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:text-chart-1">
+          <FolderOpen className="size-5" aria-hidden="true" />
         </span>
-        <span className="shrink-0 text-sm text-muted-foreground">
-          {formatRelativeTime(lastEditedAt)}
-        </span>
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <span className="block truncate font-medium">{project.name}</span>
+          <span className="block text-xs leading-relaxed text-muted-foreground">
+            {pluralize(fileCount, "file")}
+            {fieldCount > 0 ? (
+              <>
+                <span aria-hidden="true"> · </span>
+                {pluralize(fieldCount, "metadata field")}
+              </>
+            ) : null}
+          </span>
+          <span className="block text-xs text-muted-foreground">
+            {formatRelativeTime(lastEditedAt)}
+          </span>
+        </div>
+        <ArrowUpRight className="size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-primary dark:group-hover:text-chart-1" aria-hidden="true" />
       </Link>
       {dropOutcome ? (
         <p

@@ -20,7 +20,13 @@ import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 
 import { NodeSearch } from "./components/node-search";
 import { DialogFlowNode } from "./components/dialog-flow-node";
-import { DIALOG_NODE_TYPE } from "./constants";
+import {
+  DIALOG_NODE_TYPE,
+  FLOW_MIN_ZOOM,
+  STORY_FIT_VIEW_MAX_ZOOM,
+  STORY_FIT_VIEW_MIN_ZOOM,
+  STORY_FIT_VIEW_PADDING,
+} from "./constants";
 import {
   buildChoiceEdgeId,
   buildDialogGraph,
@@ -30,6 +36,12 @@ import {
   setDialogFlowInstance,
 } from "./helpers";
 import type { DialogNodeData } from "./types";
+
+const STORY_FIT_VIEW_OPTIONS = {
+  padding: STORY_FIT_VIEW_PADDING,
+  minZoom: STORY_FIT_VIEW_MIN_ZOOM,
+  maxZoom: STORY_FIT_VIEW_MAX_ZOOM,
+};
 
 export const DialogViewer = () => {
   const content = useJsonDataStore((state) => state.content);
@@ -73,6 +85,7 @@ export const DialogViewer = () => {
         void flow.fitView({
           nodes,
           padding: nodes ? 0.6 : 0.2,
+          minZoom: nodes ? undefined : STORY_FIT_VIEW_MIN_ZOOM,
           maxZoom: 1.2,
           duration: 200,
         });
@@ -149,7 +162,6 @@ export const DialogViewer = () => {
 
         return {
           ...edge,
-          label: isConnected || isPreviewed ? edge.label : undefined,
           animated: isPreviewed || edge.animated,
           className: cn(
             edge.className,
@@ -283,9 +295,15 @@ export const DialogViewer = () => {
         );
       }}
     >
+      <p id="dialog-flow-canvas-description" className="sr-only">
+        Interactive story graph canvas. Select a node to edit its dialogue,
+        choices, and metadata.
+      </p>
       <ReactFlow
-        minZoom={0.05}
-        fitViewOptions={{ padding: 0.2, maxZoom: 1.2 }}
+        aria-describedby="dialog-flow-canvas-description"
+        aria-label="Story graph canvas"
+        minZoom={FLOW_MIN_ZOOM}
+        fitViewOptions={STORY_FIT_VIEW_OPTIONS}
         fitView
         nodes={displayedNodes}
         edges={displayedEdges}
@@ -296,13 +314,14 @@ export const DialogViewer = () => {
         onNodeClick={(_e, node) => setSelectedNode(node.data.metadata)}
         nodesConnectable
         deleteKeyCode={null}
+        proOptions={{ hideAttribution: true }}
         onInit={(instance) => {
           flowInstanceRef.current = instance;
           setDialogFlowInstance(instance);
           onLayout();
         }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={18} size={1.3} />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
       </ReactFlow>
       <NodeSearch
         nodes={content.nodes}
@@ -322,7 +341,7 @@ export const DialogViewer = () => {
       <div
         role="toolbar"
         aria-label="Graph view"
-        className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded-lg border bg-card p-1 shadow-md"
+        className="workspace-bubble workspace-toolbar absolute bottom-4 left-4 z-10"
       >
         <Button
           variant="ghost"
@@ -351,7 +370,7 @@ export const DialogViewer = () => {
           size="sm"
           onClick={() =>
             void flowInstanceRef.current?.fitView({
-              padding: 0.2,
+              ...STORY_FIT_VIEW_OPTIONS,
               duration: 200,
             })
           }

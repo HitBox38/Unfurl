@@ -3,6 +3,7 @@ import { useSidebarStartup } from "@/features/settings/hooks/use-sidebar-startup
 import { useThemeSync } from "@/shared/hooks/use-theme";
 import { Link, Outlet } from "@tanstack/react-router";
 import { useHotkey } from "@tanstack/react-hotkeys";
+import type { CSSProperties } from "react";
 
 import UnfurlMark from "@/assets/unfurl-mark.svg?react";
 import { EveryWhereDialog } from "@/shared/components";
@@ -46,7 +47,7 @@ const AppNavigation = ({
         aria-label="Go to home page"
         onClick={() => setOpenMobile(false)}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-md font-heading text-sm font-medium outline-none hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
+          "inline-flex items-center gap-2.5 rounded-xl font-heading text-base font-medium outline-none hover:text-sidebar-accent-foreground focus-visible:ring-2 focus-visible:ring-sidebar-ring",
           inSidebar && "min-h-7 shrink-0 justify-center",
           isElectron && "electron-titlebar-no-drag",
         )}
@@ -54,7 +55,7 @@ const AppNavigation = ({
         <UnfurlMark
           aria-hidden="true"
           focusable="false"
-          className="size-5 shrink-0 text-primary dark:text-chart-1"
+          className="size-6 shrink-0 text-primary dark:text-chart-1"
         />
         <span
           className={cn(inSidebar && "group-data-[collapsible=icon]:hidden")}
@@ -88,6 +89,7 @@ const App = () => {
           open={sidebarOpen}
           onOpenChange={setSidebarOpen}
           className="flex h-full min-h-0 flex-col"
+          style={{ "--sidebar-width": "18rem" } as CSSProperties}
         >
           <Settings desktop={isElectron}>
             {isElectron ? (
@@ -114,7 +116,7 @@ const App = () => {
                   !isElectron ? <AppNavigation inSidebar /> : undefined
                 }
               />
-              <SidebarInset className="min-h-0 min-w-0">
+              <SidebarInset className="min-h-0 min-w-0 bg-transparent">
                 <Outlet />
               </SidebarInset>
             </div>

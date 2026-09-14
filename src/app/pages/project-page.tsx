@@ -65,7 +65,7 @@ export const ProjectPage = () => {
           fileCount={files.length}
           canDelete={projects.length > 1}
         />
-        <div className="flex flex-col gap-6 px-6 py-5">
+        <div className="library-content">
           <FileImportDropzone
             key={project.id}
             projectId={project.id}
@@ -73,25 +73,25 @@ export const ProjectPage = () => {
           />
           <section
             aria-labelledby="files-heading"
-            className="flex flex-col gap-2"
+            className="flex flex-col gap-5"
           >
             <div className="flex items-center justify-between gap-3">
               <h2
                 id="files-heading"
-                className="text-sm font-medium text-muted-foreground"
+                className="text-lg font-medium"
               >
                 Files
               </h2>
               <NewStoryButton project={project} />
             </div>
             {files.length > 0 ? (
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
                 {files.map((file) => (
                   <FileCard key={file.id} file={file} projects={projects} />
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-start gap-1 rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+              <div className="workspace-bubble flex flex-col items-start gap-2 p-8 text-sm text-muted-foreground">
                 <p className="font-medium text-foreground">No files yet.</p>
                 <p>
                   Create a new story, or drop .twee, .json or .md files here to
