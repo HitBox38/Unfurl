@@ -1,5 +1,5 @@
 import { Link, useParams } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { DialogViewer } from "@/features/dialog-viewer";
@@ -11,6 +11,7 @@ import { NodeEditor } from "@/features/node-editor";
 import { InlineNameInput } from "@/shared/components";
 import { getEditableFile } from "@/shared/lib/editable-files-storage";
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
+import type { StoryData } from "@/shared/types";
 import { Button } from "@/shared/ui/button";
 import {
   Card,
@@ -19,6 +20,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/shared/ui/card";
+
+class FilePageState {
+  static isBlankStory(content: StoryData) {
+    const [startNode] = content.nodes;
+
+    return (
+      content.nodes.length === 1 &&
+      content.start === startNode?.name &&
+      startNode.content.every((line) => line.trim() === "") &&
+      startNode.choices.length === 0
+    );
+  }
+}
 
 export const FilePage = () => {
   const { fileId } = useParams({ strict: false }) as { fileId?: string };
@@ -100,6 +114,8 @@ export const FilePage = () => {
     );
   }
 
+  const showBlankStoryCue = FilePageState.isBlankStory(content);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
@@ -153,8 +169,22 @@ export const FilePage = () => {
               node ? "file-editor-layout has-editor" : "file-editor-layout"
             }
           >
-            <div className="file-graph-pane">
+            <div className="file-graph-pane relative">
               <DialogViewer />
+              {showBlankStoryCue ? (
+                <aside
+                  aria-label="Blank story prompt"
+                  className="pointer-events-none absolute right-4 top-4 z-10 max-w-xs rounded-xl border border-primary/20 bg-card/90 p-3 text-sm shadow-lg backdrop-blur-md"
+                >
+                  <p className="flex items-center gap-2 font-medium text-foreground">
+                    <Sparkles className="size-4 text-primary" />
+                    Give Start a first line.
+                  </p>
+                  <p className="mt-1 text-muted-foreground">
+                    Then add a choice when the path branches.
+                  </p>
+                </aside>
+              ) : null}
             </div>
             {node ? (
               <aside

@@ -243,6 +243,21 @@ describe("NodeEditor", () => {
     ).toBeInTheDocument();
   });
 
+  it("uses purple or neutral controls for dirty state actions", async () => {
+    const user = userEvent.setup();
+    selectIntroNode();
+
+    render(<NodeEditor />);
+
+    await user.type(screen.getByRole("textbox", { name: "Content" }), " draft");
+
+    expect(screen.getByText("Unsaved changes")).toHaveClass("text-primary");
+    expect(screen.getByRole("button", { name: "Cancel" })).toHaveAttribute(
+      "data-variant",
+      "secondary",
+    );
+  });
+
   it("highlights the current choice edge while its editor card is hovered", async () => {
     const user = userEvent.setup();
     selectIntroNode();

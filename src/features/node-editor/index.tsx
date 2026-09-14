@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Trash, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   Controller,
@@ -35,7 +35,6 @@ import {
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { Label } from "@/shared/ui/label";
-import { Trash } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -349,14 +348,16 @@ export const NodeEditor = () => {
           </CardContent>
           <CardFooter className="flex flex-wrap items-center justify-between gap-3 border-t bg-muted/30 px-4 py-3">
             {methods.formState.isDirty ? (
-              <span className="text-sm text-warning">Unsaved changes</span>
+              <span className="text-sm font-medium text-primary">
+                Unsaved changes
+              </span>
             ) : (
               <span className="text-sm text-muted-foreground">
                 No unsaved changes
               </span>
             )}
             <div className="flex items-center gap-2">
-              <Button type="button" variant="warning" onClick={requestClose}>
+              <Button type="button" variant="secondary" onClick={requestClose}>
                 Cancel
               </Button>
               <Button

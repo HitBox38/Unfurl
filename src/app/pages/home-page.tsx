@@ -8,6 +8,7 @@ import { useFaqModal } from "@/features/faq";
 import { FileImportDropzone } from "@/features/file-import";
 import { ProjectCard } from "@/features/project-card";
 import { RecentFilesStrip } from "@/features/recent-files-strip";
+import { StoryCard } from "@/features/story-card";
 import { useEditableFiles, useProjects } from "@/shared/hooks";
 import type { EditableFileRecord } from "@/shared/lib/editable-files-storage";
 import {
@@ -64,6 +65,11 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
     () => groupFilesByProject(projects, files),
     [files, projects],
   );
+  const projectsById = useMemo(
+    () => new Map(projects.map((project) => [project.id, project])),
+    [projects],
+  );
+  const storyCards = files.slice(0, 2);
 
   // Fall back to the most recently edited project until the user picks one
   // (or if the picked one has since been deleted).
@@ -127,6 +133,33 @@ export const HomePage = ({ isOnline }: HomePageProps) => {
               for backups. Import those files to continue in another browser.
             </p>
           </aside>
+        ) : null}
+        {storyCards.length > 0 ? (
+          <section
+            aria-labelledby="story-cards-heading"
+            className="flex flex-col gap-3"
+          >
+            <div>
+              <h2
+                id="story-cards-heading"
+                className="text-sm font-medium text-muted-foreground"
+              >
+                Story cards
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Jump back into a recent graph.
+              </p>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {storyCards.map((file) => (
+                <StoryCard
+                  key={file.id}
+                  file={file}
+                  project={projectsById.get(file.projectId)}
+                />
+              ))}
+            </div>
+          </section>
         ) : null}
         <section
           aria-labelledby="projects-heading"

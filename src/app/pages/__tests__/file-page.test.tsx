@@ -129,6 +129,35 @@ describe("FilePage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("shows a creative cue for a blank in-editor story", async () => {
+    saveEditableFile(
+      {
+        id: "draft-id",
+        name: "blank",
+        fileType: "json",
+        content: {
+          title: "blank",
+          start: "Start",
+          nodes: [
+            {
+              name: "Start",
+              content: [],
+              choices: [],
+              metadata: {},
+            },
+          ],
+        },
+        projectId: "p1",
+      },
+      { now: () => 100 },
+    );
+
+    render(<FilePage />);
+
+    expect(await screen.findByText(/give start a first line/i)).toBeInTheDocument();
+    expect(screen.getByText(/add a choice when the path branches/i)).toBeInTheDocument();
+  });
+
   it("saves header file name edits on blur", async () => {
     const user = userEvent.setup();
     saveEditableFile(

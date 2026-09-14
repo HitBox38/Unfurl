@@ -111,6 +111,59 @@ describe("DialogViewer", () => {
     );
   });
 
+  it("keeps first-open and fit-story zoom readable and hides the canvas watermark", () => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+
+    render(<DialogViewer />);
+
+    const latestReactFlowProps = reactFlow.mock.calls.at(-1)?.[0] as
+      | {
+          minZoom?: number;
+          fitViewOptions?: { minZoom?: number; maxZoom?: number };
+          proOptions?: { hideAttribution?: boolean };
+          "aria-label"?: string;
+          "aria-describedby"?: string;
+        }
+      | undefined;
+
+    expect(latestReactFlowProps?.minZoom).toBeGreaterThanOrEqual(0.2);
+    expect(latestReactFlowProps?.fitViewOptions?.minZoom).toBeGreaterThanOrEqual(
+      0.45,
+    );
+    expect(latestReactFlowProps?.fitViewOptions?.maxZoom).toBeGreaterThan(1);
+    expect(latestReactFlowProps?.proOptions).toEqual({ hideAttribution: true });
+    expect(latestReactFlowProps).toMatchObject({
+      "aria-label": expect.stringMatching(/story graph canvas/i),
+      "aria-describedby": expect.any(String),
+    });
+  });
+
+  it("uses the readable story fit settings from the toolbar", () => {
+    useJsonDataStore.getState().setJson(story, "demo", "demo-id");
+    const flowInstance = { fitView: vi.fn() };
+
+    render(<DialogViewer />);
+
+    const latestReactFlowProps = reactFlow.mock.calls.at(-1)?.[0] as
+      | {
+          onInit?: (instance: typeof flowInstance) => void;
+        }
+      | undefined;
+
+    latestReactFlowProps?.onInit?.(flowInstance);
+    screen.getByRole("button", { name: /fit story/i }).click();
+
+    expect(flowInstance.fitView).toHaveBeenCalledWith(
+      expect.objectContaining({
+        minZoom: expect.any(Number),
+        maxZoom: expect.any(Number),
+      }),
+    );
+    expect(flowInstance.fitView.mock.calls.at(-1)?.[0].minZoom).toBeGreaterThanOrEqual(
+      0.45,
+    );
+  });
+
   it("highlights the selected story node", () => {
     useJsonDataStore.getState().setJson(story, "demo", "demo-id");
     useNodeStore.getState().setNode(story.nodes[0]);
