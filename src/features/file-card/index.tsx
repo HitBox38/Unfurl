@@ -25,8 +25,8 @@ export const FileCard = ({ file, projects }: FileCardProps) => {
       : null;
 
   return (
-    <Card size="sm" className="transition-[box-shadow] hover:ring-primary/40 hover:shadow-lg">
-      <CardHeader className="flex items-start gap-3">
+    <Card className="workspace-bubble gap-5 rounded-3xl py-6 transition-[box-shadow] hover:ring-primary/40 hover:shadow-md">
+      <CardHeader className="flex items-start gap-3 px-5">
         <span className="rounded-lg bg-muted p-2 text-muted-foreground">
           <FileTypeIcon fileType={file.fileType} />
         </span>
@@ -48,7 +48,7 @@ export const FileCard = ({ file, projects }: FileCardProps) => {
         </div>
         <FileActionsMenu file={file} projects={projects} />
       </CardHeader>
-      <CardContent className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <CardContent className="flex flex-wrap items-center gap-2 px-5 text-xs text-muted-foreground">
         <FileTypeBadge fileType={file.fileType} />
         <span>{pluralize(file.content.nodes.length, "node")}</span>
         <span aria-hidden="true">·</span>

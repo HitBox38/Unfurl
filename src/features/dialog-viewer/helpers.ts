@@ -78,12 +78,7 @@ export const buildDialogGraph = (
           type: "arrowclosed" as MarkerType,
           color: "var(--muted-foreground)",
         },
-        label: choice.text || "Continue",
         ariaLabel: `${node.name} to ${choice.destination}: ${choice.text || "Continue"}`,
-        labelStyle: { fill: "var(--foreground)", fontSize: 12 },
-        labelBgStyle: { fill: "var(--background)" },
-        labelBgPadding: [6, 4],
-        labelBgBorderRadius: 4,
       } satisfies Edge;
     }),
   );

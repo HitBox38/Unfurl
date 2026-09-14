@@ -119,10 +119,10 @@ export const FilePage = () => {
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-        <header className="flex shrink-0 flex-col gap-2 border-b bg-background p-3">
+        <header className="file-header shrink-0 text-left">
           <div
             data-testid="file-page-header"
-            className="flex min-w-0 items-center rounded-lg bg-card px-2 py-1"
+            className="file-title-bubble workspace-bubble flex min-h-10 min-w-0 items-center px-3 py-1"
           >
             <InlineNameInput
               key={name || "Untitled"}
@@ -130,38 +130,32 @@ export const FilePage = () => {
               label="File name"
               name={name}
               onCommit={setFileName}
-              className="text-xl md:text-2xl"
+              className="text-base md:text-base"
             />
           </div>
           <div
             data-testid="file-toolbar"
-            className="flex flex-wrap items-center justify-end gap-2"
+            className="flex flex-wrap items-center gap-3"
           >
             <div
               data-testid="file-history-bubble"
-              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+              className="workspace-bubble workspace-toolbar"
             >
               <FileHistoryControls />
             </div>
             <div
               data-testid="file-add-node-bubble"
-              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+              className="workspace-bubble workspace-toolbar"
             >
               <GraphNodeToolbar />
             </div>
             <div
               data-testid="file-download-bubble"
-              className="rounded-full border bg-card/90 p-1.5 shadow-lg backdrop-blur-md"
+              className="flex"
             >
               <DownloadButton />
             </div>
           </div>
-          {!window.ipcRenderer ? (
-            <p className="text-xs text-muted-foreground">
-              Applied edits are saved in this browser. Export JSON to keep a
-              backup.
-            </p>
-          ) : null}
         </header>
         <div className="file-workspace min-h-0 flex-1">
           <div
@@ -174,7 +168,7 @@ export const FilePage = () => {
               {showBlankStoryCue ? (
                 <aside
                   aria-label="Blank story prompt"
-                  className="pointer-events-none absolute right-4 top-4 z-10 max-w-xs rounded-xl border border-primary/20 bg-card/90 p-3 text-sm shadow-lg backdrop-blur-md"
+                  className="workspace-bubble pointer-events-none absolute bottom-24 left-4 right-4 z-10 max-w-xs p-4 text-left text-sm"
                 >
                   <p className="flex items-center gap-2 font-medium text-foreground">
                     <Sparkles className="size-4 text-primary" />
@@ -189,7 +183,7 @@ export const FilePage = () => {
             {node ? (
               <aside
                 aria-label="Node editor"
-                className="file-node-panel border-l bg-background p-3"
+                className="file-node-panel"
               >
                 <NodeEditor />
               </aside>

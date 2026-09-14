@@ -144,7 +144,7 @@ describe("HomePage", () => {
 
     renderHome();
 
-    const stories = screen.getByRole("region", { name: /story cards/i });
+    const stories = screen.getByRole("region", { name: /continue writing/i });
     expect(within(stories).getAllByRole("link")).toHaveLength(2);
     expect(
       within(stories).getByRole("img", { name: /mini graph preview for quest/i }),

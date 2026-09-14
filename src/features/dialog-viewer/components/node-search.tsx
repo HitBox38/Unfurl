@@ -30,7 +30,7 @@ export const NodeSearch = ({ nodes, onSelect }: NodeSearchProps) => {
     .sort((a, b) => rank(a) - rank(b));
   return (
     <div
-      className="absolute left-3 top-3 z-10 w-[min(20rem,calc(100%-1.5rem))] rounded-lg border bg-card shadow-md"
+      className="workspace-bubble absolute left-4 top-4 z-10 w-[min(20rem,calc(100%-2rem))]"
       onBlur={(event) => {
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
       }}
@@ -41,7 +41,7 @@ export const NodeSearch = ({ nodes, onSelect }: NodeSearchProps) => {
         }
       }}
     >
-      <div className="flex items-center gap-2 p-2">
+      <div className="flex items-center gap-2 px-4 py-2">
         <Search
           className="size-4 shrink-0 text-muted-foreground"
           aria-hidden="true"
@@ -49,6 +49,7 @@ export const NodeSearch = ({ nodes, onSelect }: NodeSearchProps) => {
         <Input
           aria-label="Find a node"
           placeholder="Find a node or story text…"
+          className="h-9 border-0 bg-transparent px-1 shadow-none dark:bg-transparent"
           value={query}
           onFocus={() => setOpen(true)}
           onChange={(event) => {

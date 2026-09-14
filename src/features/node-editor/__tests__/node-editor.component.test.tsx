@@ -194,8 +194,8 @@ describe("NodeEditor", () => {
 
     expect(container.querySelector('[data-slot="card"]')).toHaveClass(
       "h-full",
-      "rounded-xl",
-      "shadow-2xl",
+      "min-h-0",
+      "overflow-clip",
     );
     expect(container.querySelector('[data-slot="card-content"]')).toHaveClass(
       "flex-1",

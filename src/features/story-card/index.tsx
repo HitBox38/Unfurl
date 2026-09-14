@@ -93,32 +93,33 @@ export const StoryCard = ({ file, project }: StoryCardProps) => {
       to="/files/$fileId"
       params={{ fileId: file.id }}
       onClick={() => trackEvent("recent_file_opened", {})}
-      className="group block overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm outline-none transition-[box-shadow,transform] hover:-translate-y-0.5 hover:shadow-lg focus-visible:ring-3 focus-visible:ring-ring/50"
+      className="workspace-bubble group block overflow-hidden rounded-3xl p-2 outline-none transition-[border-color,box-shadow] hover:border-primary/30 hover:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <svg
         role="img"
         aria-label={`Mini graph preview for ${file.name}`}
         viewBox={StoryCardPreview.viewBox()}
-        className="h-24 w-full bg-primary/5"
+        className="h-36 w-full rounded-2xl bg-primary/5"
       >
         <defs>
           <marker
             id={`story-card-arrow-${file.id}`}
-            markerWidth="8"
-            markerHeight="8"
-            refX="7"
-            refY="4"
+            markerUnits="userSpaceOnUse"
+            markerWidth="5"
+            markerHeight="5"
+            refX="5"
+            refY="2.5"
             orient="auto"
           >
-            <path d="M 0 0 L 8 4 L 0 8 z" className="fill-primary/60" />
+            <path d="M 0 0 L 5 2.5 L 0 5 z" className="fill-primary/60 dark:fill-chart-1/60" />
           </marker>
         </defs>
         <rect width="240" height="92" className="fill-primary/5" />
-        {edges.map((edge) => (
+        {edges.map((edge, index) => (
           <path
-            key={`${edge.source.id}-${edge.target.id}`}
+            key={`${edge.source.id}-${edge.target.id}-${index}`}
             d={StoryCardPreview.edgePath(edge)}
-            className="fill-none stroke-primary/40"
+            className="fill-none stroke-primary/40 dark:stroke-chart-1/40"
             strokeWidth="2"
             markerEnd={`url(#story-card-arrow-${file.id})`}
           />
@@ -165,12 +166,12 @@ export const StoryCard = ({ file, project }: StoryCardProps) => {
           </g>
         ))}
       </svg>
-      <div className="grid gap-2 p-3">
+      <div className="grid gap-4 p-4">
         <div className="min-w-0">
           <h3 className="truncate font-heading text-base font-medium">
             {file.name}
           </h3>
-          <p className="truncate text-xs text-muted-foreground">
+          <p className="mt-1.5 truncate text-xs text-muted-foreground">
             {projectName} - {formatRelativeTime(file.updatedAt)}
           </p>
         </div>

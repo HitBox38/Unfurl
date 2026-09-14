@@ -39,10 +39,10 @@ export const ProjectHeader = ({
     });
 
   return (
-    <header className="sticky top-0 z-10 flex flex-col gap-2 border-b bg-background/80 px-6 py-3 backdrop-blur">
+    <header className="library-header flex-col items-stretch gap-5">
       <Link
         to="/"
-        className="inline-flex w-fit items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+        className="inline-flex w-fit items-center gap-1 rounded-lg text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
       >
         <ChevronLeft className="size-4" aria-hidden="true" />
         Projects
@@ -60,7 +60,7 @@ export const ProjectHeader = ({
           <span>{pluralize(fileCount, "file")}</span>
           <SourceBadge />
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="workspace-bubble workspace-toolbar ml-auto">
           <MetadataConfig project={project} />
           <Tooltip>
             <TooltipTrigger asChild>

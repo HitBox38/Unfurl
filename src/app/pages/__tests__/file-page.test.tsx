@@ -30,8 +30,8 @@ vi.mock("@/features/graph-node-toolbar", () => ({
       <button
         type="button"
         aria-label="Add node"
-        data-variant="secondary"
-        data-size="icon-sm"
+        data-variant="ghost"
+        data-size="icon"
       >
         Add node
       </button>
@@ -39,8 +39,8 @@ vi.mock("@/features/graph-node-toolbar", () => ({
         type="button"
         aria-label="Delete nodes"
         aria-pressed="false"
-        data-variant="secondary"
-        data-size="icon-sm"
+        data-variant="ghost"
+        data-size="icon"
       >
         Delete nodes
       </button>
@@ -76,7 +76,7 @@ describe("FilePage", () => {
     useNodeStore.getState().setNode(null);
   });
 
-  it("renders a compact header without an upload-another-file action", async () => {
+  it("groups file actions in separate bubbles without an upload-another-file action", async () => {
     saveEditableFile(
       {
         id: "draft-id",
@@ -95,34 +95,30 @@ describe("FilePage", () => {
     ).toHaveValue("demo");
     expect(
       container.querySelector('[data-testid="file-page-header"]'),
-    ).toHaveClass("min-w-0", "rounded-lg");
+    ).toHaveClass("min-w-0", "workspace-bubble");
     expect(container.querySelector('[data-testid="file-toolbar"]')).toHaveClass(
       "flex-wrap",
-      "justify-end",
-      "gap-2",
+      "gap-3",
     );
     expect(
-      container.querySelector('[data-testid="file-download-bubble"]'),
-    ).toHaveClass("rounded-full", "bg-card/90");
-    expect(
       container.querySelector('[data-testid="file-add-node-bubble"]'),
-    ).toHaveClass("rounded-full", "bg-card/90", "shadow-lg");
+    ).toHaveClass("workspace-bubble", "workspace-toolbar");
     expect(
       container.querySelector('[data-testid="file-history-bubble"]'),
-    ).toHaveClass("rounded-full", "bg-card/90", "shadow-lg");
+    ).toHaveClass("workspace-bubble", "workspace-toolbar");
     expect(screen.getByRole("button", { name: /undo edit/i })).toBeDisabled();
     expect(screen.getByRole("button", { name: /redo edit/i })).toBeDisabled();
     const addNode = screen.getByRole("button", { name: /add node/i });
-    expect(addNode).toHaveAttribute("data-variant", "secondary");
-    expect(addNode).toHaveAttribute("data-size", "icon-sm");
+    expect(addNode).toHaveAttribute("data-variant", "ghost");
+    expect(addNode).toHaveAttribute("data-size", "icon");
     const deleteNodes = screen.getByRole("button", { name: /delete nodes/i });
-    expect(deleteNodes).toHaveAttribute("data-variant", "secondary");
-    expect(deleteNodes).toHaveAttribute("data-size", "icon-sm");
+    expect(deleteNodes).toHaveAttribute("data-variant", "ghost");
+    expect(deleteNodes).toHaveAttribute("data-size", "icon");
     expect(
       container.querySelector('[data-testid="file-add-node-bubble"]'),
     ).toContainElement(screen.getByTestId("graph-node-toolbar"));
     const download = screen.getByRole("button", { name: /export json/i });
-    expect(download).toHaveAttribute("data-variant", "secondary");
+    expect(download).toHaveAttribute("data-variant", "outline");
     expect(download).toHaveAttribute("data-size", "sm");
     expect(
       screen.queryByRole("link", { name: /upload another file/i }),

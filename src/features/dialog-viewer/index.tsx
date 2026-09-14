@@ -162,7 +162,6 @@ export const DialogViewer = () => {
 
         return {
           ...edge,
-          label: isConnected || isPreviewed ? edge.label : undefined,
           animated: isPreviewed || edge.animated,
           className: cn(
             edge.className,
@@ -322,7 +321,7 @@ export const DialogViewer = () => {
           onLayout();
         }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={18} size={1.3} />
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1} />
       </ReactFlow>
       <NodeSearch
         nodes={content.nodes}
@@ -342,7 +341,7 @@ export const DialogViewer = () => {
       <div
         role="toolbar"
         aria-label="Graph view"
-        className="absolute bottom-4 left-4 z-10 flex items-center gap-1 rounded-lg border bg-card p-1 shadow-md"
+        className="workspace-bubble workspace-toolbar absolute bottom-4 left-4 z-10"
       >
         <Button
           variant="ghost"
