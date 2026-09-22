@@ -39,7 +39,7 @@
     "@radix-ui/react-tooltip": "^1.2.16",
     "@tanstack/react-hotkeys": "^0.11.0",
     "@tanstack/react-router": "^1.170.38",
-    "@xyflow/react": "^12.10.2",
+    "@xyflow/react": "^12.11.6",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dagre": "^0.8.5",
