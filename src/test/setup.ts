@@ -2,6 +2,20 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 
+// jsdom 30 emits a window blur during Radix Select's portal focus handoff,
+// which closes the listbox before user-event can choose an option.
+if (typeof window !== "undefined") {
+  window.addEventListener(
+    "blur",
+    (event) => {
+      if (document.querySelector('[role="listbox"]')) {
+        event.stopImmediatePropagation();
+      }
+    },
+    true,
+  );
+}
+
 afterEach(() => {
   cleanup();
   localStorage.clear();
