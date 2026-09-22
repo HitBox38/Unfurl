@@ -1,13 +1,21 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SpellcheckContextMenu } from "@/features/spellcheck-context-menu";
+import { AddToDictionaryItem } from "@/features/spellcheck-context-menu/components/add-to-dictionary-item";
 import {
   SPELLCHECK_ADD_WORD_CHANNEL,
   SPELLCHECK_CONTEXT_MENU_CHANNEL,
   SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
   type SpellcheckContextMenuPayload,
 } from "@/shared/types";
+import { ContextMenu, ContextMenuContent } from "@/shared/ui/context-menu";
 
 const createIpcRendererMock = () => {
   const listeners = new Map<string, (...args: unknown[]) => void>();
@@ -63,26 +71,29 @@ describe("SpellcheckContextMenu", () => {
     });
 
     expect(await screen.findByRole("menu")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("menuitem", { name: "dialogue" }));
+    screen.getByRole("menuitem", { name: "dialogue" }).focus();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Enter" });
 
     expect(ipcRenderer.send).toHaveBeenCalledWith(
       SPELLCHECK_REPLACE_MISSPELLING_CHANNEL,
       "dialogue",
     );
+    await waitFor(() => expect(screen.queryByRole("menu")).not.toBeInTheDocument());
   });
 
   it("allows the misspelled word to be added to the dictionary", async () => {
-    const { emitSpellcheckMenu, ipcRenderer } = createIpcRendererMock();
-    render(<SpellcheckContextMenu />);
+    const { ipcRenderer } = createIpcRendererMock();
+    render(
+      <ContextMenu open>
+        <ContextMenuContent>
+          <AddToDictionaryItem word="Unfurlian" />
+        </ContextMenuContent>
+      </ContextMenu>,
+    );
 
-    emitSpellcheckMenu({
-      dictionarySuggestions: [],
-      misspelledWord: "Unfurlian",
-      x: 24,
-      y: 32,
-    });
-
-    fireEvent.click(await screen.findByRole("menuitem", { name: "Add to dictionary" }));
+    const item = await screen.findByRole("menuitem", { name: "Add to dictionary" });
+    item.focus();
+    fireEvent.keyDown(document.activeElement ?? document.body, { key: "Enter" });
 
     expect(ipcRenderer.send).toHaveBeenCalledWith(
       SPELLCHECK_ADD_WORD_CHANNEL,
