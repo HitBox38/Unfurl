@@ -2,12 +2,11 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { JSDOM } from "jsdom";
 import { describe, expect, it } from "vitest";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const documentHtml = readFileSync(path.join(projectRoot, "index.html"), "utf8");
-const documentHead = new JSDOM(documentHtml).window.document.head;
+const documentHead = new DOMParser().parseFromString(documentHtml, "text/html").head;
 
 const expectedTitle = "Unfurl - branching dialogue editor";
 const expectedDescription =
