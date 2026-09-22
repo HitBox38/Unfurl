@@ -78,8 +78,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       tailwind-merge:
-        specifier: ^3.6.0
-        version: 3.6.0
+        specifier: ^3.7.0
+        version: 3.7.0
       zustand:
         specifier: ^5.0.13
         version: 5.0.13(@types/react@19.2.14)(react@19.2.6)(use-sync-external-store@1.6.0(react@19.2.6))
@@ -4185,6 +4185,9 @@ packages:
 
   tailwind-merge@3.6.0:
     resolution: {integrity: sha512-uxL7qAVQriqRQPAyK3pj66VqskWqoZ37PW94jwOTwNfq/z9oyu1V+eqrZqtR2+fCiXdYOZe/Modt8GtvqNzu+w==}
+
+  tailwind-merge@3.7.0:
+    resolution: {integrity: sha512-XPPUyAc+cvspz3lHTcR/QgPfW2A0lv/xQNIjX3HGhLR+Nq2lHaLq5MtTesHn8GUr3W3DguT2KT5x3NVgRtYwmA==}
 
   tailwindcss@4.3.0:
     resolution: {integrity: sha512-y6nxMGB1nMW9R6k96e5gdIFzcfL/gTJRNaqGes1YvkLnPVXzWgbqFF2yLC0T8G774n24cx3Pe8XrKoniCOAH+Q==}
@@ -8940,6 +8943,8 @@ snapshots:
   tagged-tag@1.0.0: {}
 
   tailwind-merge@3.6.0: {}
+
+  tailwind-merge@3.7.0: {}
 
   tailwindcss@4.3.0: {}
 
