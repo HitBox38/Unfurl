@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -45,6 +45,12 @@ const story: StoryData = {
   ],
 };
 
+const openActionsMenu = async (user: ReturnType<typeof userEvent.setup>) => {
+  screen.getByRole("button", { name: /actions for quest/i }).focus();
+  await user.keyboard("{Enter}");
+  await screen.findByRole("menu");
+};
+
 describe("FileCard", () => {
   let projects: ProjectRecord[];
   let file: EditableFileRecord;
@@ -83,20 +89,21 @@ describe("FileCard", () => {
     const user = userEvent.setup();
     render(<FileCard file={file} projects={projects} />);
 
-    await user.click(screen.getByRole("button", { name: /actions for quest/i }));
+    await openActionsMenu(user);
     await user.click(await screen.findByRole("menuitem", { name: /^open$/i }));
 
     expect(navigate).toHaveBeenCalledWith({
       to: "/files/$fileId",
       params: { fileId: "quest-id" },
     });
+    await waitFor(() => expect(screen.queryByRole("menu")).not.toBeInTheDocument());
   });
 
   it("renames through a form dialog", async () => {
     const user = userEvent.setup();
     render(<FileCard file={file} projects={projects} />);
 
-    await user.click(screen.getByRole("button", { name: /actions for quest/i }));
+    await openActionsMenu(user);
     await user.click(await screen.findByRole("menuitem", { name: /rename/i }));
 
     const dialog = useDialogStore.getState();
@@ -111,7 +118,7 @@ describe("FileCard", () => {
     const user = userEvent.setup();
     render(<FileCard file={file} projects={projects} />);
 
-    await user.click(screen.getByRole("button", { name: /actions for quest/i }));
+    await openActionsMenu(user);
     await user.hover(await screen.findByRole("menuitem", { name: /move to/i }));
     // jsdom has no layout, so Radix's pointer "grace area" toward the submenu is
     // degenerate and a mouse click would close it first; keyboard navigation is
@@ -127,7 +134,7 @@ describe("FileCard", () => {
     const user = userEvent.setup();
     render(<FileCard file={file} projects={[projects[0]]} />);
 
-    await user.click(screen.getByRole("button", { name: /actions for quest/i }));
+    await openActionsMenu(user);
 
     expect(await screen.findByRole("menuitem", { name: /move to/i })).toHaveAttribute(
       "aria-disabled",
@@ -142,7 +149,7 @@ describe("FileCard", () => {
       .mockImplementation(() => undefined);
     render(<FileCard file={file} projects={projects} />);
 
-    await user.click(screen.getByRole("button", { name: /actions for quest/i }));
+    await openActionsMenu(user);
     await user.click(await screen.findByRole("menuitem", { name: /export json/i }));
 
     expect(click).toHaveBeenCalledTimes(1);
@@ -154,7 +161,7 @@ describe("FileCard", () => {
     const user = userEvent.setup();
     render(<FileCard file={file} projects={projects} />);
 
-    await user.click(screen.getByRole("button", { name: /actions for quest/i }));
+    await openActionsMenu(user);
     await user.click(await screen.findByRole("menuitem", { name: /delete/i }));
 
     const dialog = useDialogStore.getState();

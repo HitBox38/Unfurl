@@ -12,14 +12,17 @@ export const openContextMenuAt = (
 ) => {
   trigger.style.left = `${x}px`;
   trigger.style.top = `${y}px`;
+  const ContextMenuEvent =
+    typeof PointerEvent === "undefined" ? MouseEvent : PointerEvent;
   trigger.dispatchEvent(
-    new MouseEvent("contextmenu", {
+    new ContextMenuEvent("contextmenu", {
       bubbles: true,
       button: 2,
       buttons: 2,
       cancelable: true,
       clientX: x,
       clientY: y,
+      pointerType: "mouse",
     }),
   );
 };
