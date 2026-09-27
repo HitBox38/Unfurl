@@ -17,6 +17,8 @@ beforeEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
   localStorage.clear();
+  Reflect.deleteProperty(window, "ipcRenderer");
+  window.history.replaceState({}, "", "/");
   sdk.init.mockReturnValue(sdk);
   vi.stubEnv("PROD", true);
   vi.stubEnv("VITE_PUBLIC_POSTHOG_KEY", "phc_test");
@@ -96,12 +98,97 @@ describe("optional analytics", () => {
     });
     expect(clean.$set).toBeUndefined();
     expect(clean.$set_once).toBeUndefined();
-    expect(
-      config.before_send({ event: "$pageview", properties: {} }),
-    ).toBeNull();
+    const pageview = config.before_send({
+      event: "$pageview",
+      properties: {
+        route_template: "/files/$fileId",
+        $current_url: "https://example.com/files/secret-file-id",
+        $pathname: "/files/secret-file-id",
+        $referrer: "https://example.com/projects/secret-project-id",
+        fileId: "secret-file-id",
+      },
+    });
+    expect(pageview.properties).toMatchObject({
+      token: "phc_test",
+      distinct_id: expect.any(String),
+      surface: "web",
+      distribution: "web",
+      app_version: expect.any(String),
+      $geoip_disable: true,
+      $process_person_profile: true,
+      $current_url: "http://localhost:3000/files/$fileId",
+      $pathname: "/files/$fileId",
+      $host: "localhost:3000",
+    });
+    expect(JSON.stringify(pageview.properties)).not.toContain("secret-file-id");
     expect(
       config.before_send({ event: "constructor", properties: {} }),
     ).toBeNull();
+  });
+
+  it("allows sanitized screen events for desktop routes without leaking identifiers", async () => {
+    Object.defineProperty(window, "ipcRenderer", {
+      configurable: true,
+      value: {},
+    });
+    const analytics = await import("@/shared/lib/analytics");
+    analytics.setAnalyticsConsent("granted");
+    await settle();
+    const config = sdk.init.mock.calls[0][1];
+    const screen = config.before_send({
+      event: "$screen",
+      properties: {
+        route_template: "/projects/$projectId",
+        $current_url: "file:///Users/alice/project/index.html#/projects/secret-project-id",
+        $pathname: "/projects/secret-project-id",
+        projectId: "secret-project-id",
+      },
+    });
+    expect(screen.properties).toMatchObject({
+      token: "phc_test",
+      distinct_id: expect.any(String),
+      surface: "desktop",
+      distribution: "web",
+      app_version: expect.any(String),
+      $geoip_disable: true,
+      $process_person_profile: true,
+      $screen_name: "/projects/$projectId",
+    });
+    expect(JSON.stringify(screen.properties)).not.toContain(
+      "secret-project-id",
+    );
+    expect(JSON.stringify(screen.properties)).not.toContain("Users/alice");
+  });
+
+  it("captures route views from router resolutions only after consent is granted", async () => {
+    const subscribers = new Set<() => void>();
+    const router = {
+      state: { matches: [{ routeId: "/files/$fileId" }] },
+      subscribe: vi.fn((event: string, listener: () => void) => {
+        expect(event).toBe("onResolved");
+        subscribers.add(listener);
+        return () => subscribers.delete(listener);
+      }),
+    };
+    const analytics = await import("@/shared/lib/analytics");
+
+    const unsubscribe = analytics.subscribeRouteAnalytics(router);
+    subscribers.forEach((listener) => listener());
+    await settle();
+    expect(sdk.capture).not.toHaveBeenCalled();
+
+    analytics.setAnalyticsConsent("granted");
+    await settle();
+    subscribers.forEach((listener) => listener());
+    expect(sdk.capture).toHaveBeenCalledWith("$pageview", {
+      route_template: "/files/$fileId",
+    });
+
+    unsubscribe();
+    subscribers.forEach((listener) => listener());
+    expect(
+      sdk.capture.mock.calls.filter(([event]) => event === "$pageview"),
+    ).toHaveLength(1);
   });
 
   it("counts the first real edit once across calls and reloads", async () => {
