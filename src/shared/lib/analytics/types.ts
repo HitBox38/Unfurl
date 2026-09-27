@@ -1,6 +1,12 @@
 export type AnalyticsConsent = "pending" | "granted" | "denied";
 export type AnalyticsFormat = "twee" | "obsidian" | "json" | "unknown";
 export type NodeCountBucket = "0" | "1-20" | "21-100" | "100+";
+export const analyticsRouteTemplates = [
+  "/",
+  "/projects/$projectId",
+  "/files/$fileId",
+] as const;
+export type AnalyticsRouteTemplate = (typeof analyticsRouteTemplates)[number];
 export type AnalyticsError =
   | "invalid_json"
   | "invalid_story"
@@ -15,6 +21,8 @@ type Transfer = {
   node_count_bucket?: NodeCountBucket;
 };
 export type AnalyticsEvents = {
+  $pageview: { route_template: AnalyticsRouteTemplate };
+  $screen: { route_template: AnalyticsRouteTemplate };
   app_opened: Record<string, never>;
   demo_loaded: { source: "button" | "konami" };
   import_succeeded: Transfer & { node_count_bucket: NodeCountBucket };

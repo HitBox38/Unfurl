@@ -1,9 +1,11 @@
 import type { PostHog, PostHogConfig } from "posthog-js";
 
-import type {
-  AnalyticsConsent,
-  AnalyticsEvents,
-  NodeCountBucket,
+import {
+  analyticsRouteTemplates,
+  type AnalyticsRouteTemplate,
+  type AnalyticsConsent,
+  type AnalyticsEvents,
+  type NodeCountBucket,
 } from "./types";
 
 export type { AnalyticsConsent } from "./types";
@@ -16,6 +18,8 @@ const allowedProperties: Record<
   keyof AnalyticsEvents,
   Record<string, readonly string[]>
 > = {
+  $pageview: { route_template: analyticsRouteTemplates },
+  $screen: { route_template: analyticsRouteTemplates },
   app_opened: {},
   demo_loaded: { source: ["button", "konami"] },
   import_succeeded: {
@@ -54,6 +58,34 @@ let initialized = false;
 let opened = false;
 let editPending = false;
 let deniedForSession = false;
+const routeTemplateSet = new Set<string>(analyticsRouteTemplates);
+
+type RouteAnalyticsLocation = {
+  href?: unknown;
+  pathname?: unknown;
+  search?: unknown;
+  hash?: unknown;
+};
+
+type RouteAnalyticsMatch = {
+  routeId?: unknown;
+  fullPath?: unknown;
+  pathname?: unknown;
+  route?: {
+    id?: unknown;
+    path?: unknown;
+    fullPath?: unknown;
+  };
+};
+
+type RouteAnalyticsRouter = {
+  state?: {
+    matches?: readonly RouteAnalyticsMatch[];
+    location?: RouteAnalyticsLocation;
+    resolvedLocation?: RouteAnalyticsLocation;
+  };
+  subscribe: (event: "onResolved", listener: () => void) => () => void;
+};
 
 const read = (key: string) => {
   try {
@@ -82,10 +114,64 @@ export const isAnalyticsAvailable = () =>
   );
 
 const commonProperties = () => ({
-  surface: window.ipcRenderer ? "desktop" : "web",
+  surface: isDesktopRuntime() ? "desktop" : "web",
   distribution: import.meta.env.VITE_PUBLIC_DISTRIBUTION,
   app_version: __APP_VERSION__,
 });
+
+const isDesktopRuntime = () =>
+  Boolean(window.ipcRenderer) || window.location.protocol === "file:";
+
+const isAnalyticsRouteTemplate = (
+  value: unknown,
+): value is AnalyticsRouteTemplate =>
+  typeof value === "string" && routeTemplateSet.has(value);
+
+const routeTemplateFromProperties = (
+  properties: Record<string, unknown>,
+): AnalyticsRouteTemplate | null => {
+  const routeTemplate = properties.route_template;
+  return isAnalyticsRouteTemplate(routeTemplate) ? routeTemplate : null;
+};
+
+const routeTemplateFromMatch = (
+  match: RouteAnalyticsMatch,
+): AnalyticsRouteTemplate | null => {
+  const candidates = [
+    match.routeId,
+    match.fullPath,
+    match.pathname,
+    match.route?.fullPath,
+    match.route?.path,
+    match.route?.id,
+  ];
+  return candidates.find(isAnalyticsRouteTemplate) ?? null;
+};
+
+const currentRouteTemplate = (
+  router: RouteAnalyticsRouter,
+): AnalyticsRouteTemplate | null => {
+  const matches = router.state?.matches;
+  if (!matches) return null;
+  for (let index = matches.length - 1; index >= 0; index -= 1) {
+    const routeTemplate = routeTemplateFromMatch(matches[index]);
+    if (routeTemplate) return routeTemplate;
+  }
+  return null;
+};
+
+const stringPart = (value: unknown) => (typeof value === "string" ? value : "");
+
+const currentRouteKey = (router: RouteAnalyticsRouter) => {
+  const location = router.state?.resolvedLocation ?? router.state?.location;
+  if (!location) return null;
+  const href = stringPart(location.href);
+  if (href) return href;
+  const pathname = stringPart(location.pathname);
+  const search = stringPart(location.search);
+  const hash = stringPart(location.hash);
+  return pathname || search || hash ? `${pathname}${search}${hash}` : null;
+};
 
 // Rebuild the entire property object: SDK defaults include URLs and referrers,
 // which can contain file identifiers and local Electron installation paths.
@@ -97,6 +183,16 @@ const beforeSend: NonNullable<PostHogConfig["before_send"]> = (event) => {
   )
     return null;
   const rules = allowedProperties[event.event as keyof AnalyticsEvents];
+  const eventProperties = event.properties ?? {};
+  const routeTemplate =
+    event.event === "$pageview" || event.event === "$screen"
+      ? routeTemplateFromProperties(eventProperties)
+      : null;
+  if (
+    (event.event === "$pageview" || event.event === "$screen") &&
+    !routeTemplate
+  )
+    return null;
   const properties: Record<string, unknown> = {
     token: import.meta.env.VITE_PUBLIC_POSTHOG_KEY,
     distinct_id: read(ID_KEY),
@@ -105,11 +201,20 @@ const beforeSend: NonNullable<PostHogConfig["before_send"]> = (event) => {
     $process_person_profile: true,
   };
   for (const [key, values] of Object.entries(rules)) {
-    const value: unknown = event.properties[key];
+    if (key === "route_template") continue;
+    const value: unknown = eventProperties[key];
     if (typeof value === "string" && values.includes(value))
       properties[key] = value;
   }
-  const session: unknown = event.properties.$session_id;
+  if (event.event === "$pageview" && routeTemplate) {
+    properties.$current_url = `${window.location.origin}${routeTemplate}`;
+    properties.$pathname = routeTemplate;
+    properties.$host = window.location.host;
+  }
+  if (event.event === "$screen" && routeTemplate) {
+    properties.$screen_name = routeTemplate;
+  }
+  const session: unknown = eventProperties.$session_id;
   if (typeof session === "string" && /^[\da-f-]{36}$/i.test(session))
     properties.$session_id = session;
   if (event.event === "app_opened")
@@ -211,6 +316,34 @@ export const trackEvent = <E extends keyof AnalyticsEvents>(
   };
   if (client && !starting) send();
   else void start().then(send);
+};
+
+const trackRouteView = (routeTemplate: AnalyticsRouteTemplate) => {
+  if (isDesktopRuntime()) {
+    trackEvent("$screen", { route_template: routeTemplate });
+    return;
+  }
+  trackEvent("$pageview", { route_template: routeTemplate });
+};
+
+export const subscribeRouteAnalytics = (router: RouteAnalyticsRouter) => {
+  let lastCapturedRouteKey: string | null = null;
+  const captureCurrentRoute = () => {
+    if (getAnalyticsConsent() !== "granted") return;
+    const routeTemplate = currentRouteTemplate(router);
+    if (!routeTemplate) return;
+    const routeKey = currentRouteKey(router) ?? routeTemplate;
+    if (routeKey === lastCapturedRouteKey) return;
+    lastCapturedRouteKey = routeKey;
+    trackRouteView(routeTemplate);
+  };
+  const unsubscribeRouter = router.subscribe("onResolved", captureCurrentRoute);
+  const unsubscribeConsent = subscribeAnalyticsConsent(captureCurrentRoute);
+  captureCurrentRoute();
+  return () => {
+    unsubscribeRouter();
+    unsubscribeConsent();
+  };
 };
 
 export const trackFirstGraphEdit = () => {
