@@ -88,7 +88,7 @@ Open the URL printed by the preview server. This is also useful in headless envi
 | --- | --- |
 | `pnpm dev` | Start Vite and Electron in development mode. |
 | `pnpm typecheck` | Check TypeScript project references with `tsc -b`. |
-| `pnpm lint` | Run ESLint with zero warnings allowed. |
+| `pnpm lint` | Run Oxlint with zero warnings allowed. |
 | `pnpm test` | Run the Vitest suite once. |
 | `pnpm test:watch` | Run tests in watch mode. |
 | `pnpm test:coverage` | Run tests with coverage output in `coverage/`. |

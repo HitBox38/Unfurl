@@ -21,7 +21,7 @@ deterministic and binds cleanly to `127.0.0.1`.
 
 - **Bundler**: Vite 8 (`vite.config.ts`) with `@vitejs/plugin-react`,
   `vite-plugin-electron/simple`, `vite-plugin-svgr`, and `@tailwindcss/vite`.
-- **Runtime**: React 19, Electron 42, TypeScript 6.
+- **Runtime**: React 19, Electron 42, TypeScript 7.
 - **State**: Zustand 5 stores under `src/shared/stores`.
 - **Graph**: `@xyflow/react` (formerly `reactflow`) plus `dagre` for layout.
 - **Forms**: `react-hook-form` 7.
@@ -32,9 +32,8 @@ deterministic and binds cleanly to `127.0.0.1`.
 - **Tests**: Vitest 4 + Testing Library on jsdom. Setup file
   `src/test/setup.ts` patches the jsdom gaps Radix UI expects (pointer
   capture, `ResizeObserver`).
-- **Lint**: ESLint 10 flat config (`eslint.config.js`) with
-  `typescript-eslint`, `eslint-plugin-react-hooks`, and
-  `eslint-plugin-react-refresh`.
+- **Lint**: Oxlint (`.oxlintrc.json`) with native TypeScript and React
+  rules, including hooks and refresh checks. Zero warnings are allowed.
 - **Package manager**: **pnpm 11** (pinned via `packageManager`); never use
   npm or yarn in this repo. The lockfile is `pnpm-lock.yaml`; workspace
   settings live in `pnpm-workspace.yaml`; supply-chain exclusions and
@@ -109,7 +108,7 @@ pnpm dev
 # typecheck (composite tsc -b)
 pnpm typecheck
 
-# lint (flat config, zero-warning gate)
+# lint (Oxlint, zero-warning gate)
 pnpm lint
 
 # tests
