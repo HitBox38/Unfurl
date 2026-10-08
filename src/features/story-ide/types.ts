@@ -9,7 +9,13 @@ export interface NodeDocument {
   deleted?: boolean;
 }
 
-export type SearchScope = "all" | "name" | "content" | "choices" | "destination" | "metadata";
+export type SearchScope =
+  | "all"
+  | "name"
+  | "content"
+  | "choices"
+  | "destination"
+  | "metadata";
 export interface StorySearch {
   query: string;
   scope: SearchScope;

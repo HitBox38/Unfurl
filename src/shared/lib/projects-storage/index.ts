@@ -1,5 +1,5 @@
 import { deleteEditableFilesByProject } from "@/shared/lib/editable-files-storage";
-import { metadataUndoKey } from "@/shared/lib/project-metadata-refactor/helpers";
+import { metadataUndoKey } from "@/shared/lib/metadata-refactor-storage";
 import type { MetadataConfigTemplate, ProjectRecord } from "@/shared/types";
 
 import {

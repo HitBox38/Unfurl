@@ -5,11 +5,20 @@ import type { MergeConflict } from "./types";
 export const valuesEqual = (left: unknown, right: unknown): boolean => {
   if (Object.is(left, right)) return true;
   if (Array.isArray(left) && Array.isArray(right)) {
-    return left.length === right.length && left.every((value, index) => valuesEqual(value, right[index]));
+    return (
+      left.length === right.length &&
+      left.every((value, index) => valuesEqual(value, right[index]))
+    );
   }
   if (isRecord(left) && isRecord(right)) {
     const keys = Object.keys(left);
-    return keys.length === Object.keys(right).length && keys.every((key) => Object.hasOwn(right, key) && valuesEqual(left[key], right[key]));
+    return (
+      keys.length === Object.keys(right).length &&
+      keys.every(
+        (key) =>
+          Object.hasOwn(right, key) && valuesEqual(left[key], right[key]),
+      )
+    );
   }
   return false;
 };
@@ -32,14 +41,34 @@ export const mergeValues = (
   if (valuesEqual(saved, original) || valuesEqual(saved, draft)) return draft;
   if (isRecord(original) && isRecord(saved) && isRecord(draft)) {
     return Object.fromEntries(
-      [...new Set([...Object.keys(original), ...Object.keys(saved), ...Object.keys(draft)])]
-        .map((key) => [key, mergeValues(original[key], saved[key], draft[key], context, [...path, key])])
+      [
+        ...new Set([
+          ...Object.keys(original),
+          ...Object.keys(saved),
+          ...Object.keys(draft),
+        ]),
+      ]
+        .map((key) => [
+          key,
+          mergeValues(original[key], saved[key], draft[key], context, [
+            ...path,
+            key,
+          ]),
+        ])
         .filter(([, value]) => value !== undefined),
     );
   }
   const id = JSON.stringify([context.documentId, path, original, saved, draft]);
   const resolution = context.resolutions[id];
   if (resolution) return resolution === "saved" ? saved : draft;
-  context.conflicts.push({ id, documentId: context.documentId, nodeName: context.nodeName, path, original, saved, draft });
+  context.conflicts.push({
+    id,
+    documentId: context.documentId,
+    nodeName: context.nodeName,
+    path,
+    original,
+    saved,
+    draft,
+  });
   return draft;
 };

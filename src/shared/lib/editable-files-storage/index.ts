@@ -9,7 +9,11 @@ import {
   sortNewestFirst,
   writeFiles,
 } from "./helpers";
-import type { EditableFileDraft, EditableFileRecord, StorageOptions } from "./types";
+import type {
+  EditableFileDraft,
+  EditableFileRecord,
+  StorageOptions,
+} from "./types";
 
 export { EDITABLE_FILES_STORAGE_KEY } from "./constants";
 export type {
@@ -67,10 +71,7 @@ export const saveEditableFile = (
   };
   writeFiles(
     storage,
-    sortNewestFirst([
-      record,
-      ...files.filter((file) => file.id !== record.id),
-    ]),
+    sortNewestFirst([record, ...files.filter((file) => file.id !== record.id)]),
   );
   return record;
 };
@@ -151,7 +152,11 @@ export const deleteEditableFilesByProject = (
     storage,
     files.filter((file) => file.projectId !== projectId),
   );
-  for (const file of files) if (file.projectId === projectId) removeStoryIdeStorage(file.id, storage);
+  for (const file of files) {
+    if (file.projectId === projectId) {
+      removeStoryIdeStorage(file.id, storage);
+    }
+  }
 };
 
 /**
