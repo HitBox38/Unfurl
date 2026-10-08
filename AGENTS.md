@@ -85,6 +85,9 @@ public/                    # Static files served at /
   `hooks/`, `components/`, `__tests__/`. Import via the package barrel
   (`@/features/<name>`, `@/shared/lib`, `@/shared/stores`, `@/shared/hooks`)
   or the module folder. Split multi-export domains into sibling folders.
+- **Component size**: keep component files around 100 lines or fewer. Split by
+  responsibility and move stateful logic into feature hooks; keep normal,
+  readable formatting rather than compressing code to meet the limit.
 - **Imports at the top of the file.** No inline `await import()` for plain
   module imports; use `await import()` only when you need real lazy
   loading. Imports go above all other code.

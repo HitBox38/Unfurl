@@ -23,6 +23,8 @@ export interface JsonDataState {
     activeProjectId?: string | null,
   ) => void;
   setName: (name: string) => void;
+  applyStory: (content: StoryData, expected: StoryData) => void;
+  syncSavedFile: () => void;
   setNode: (newNode: StoryNode, previousName?: string) => void;
   addNode: (node: StoryNode) => void;
   removeNode: (nodeName: string) => void;

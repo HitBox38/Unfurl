@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { trackFirstGraphEdit } from "@/shared/lib/analytics";
+import { getEditableFile } from "@/shared/lib/editable-files-storage";
 
 import type { StoryData } from "@/shared/types";
 
@@ -50,6 +51,27 @@ export const useJsonDataStore = create<JsonDataState>((set) => ({
         canUndo: true,
         canRedo: false,
       };
+    }),
+  applyStory: (content, expected) =>
+    set((state) => {
+      const file = state.activeFileId ? getEditableFile(state.activeFileId) : null;
+      const saved = file?.content ?? state.content;
+      if (JSON.stringify(saved) !== JSON.stringify(expected)) {
+        throw new Error("The saved story changed. Review the latest changes before applying your fix.");
+      }
+      if (snapshotsAreEqual({ name: state.name, content }, { name: state.name, content: saved })) return {};
+      const snapshot = { name: file?.name ?? state.name, content: saved };
+      const historyState = JSON.stringify(state.content) === JSON.stringify(saved) ? state : { ...state, ...snapshot, past: [] };
+      const past = pushHistorySnapshot(historyState);
+      persistActiveFileContent(state.activeFileId, content);
+      return { content, name: snapshot.name, past, future: [], canUndo: true, canRedo: false };
+    }),
+  syncSavedFile: () =>
+    set((state) => {
+      if (!state.activeFileId) return {};
+      const file = getEditableFile(state.activeFileId);
+      if (!file || snapshotsAreEqual({ name: file.name, content: file.content }, state)) return {};
+      return { name: file.name, content: file.content, past: [], future: [], canUndo: false, canRedo: false };
     }),
   setNode: (newNode, previousName = newNode.name) =>
     set((state) => {

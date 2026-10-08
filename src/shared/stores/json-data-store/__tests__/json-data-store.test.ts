@@ -28,6 +28,29 @@ describe("useJsonDataStore", () => {
     useJsonDataStore.getState().reset();
   });
 
+  it("applies a complete multi-node fix as one persisted undo snapshot", () => {
+    saveEditableFile({ id: "ide-file", projectId: "p1", name: "demo", fileType: "json", content: sample });
+    useJsonDataStore.getState().setJson(sample, "demo", "ide-file", "p1");
+    const next = { ...sample, nodes: sample.nodes.map((node) => ({ ...node, metadata: { reward: 10 } })) };
+    useJsonDataStore.getState().applyStory(next, sample);
+    expect(getEditableFile("ide-file")?.content).toEqual(next);
+    expect(useJsonDataStore.getState().past).toHaveLength(1);
+    useJsonDataStore.getState().undo();
+    expect(getEditableFile("ide-file")?.content).toEqual(sample);
+    useJsonDataStore.getState().redo();
+    expect(getEditableFile("ide-file")?.content).toEqual(next);
+  });
+
+  it("refuses to overwrite a saved story that changed after review", () => {
+    const record = saveEditableFile({ id: "ide-file", projectId: "p1", name: "demo", fileType: "json", content: sample });
+    useJsonDataStore.getState().setJson(sample, "demo", record.id, "p1");
+    const external = { ...sample, title: "External change" };
+    saveEditableFile({ ...record, content: external });
+    expect(() => useJsonDataStore.getState().applyStory({ ...sample, title: "My fix" }, sample)).toThrow(/changed/i);
+    expect(getEditableFile(record.id)?.content).toEqual(external);
+    expect(useJsonDataStore.getState().past).toHaveLength(0);
+  });
+
   it("starts empty", () => {
     const state = useJsonDataStore.getState();
     expect(state.name).toBe("");
