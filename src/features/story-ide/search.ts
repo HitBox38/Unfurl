@@ -59,6 +59,7 @@ export const previewReplacement = (
   const changes: ReplacementChange[] = [];
   const errors: string[] = [];
   for (const match of matches) {
+    if (match.key) continue;
     let next: string | number | boolean;
     if (typeof match.value === "string") {
       next = search.exact || !search.query ? replacement : match.value.replace(new RegExp(escapeRegExp(search.query), search.caseSensitive ? "g" : "gi"), () => replacement);

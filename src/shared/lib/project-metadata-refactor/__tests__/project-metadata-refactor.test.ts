@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createProject, getProject, PROJECTS_STORAGE_KEY } from "@/shared/lib/projects-storage";
 import { EDITABLE_FILES_STORAGE_KEY, getEditableFile, saveEditableFile, updateEditableFileContent } from "@/shared/lib/editable-files-storage";
 import { applyMetadataRefactor, createMetadataEdits, getMetadataUndo, planMetadataRefactor, recoverMetadataTransaction, undoMetadataRefactor } from "@/shared/lib/project-metadata-refactor";
-import { metadataTransactionKey } from "@/shared/lib/project-metadata-refactor/helpers";
+import { metadataTransactionKey, metadataUndoKey } from "@/shared/lib/project-metadata-refactor/helpers";
 import { ideMetadata, makeIdeStory } from "@/test/fixtures/story-ide";
 
 describe("project metadata refactors", () => {
@@ -12,6 +12,78 @@ describe("project metadata refactors", () => {
     createProject({ name: "Other", metadataConfig: ideMetadata }, { createId: () => "other" });
     for (const id of ["one", "two"]) saveEditableFile({ id, projectId: "project", name: id, fileType: "json", content: makeIdeStory() });
     saveEditableFile({ id: "unrelated", projectId: "other", name: "unrelated", fileType: "json", content: makeIdeStory() });
+  });
+
+  it.each(["{ invalid journal", JSON.stringify({ version: 2, before: {}, after: {} }), JSON.stringify({ version: 1, before: { unrelated: "[]" }, after: {} })])("reports and preserves an unreadable journal without blocking startup: %s", (raw) => {
+    const files = localStorage.getItem(EDITABLE_FILES_STORAGE_KEY);
+    localStorage.setItem(metadataTransactionKey, raw);
+    expect(recoverMetadataTransaction()).toEqual(expect.any(String));
+    expect(localStorage.getItem(EDITABLE_FILES_STORAGE_KEY)).toBe(files);
+    expect(Object.keys(localStorage).some((key) => key.startsWith(metadataTransactionKey) && localStorage.getItem(key) === raw)).toBe(true);
+  });
+
+  it("retains an unreadable journal when archiving fails and refuses to overwrite it", () => {
+    const raw = "{ invalid journal"; localStorage.setItem(metadataTransactionKey, raw);
+    const originalSetItem = Storage.prototype.setItem;
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (this: Storage, key, value) {
+      if (key.startsWith(`${metadataTransactionKey}:unreadable:`)) throw new Error("Storage full");
+      originalSetItem.call(this, key, value);
+    });
+    try {
+      expect(recoverMetadataTransaction()).toEqual(expect.any(String));
+      expect(localStorage.getItem(metadataTransactionKey)).toBe(raw);
+      const edits = createMetadataEdits(ideMetadata); edits[0].field!.name = "questReward";
+      expect(() => applyMetadataRefactor(planMetadataRefactor("project", edits))).toThrow(/preserved/);
+      expect(localStorage.getItem(metadataTransactionKey)).toBe(raw);
+      expect(getEditableFile("one")?.content).toEqual(makeIdeStory());
+    } finally { spy.mockRestore(); }
+  });
+
+  it("keeps the journal available for retry if recovery cannot write a snapshot", () => {
+    const raw = JSON.stringify({ version: 1, before: {
+      [EDITABLE_FILES_STORAGE_KEY]: localStorage.getItem(EDITABLE_FILES_STORAGE_KEY),
+      [PROJECTS_STORAGE_KEY]: localStorage.getItem(PROJECTS_STORAGE_KEY),
+    } });
+    localStorage.setItem(metadataTransactionKey, raw);
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => { throw new Error("Storage full"); });
+    try {
+      expect(recoverMetadataTransaction()).toEqual(expect.any(String));
+      expect(localStorage.getItem(metadataTransactionKey)).toBe(raw);
+    } finally { spy.mockRestore(); }
+    expect(recoverMetadataTransaction()).toBeNull();
+    expect(localStorage.getItem(metadataTransactionKey)).toBeNull();
+  });
+
+  it("expires retained metadata undo instead of keeping full story copies indefinitely", () => {
+    const edits = createMetadataEdits(ideMetadata); edits[0].field!.name = "questReward";
+    applyMetadataRefactor(planMetadataRefactor("project", edits));
+    const now = Date.now(); const clock = vi.spyOn(Date, "now").mockReturnValue(now + 8 * 24 * 60 * 60 * 1000);
+    try { expect(getMetadataUndo("project")).toBeNull(); expect(localStorage.getItem(metadataUndoKey("project"))).toBeNull(); }
+    finally { clock.mockRestore(); }
+  });
+
+  it("applies a large refactor without retaining an oversized undo snapshot", () => {
+    const story = makeIdeStory(); story.nodes[0].content = ["x".repeat(300_000)];
+    updateEditableFileContent("one", story);
+    const edits = createMetadataEdits(ideMetadata); edits[0].field!.name = "questReward";
+    const plan = planMetadataRefactor("project", edits);
+    expect(plan.undoAvailable).toBe(false);
+    applyMetadataRefactor(plan);
+    expect(getEditableFile("one")?.content.nodes[0].metadata.questReward).toBe(100);
+    expect(getMetadataUndo("project")).toBeNull();
+  });
+
+  it("journals only the rollback snapshots, keeping the forward data out of temporary storage", () => {
+    const edits = createMetadataEdits(ideMetadata); edits[0].field!.name = "questReward";
+    const originalSetItem = Storage.prototype.setItem; let journal: string | null = null;
+    const spy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (this: Storage, key, value) {
+      if (key === metadataTransactionKey) journal = value;
+      originalSetItem.call(this, key, value);
+    });
+    try { applyMetadataRefactor(planMetadataRefactor("project", edits)); }
+    finally { spy.mockRestore(); }
+    expect(JSON.parse(journal!)).not.toHaveProperty("after");
+    expect(JSON.parse(journal!)).toHaveProperty(["before", EDITABLE_FILES_STORAGE_KEY]);
   });
 
   it("previews a rename across every story and applies definitions and values together", () => {

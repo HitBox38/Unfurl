@@ -3,18 +3,47 @@ import { create } from "zustand";
 import { getEditableFile } from "@/shared/lib/editable-files-storage";
 import { getProject } from "@/shared/lib/projects-storage";
 import { createStoryNode } from "@/shared/lib/create-story-node";
+import { workspaceStorageKey, workspaceViewKey } from "@/shared/lib/story-ide-storage";
 import type { StoryData } from "@/shared/types";
 import { canApplyDraft, createWorkspace, evaluateDraft, rebaseWorkspace, serializeNode, stageDocuments, workspaceHasChanges } from "@/features/story-ide/draft";
 import { valuesEqual } from "@/features/story-ide/merge";
 import type { IdeWorkspace, StorySearch } from "@/features/story-ide/types";
 
-export const workspaceStorageKey = (fileId: string) => `unfurl:story-ide:v1:${fileId}`;
+export { workspaceStorageKey } from "@/shared/lib/story-ide-storage";
 const unreadableCopies = new Map<string, { key: string; raw: string }>();
 const preserveUnreadableCopy = (fileId: string) => {
   const copy = unreadableCopies.get(fileId);
   if (!copy) return;
   localStorage.setItem(copy.key, copy.raw);
   unreadableCopies.delete(fileId);
+};
+
+const persistWorkspace = (workspace: IdeWorkspace) => {
+  const fileId = workspace.fileId;
+  preserveUnreadableCopy(fileId);
+  if (workspaceHasChanges(workspace)) {
+    localStorage.setItem(workspaceStorageKey(fileId), JSON.stringify(workspace));
+    return;
+  }
+  localStorage.removeItem(workspaceStorageKey(fileId));
+  const originals = workspace.documents.filter((document) => document.originalName !== null);
+  localStorage.setItem(workspaceViewKey(fileId), JSON.stringify({
+    version: 1, mode: workspace.mode, search: workspace.search,
+    tabs: workspace.tabs.map((id) => originals.findIndex((document) => document.id === id)).filter((index) => index >= 0),
+    activeIndex: originals.findIndex((document) => document.id === workspace.activeId),
+  }));
+};
+
+const recoverView = (workspace: IdeWorkspace) => {
+  try {
+    const raw = localStorage.getItem(workspaceViewKey(workspace.fileId));
+    if (!raw) return workspace;
+    const view = JSON.parse(raw);
+    if (view.version !== 1 || !Array.isArray(view.tabs) || !view.search || !["graph", "ide"].includes(view.mode)) return workspace;
+    const tabs = view.tabs.flatMap((index: unknown) => typeof index === "number" && Number.isInteger(index) && workspace.documents[index] ? [workspace.documents[index].id] : []);
+    const activeId = typeof view.activeIndex === "number" ? workspace.documents[view.activeIndex]?.id : null;
+    return { ...workspace, mode: view.mode, search: { ...workspace.search, ...view.search }, tabs, activeId: tabs.includes(activeId) ? activeId : tabs[0] ?? null };
+  } catch { return workspace; }
 };
 
 interface StoryIdeState {
@@ -68,9 +97,11 @@ export const useStoryIdeStore = create<StoryIdeState>((set, get) => ({
           ...existing, base: { ...existing.base, nodes: [...existing.base.nodes, ...additions] },
           documents: [...existing.documents, ...additions.map((node) => ({ id: crypto.randomUUID(), originalName: node.name, lastName: node.name, text: serializeNode(node) }))],
         } : existing;
-        set((state) => ({ workspaces: { ...state.workspaces, [fileId]: previewWorkspace(next) } }));
+        const workspace = previewWorkspace(next);
+        set((state) => ({ workspaces: { ...state.workspaces, [fileId]: workspace } }));
+        if (!workspaceHasChanges(workspace)) persistWorkspace(workspace);
       } else {
-        const workspace = createWorkspace(fileId, saved);
+        const workspace = recoverView(createWorkspace(fileId, saved));
         if (existing) {
           workspace.mode = existing.mode;
           workspace.search = existing.search;
@@ -80,6 +111,7 @@ export const useStoryIdeStore = create<StoryIdeState>((set, get) => ({
           workspace.activeId = workspace.documents.find((document) => document.originalName === active)?.id ?? workspace.tabs[0] ?? null;
         }
         set((state) => ({ workspaces: { ...state.workspaces, [fileId]: workspace } }));
+        persistWorkspace(workspace);
       }
     } catch (error) {
       try {
@@ -92,11 +124,11 @@ export const useStoryIdeStore = create<StoryIdeState>((set, get) => ({
   },
   update: (fileId, edit, preview = false) => {
     const current = get().workspaces[fileId];
-    if (!current) return;
+    if (!current || !getEditableFile(fileId)) return;
     let workspace = edit(current);
     if (preview) workspace = previewWorkspace(workspace);
     let storageError: string | null = null;
-    try { preserveUnreadableCopy(fileId); localStorage.setItem(workspaceStorageKey(fileId), JSON.stringify(workspace)); }
+    try { persistWorkspace(workspace); }
     catch { storageError = "Draft recovery could not be saved. Keep this window open and export a test copy when the draft is valid."; }
     set((state) => ({ workspaces: { ...state.workspaces, [fileId]: workspace }, storageError }));
   },

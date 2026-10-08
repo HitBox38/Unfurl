@@ -3,22 +3,28 @@ import { getProject, listProjects, PROJECTS_STORAGE_KEY } from "@/shared/lib/pro
 import { nodeShapeIssues } from "@/shared/lib/story-validation";
 import type { MetadataConfigTemplate } from "@/shared/types";
 
-import { commitStorageTransaction, metadataUndoKey } from "./helpers";
+import { commitStorageTransaction, metadataUndoKey, metadataUndoLifetime, metadataUndoMaxBytes, pruneMetadataUndo } from "./helpers";
 import type { MetadataEdit, MetadataRefactorPlan, MetadataUndo } from "./types";
 
-export { recoverMetadataTransaction, metadataUndoKey } from "./helpers";
+export { recoverMetadataTransaction, metadataUndoKey, pruneMetadataUndo } from "./helpers";
 export type { MetadataEdit, MetadataRefactorPlan, MetadataUndo } from "./types";
 
 export const createMetadataEdits = (config: MetadataConfigTemplate): MetadataEdit[] => config.config.map((field, index) => ({
   id: `field:${index}:${field.name}`, originalName: field.name, field: { ...field }, defaultValue: field.type === "number" ? 0 : false, conversion: "none",
 }));
 
+const serializeUndo = (plan: MetadataRefactorPlan, afterFiles: MetadataRefactorPlan["nextFiles"], now: number) => {
+  const undo: MetadataUndo = { expiresAt: now + metadataUndoLifetime, projectId: plan.projectId, beforeConfig: plan.baseConfig, afterConfig: plan.nextConfig, beforeFiles: plan.baseFiles, afterFiles };
+  const raw = JSON.stringify(undo);
+  return raw.length * 2 <= metadataUndoMaxBytes ? raw : null;
+};
+
 export const planMetadataRefactor = (projectId: string, edits: MetadataEdit[], storage: Storage = localStorage): MetadataRefactorPlan => {
   const project = getProject(projectId, { storage });
   if (!project) throw new Error("Project not found.");
   const baseFiles = listEditableFilesByProject(projectId, { storage });
   const nextConfig: MetadataConfigTemplate = { config: edits.flatMap((edit) => edit.field ? [edit.field] : []) };
-  const plan: MetadataRefactorPlan = { projectId, baseConfig: project.metadataConfig, nextConfig, baseFiles, nextFiles: [], changes: [], errors: [] };
+  const plan: MetadataRefactorPlan = { projectId, baseConfig: project.metadataConfig, nextConfig, baseFiles, nextFiles: [], changes: [], errors: [], undoAvailable: false };
   const names = new Set<string>();
   const signs = new Set<string>();
   for (const field of nextConfig.config) {
@@ -70,6 +76,8 @@ export const planMetadataRefactor = (projectId: string, edits: MetadataEdit[], s
       }),
     },
   }));
+  const now = Date.now();
+  plan.undoAvailable = serializeUndo(plan, plan.nextFiles.map((file) => ({ ...file, updatedAt: now })), now) !== null;
   return plan;
 };
 
@@ -88,13 +96,13 @@ export const applyMetadataRefactor = (plan: MetadataRefactorPlan, storage: Stora
   const nextById = new Map(nextFiles.map((file) => [file.id, file]));
   const allFiles = listEditableFiles({ storage }).map((file) => nextById.get(file.id) ?? file);
   const projects = listProjects({ storage }).map((entry) => entry.id === plan.projectId ? { ...entry, metadataConfig: plan.nextConfig, updatedAt: now } : entry);
-  const undo: MetadataUndo = { projectId: plan.projectId, beforeConfig: plan.baseConfig, afterConfig: plan.nextConfig, beforeFiles: plan.baseFiles, afterFiles: nextFiles };
   commitStorageTransaction(storage, {
-    [EDITABLE_FILES_STORAGE_KEY]: JSON.stringify(allFiles), [PROJECTS_STORAGE_KEY]: JSON.stringify(projects), [metadataUndoKey(plan.projectId)]: JSON.stringify(undo),
+    [EDITABLE_FILES_STORAGE_KEY]: JSON.stringify(allFiles), [PROJECTS_STORAGE_KEY]: JSON.stringify(projects), [metadataUndoKey(plan.projectId)]: serializeUndo(plan, nextFiles, now),
   });
 };
 
 export const getMetadataUndo = (projectId: string, storage: Storage = localStorage): MetadataUndo | null => {
+  pruneMetadataUndo(storage);
   const raw = storage.getItem(metadataUndoKey(projectId));
   if (!raw) return null;
   try {

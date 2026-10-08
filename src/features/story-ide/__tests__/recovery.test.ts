@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { evaluateDraft, serializeNode } from "@/features/story-ide/draft";
 import { useStoryIdeStore, workspaceStorageKey } from "@/features/story-ide/hooks/use-story-ide-store";
 import { createProject } from "@/shared/lib/projects-storage";
-import { getEditableFile, saveEditableFile, updateEditableFileContent } from "@/shared/lib/editable-files-storage";
+import { workspaceViewKey } from "@/shared/lib/story-ide-storage";
+import { deleteEditableFile, deleteEditableFilesByProject, getEditableFile, saveEditableFile, updateEditableFileContent } from "@/shared/lib/editable-files-storage";
 import { ideMetadata, makeIdeStory } from "@/test/fixtures/story-ide";
 
 describe("IDE draft recovery", () => {
@@ -11,6 +12,31 @@ describe("IDE draft recovery", () => {
     useStoryIdeStore.setState({ workspaces: {}, storageError: null });
     createProject({ name: "Game", metadataConfig: ideMetadata }, { createId: () => "project" });
     saveEditableFile({ id: "file", projectId: "project", name: "quest", fileType: "json", content: makeIdeStory() });
+  });
+
+  it("stores view preferences without duplicating a clean story, and releases applied or discarded drafts", () => {
+    const story = makeIdeStory(); const actions = useStoryIdeStore.getState(); actions.initialize("file", story);
+    const id = useStoryIdeStore.getState().workspaces.file.documents[1].id;
+    actions.selectDocument("file", id); actions.setMode("file", "ide"); actions.setSearch("file", { query: "coins" });
+    expect(localStorage.getItem(workspaceStorageKey("file"))).toBeNull();
+    useStoryIdeStore.setState({ workspaces: {} }); actions.initialize("file", story);
+    expect(useStoryIdeStore.getState().workspaces.file).toMatchObject({ mode: "ide", search: { query: "coins" } });
+    expect(useStoryIdeStore.getState().workspaces.file.activeId).toBe(id);
+    actions.editDocument("file", id, "{ pending");
+    expect(localStorage.getItem(workspaceStorageKey("file"))).not.toBeNull();
+    actions.reset("file", story);
+    expect(localStorage.getItem(workspaceStorageKey("file"))).toBeNull();
+  });
+
+  it.each(["file", "project"])("removes recovery data when the %s is deleted", (kind) => {
+    const actions = useStoryIdeStore.getState(); actions.initialize("file", makeIdeStory());
+    actions.editDocument("file", useStoryIdeStore.getState().workspaces.file.documents[0].id, "{ pending");
+    if (kind === "file") deleteEditableFile("file"); else deleteEditableFilesByProject("project");
+    expect(localStorage.getItem(workspaceStorageKey("file"))).toBeNull();
+    expect(localStorage.getItem(workspaceViewKey("file"))).toBeNull();
+    actions.setMode("file", "ide");
+    expect(localStorage.getItem(workspaceStorageKey("file"))).toBeNull();
+    expect(localStorage.getItem(workspaceViewKey("file"))).toBeNull();
   });
 
   it("recovers invalid source, tabs, search, and view without modifying the saved file", () => {
@@ -60,6 +86,7 @@ describe("IDE draft recovery", () => {
     useStoryIdeStore.getState().setMode("file", "ide");
     const archivedKey = Object.keys(localStorage).find((itemKey) => itemKey.startsWith(`${key}:unreadable:`));
     expect(archivedKey).toBeDefined(); expect(localStorage.getItem(archivedKey!)).toBe(unreadable);
-    expect(JSON.parse(localStorage.getItem(key)!).mode).toBe("ide");
+    expect(localStorage.getItem(key)).toBeNull();
+    expect(JSON.parse(localStorage.getItem(workspaceViewKey("file"))!).mode).toBe("ide");
   });
 });

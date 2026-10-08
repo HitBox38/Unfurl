@@ -6,6 +6,19 @@ import { jsonRangeAtPath } from "@/shared/lib/json-source";
 import { makeIdeStory } from "@/test/fixtures/story-ide";
 
 describe("story investigation", () => {
+  it("keeps field-name matches navigable while replacing only narrative values", () => {
+    const story = makeIdeStory(); story.nodes[0].content = ["Collect the reward"];
+    const workspace = createWorkspace("file", story);
+    const search = { ...emptySearch, query: "reward" };
+    const matches = searchDocuments(workspace.documents, search);
+    expect(matches.filter((match) => match.key)).toHaveLength(2);
+    const preview = previewReplacement(workspace.documents, search, matches, "bonus");
+    expect(preview.changes).toHaveLength(1);
+    expect(JSON.parse(preview.documents[0].text)).toMatchObject({ content: ["Collect the bonus"], metadata: story.nodes[0].metadata });
+    expect(preview.documents[1]).toEqual(workspace.documents[1]);
+    const keyOnly = { ...emptySearch, query: "name", exact: true };
+    expect(previewReplacement(workspace.documents, keyOnly, searchDocuments(workspace.documents, keyOnly), "title").documents).toEqual(workspace.documents);
+  });
   it("targets a typed metadata value without changing dialogue or graph positions", () => {
     const story = makeIdeStory(); const workspace = createWorkspace("file", story);
     const search = { ...emptySearch, query: "100", scope: "metadata" as const, field: "reward", exact: true };

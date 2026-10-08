@@ -1,4 +1,5 @@
 import type { StoryData } from "@/shared/types";
+import { removeStoryIdeStorage } from "@/shared/lib/story-ide-storage";
 
 import {
   createEditableFileId,
@@ -137,6 +138,7 @@ export const deleteEditableFile = (
     storage,
     readFiles(storage).filter((file) => file.id !== id),
   );
+  removeStoryIdeStorage(id, storage);
 };
 
 export const deleteEditableFilesByProject = (
@@ -144,10 +146,12 @@ export const deleteEditableFilesByProject = (
   options: Pick<StorageOptions, "storage"> = {},
 ) => {
   const storage = getStorage(options.storage);
+  const files = readFiles(storage);
   writeFiles(
     storage,
-    readFiles(storage).filter((file) => file.projectId !== projectId),
+    files.filter((file) => file.projectId !== projectId),
   );
+  for (const file of files) if (file.projectId === projectId) removeStoryIdeStorage(file.id, storage);
 };
 
 /**

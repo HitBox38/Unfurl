@@ -26,9 +26,11 @@ export interface MetadataRefactorPlan {
   nextFiles: EditableFileRecord[];
   changes: MetadataChange[];
   errors: string[];
+  undoAvailable: boolean;
 }
 
 export interface MetadataUndo {
+  expiresAt: number;
   projectId: string;
   beforeConfig: MetadataConfigTemplate;
   afterConfig: MetadataConfigTemplate;

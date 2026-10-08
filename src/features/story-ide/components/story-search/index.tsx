@@ -46,7 +46,7 @@ export const StorySearch = ({ documents, search, onSearch, onSelect, onReplace }
           <Label className="flex items-center gap-2 text-xs"><Checkbox checked={search.exact} onCheckedChange={(checked) => onSearch({ exact: checked === true })} />Exact value</Label>
           <Label className="flex items-center gap-2 text-xs"><Checkbox checked={search.caseSensitive} onCheckedChange={(checked) => onSearch({ caseSensitive: checked === true })} />Match case</Label>
         </div>
-        <div className="flex gap-1.5"><Input aria-label="Replacement value" placeholder="Replace with…" value={replacement} onChange={(event) => setReplacement(event.target.value)} /><Button size="icon" variant="outline" aria-label="Preview replacements" title="Preview replacements" disabled={!matches.length} onClick={() => setPreviewOpen(true)}><Replace className="size-4" /></Button></div>
+        <div className="flex gap-1.5"><Input aria-label="Replacement value" placeholder="Replace with…" value={replacement} onChange={(event) => setReplacement(event.target.value)} /><Button size="icon" variant="outline" aria-label="Preview replacements" title="Preview replacements" disabled={!matches.some((match) => !match.key)} onClick={() => setPreviewOpen(true)}><Replace className="size-4" /></Button></div>
       </div>
       <p role="status" className="px-3 py-2 text-xs text-muted-foreground">{matches.length} matches · {new Set(matches.map((match) => match.documentId)).size} nodes</p>
       <div className="min-h-0 flex-1 overflow-auto px-2 pb-2">

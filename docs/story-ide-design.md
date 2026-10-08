@@ -74,12 +74,17 @@ Use **Export test copy** to test a validated fix in the game, then choose
 whole application. **Discard fix** returns to the latest saved story. Drafts,
 tabs, search filters, and the chosen view are recovered from this browser's
 local storage when reopening the story.
+Only pending fixes retain a full recovery workspace; a clean story stores its
+view preferences separately. Deleting a story also removes its recovery data.
 
 **Metadata refactor** reviews definitions and saved values across the current
 project. Type changes require matching values or an explicit binary conversion.
 **Undo last refactor** restores the project only if subsequent saved edits would
 not be overwritten. Pending story edits reconcile against the resulting saved
 story and may require conflict resolution.
+Metadata undo snapshots expire after seven days and are limited to 512 KB per
+project. The review indicates when a refactor exceeds that limit and needs an
+exported backup instead of retained undo.
 
 ## Related decisions
 
