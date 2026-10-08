@@ -2,7 +2,7 @@ import { Code2, Download, ListChecks } from "lucide-react";
 
 import { ProjectMetadataRefactor } from "@/features/project-metadata-refactor";
 import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
+import { IdeFixStatus } from "@/features/story-ide/components/ide-fix-status";
 import type { StoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
 
 export const IdeToolbar = ({ ide }: { ide: StoryIdeController }) => {
@@ -21,9 +21,7 @@ export const IdeToolbar = ({ ide }: { ide: StoryIdeController }) => {
       <div className="flex min-w-0 items-center gap-2">
         <Code2 className="size-4 text-chart-2" />
         <span className="text-sm font-medium">Story IDE</span>
-        <Badge variant="secondary">
-          {pending ? `${changedNodes} nodes in pending fix` : "Saved story"}
-        </Badge>
+        <IdeFixStatus pending={pending} changedNodes={changedNodes} />
       </div>
       <div className="flex flex-wrap gap-2">
         <ProjectMetadataRefactor projectId={projectId} />

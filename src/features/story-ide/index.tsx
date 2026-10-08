@@ -6,6 +6,7 @@ import { IdeSidebar } from "@/features/story-ide/components/ide-sidebar";
 import { NodeTabs } from "@/features/story-ide/components/node-tabs";
 import { IdeEditorPane } from "@/features/story-ide/components/ide-editor-pane";
 import { IdeDiagnostics } from "@/features/story-ide/components/ide-diagnostics";
+import { IdeMotion } from "@/features/story-ide/components/ide-motion";
 import { useStoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
 
 export const StoryIde = ({ fileId }: { fileId: string }) => {
@@ -17,10 +18,7 @@ export const StoryIde = ({ fileId }: { fileId: string }) => {
       </div>
     );
   return (
-    <section
-      className="story-ide workspace-bubble flex h-full min-h-0 min-w-0 flex-col overflow-hidden text-left"
-      aria-label="Story IDE"
-    >
+    <IdeMotion>
       <IdeToolbar ide={ide} />
       <IdeMessages ide={ide} />
       <div className="story-ide-body min-h-0 flex-1" data-sidebar={ide.sidebar}>
@@ -50,7 +48,7 @@ export const StoryIde = ({ fileId }: { fileId: string }) => {
           ide.actions.resolve(fileId, id, resolution)
         }
       />
-    </section>
+    </IdeMotion>
   );
 };
 export default StoryIde;

@@ -1,9 +1,11 @@
-import { X } from "lucide-react";
+import * as m from "motion/react-m";
 
 import { cn } from "@/shared/lib/cn";
-import { Button } from "@/shared/ui/button";
 import { TabsTrigger } from "@/shared/ui/tabs";
+import { NodeTabClose } from "@/features/story-ide/components/node-tab-close";
 import { valuesEqual } from "@/features/story-ide/merge";
+import { useIdeMotion } from "@/features/story-ide/hooks/use-ide-motion";
+import { useNodeTabInteraction } from "@/features/story-ide/hooks/use-node-tab-interaction";
 import type { StoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
 
 export const NodeTab = ({
@@ -13,7 +15,10 @@ export const NodeTab = ({
   ide: StoryIdeController;
   id: string;
 }) => {
-  const { workspace, result, actions, fileId } = ide;
+  const { workspace, result } = ide;
+  const { reducedMotion, tabTransition } = useIdeMotion();
+  const selected = workspace.activeId === id;
+  const { expanded, interactionProps } = useNodeTabInteraction(selected);
   const document = workspace.documents.find((entry) => entry.id === id);
   if (!document) return null;
   const node = result.nodesByDocument.get(id);
@@ -28,47 +33,41 @@ export const NodeTab = ({
       ),
     );
   return (
-    <div
-      className={cn(
-        "flex shrink-0 items-center rounded-xl pr-1",
-        workspace.activeId === id && "bg-secondary",
-      )}
+    <m.div
+      layout={!reducedMotion}
+      transition={tabTransition}
+      className="ide-node-tab relative isolate flex shrink-0 items-center rounded-xl pr-1"
+      data-selected={selected}
+      {...interactionProps}
     >
+      {selected ? (
+        <m.span
+          layoutId={reducedMotion ? undefined : "node-tab-selection"}
+          className="pointer-events-none absolute inset-0 -z-10 rounded-xl border border-border/60 bg-secondary"
+          transition={tabTransition}
+          aria-hidden="true"
+        />
+      ) : null}
       <TabsTrigger
+        asChild
         value={id}
-        className="h-8 max-w-52 flex-none justify-start gap-2 rounded-xl px-3 font-mono text-xs data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
+        className="h-8 max-w-52 flex-none justify-start gap-2 rounded-xl bg-transparent px-3 font-mono text-xs transition-colors data-active:bg-transparent data-[state=active]:text-secondary-foreground dark:data-active:border-transparent dark:data-active:bg-transparent group-data-[variant=default]/tabs-list:data-active:shadow-none"
       >
-        <span className={cn("truncate", document.deleted && "line-through")}>
-          {name}
-        </span>
-        {dirty ? (
-          <span
-            className="size-1.5 shrink-0 rounded-full bg-chart-2"
-            aria-label="Pending changes"
-          />
-        ) : null}
+        <m.button layout="position" transition={tabTransition}>
+          <span className={cn("truncate", document.deleted && "line-through")}>
+            {name}
+          </span>
+          {dirty ? (
+            <span
+              className="size-1.5 shrink-0 rounded-full bg-chart-2"
+              aria-label="Pending changes"
+            />
+          ) : null}
+        </m.button>
       </TabsTrigger>
-      <Button
-        variant="ghost"
-        size="icon-xs"
-        className="mr-1 shrink-0"
-        aria-label={`Close tab ${name}`}
-        onClick={(event) => {
-          const list = event.currentTarget.closest('[role="tablist"]');
-          const addNode = list
-            ?.closest('[aria-label="Story IDE"]')
-            ?.querySelector<HTMLButtonElement>('[aria-label="Add draft node"]');
-          actions.closeTab(fileId, id);
-          requestAnimationFrame(() => {
-            const activeTab = list?.querySelector<HTMLButtonElement>(
-              '[role="tab"][data-state="active"]',
-            );
-            (activeTab ?? addNode)?.focus();
-          });
-        }}
-      >
-        <X className="size-3" />
-      </Button>
-    </div>
+      {expanded ? (
+        <NodeTabClose ide={ide} id={id} name={name} selected={selected} />
+      ) : null}
+    </m.div>
   );
 };

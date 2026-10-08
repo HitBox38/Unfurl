@@ -77,6 +77,18 @@ local storage when reopening the story.
 Only pending fixes retain a full recovery workspace; a clean story stores its
 view preferences separately. Deleting a story also removes its recovery data.
 
+The IDE loads Motion with its lazy workspace. Pointer interactions use 180 ms
+transitions for the Nodes / Search selection, investigation panes, messages,
+and saved / pending status. The node-tab selection pill uses a spring with a
+small bounce to expand and contract between tab widths. Inactive tabs collapse
+their close-button space. Hover, selection, or keyboard focus expands the tab
+to reveal its close button, with neighboring tabs moving together. Keyboard
+interactions remain instant. Reduced motion keeps the
+opacity fades and removes selection movement. The editor switches nodes
+immediately; code editing and the graph do not animate. Exiting messages are
+immediately hidden from assistive technology and made inert until their fade
+finishes.
+
 **Metadata refactor** reviews definitions and saved values across the current
 project. Type changes require matching values or an explicit binary conversion.
 **Undo last refactor** restores the project only if subsequent saved edits would
