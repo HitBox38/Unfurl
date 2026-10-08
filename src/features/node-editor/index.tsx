@@ -52,7 +52,7 @@ import { NodeMetadataEditor } from "@/features/node-metadata-editor";
 
 import type { StoryNodeForm } from "./types";
 
-export const NodeEditor = () => {
+export const NodeEditor = ({ onDirtyChange }: { onDirtyChange?: (dirty: boolean) => void }) => {
   const [confirmClose, setConfirmClose] = useState(false);
   const node = useNodeStore((state) => state.node);
   const isNew = useNodeStore((state) => state.isNew);
@@ -74,6 +74,11 @@ export const NodeEditor = () => {
       metadata: { ...node?.metadata },
     },
   });
+
+  useEffect(() => {
+    onDirtyChange?.(methods.formState.isDirty);
+    return () => onDirtyChange?.(false);
+  }, [methods.formState.isDirty, onDirtyChange]);
 
   const { append, fields, remove } = useFieldArray({
     control: methods.control,

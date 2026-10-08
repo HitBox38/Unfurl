@@ -6,9 +6,11 @@ import { router } from "@/app/router";
 import { initAnalytics, subscribeRouteAnalytics } from "@/shared/lib/analytics";
 import { initTheme } from "@/shared/hooks/use-theme";
 import { migrateStorage } from "@/shared/lib/projects-storage";
+import { recoverMetadataTransaction } from "@/shared/lib/project-metadata-refactor";
 import "@/styles/index.css";
 
 initTheme();
+recoverMetadataTransaction();
 migrateStorage();
 initAnalytics();
 subscribeRouteAnalytics(router);
