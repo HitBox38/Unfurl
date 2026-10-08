@@ -31,8 +31,8 @@ vi.mock("@/features/story-ide/components/json-node-editor", () => ({
 const editor = () => screen.getByRole("textbox", { name: "Node JSON editor" });
 const savedRewards = () => getEditableFile("file")!.content.nodes.map((node) => node.metadata.reward);
 const openIde = async (user: ReturnType<typeof userEvent.setup>) => {
-  await screen.findByRole("button", { name: "IDE" });
-  await user.click(screen.getByRole("button", { name: "IDE" }));
+  await screen.findByRole("tab", { name: "IDE" });
+  await user.click(screen.getByRole("tab", { name: "IDE" }));
   await screen.findByRole("textbox", { name: "Node JSON editor" });
 };
 
@@ -62,7 +62,7 @@ describe("story IDE editing flow", () => {
     await user.click(screen.getByRole("button", { name: "Export test copy" }));
     expect(download).toHaveBeenCalledWith("quest-test-copy.json", expect.objectContaining({ nodes: expect.arrayContaining([expect.objectContaining({ metadata: { reward: 25, visited: false } })]) }));
     expect(savedRewards()).toEqual([100, 100]);
-    await user.click(screen.getByRole("button", { name: "Graph" }));
+    await user.click(screen.getByRole("tab", { name: "Graph" }));
     expect(screen.getByRole("button", { name: "Undo edit" })).toBeDisabled();
     expect(screen.queryByRole("button", { name: "Add saved node" })).not.toBeInTheDocument();
     expect(screen.getByText("Pending fix · Read-only graph preview")).toBeInTheDocument();
@@ -77,6 +77,32 @@ describe("story IDE editing flow", () => {
     expect(savedRewards()).toEqual([100, 100]);
     await user.click(screen.getByRole("button", { name: "Redo edit" }));
     expect(savedRewards()).toEqual([25, 25]);
+  });
+
+  it("uses keyboard-accessible node tabs and retains drafts after closing and reopening a tab", async () => {
+    const user = userEvent.setup();
+    render(<FilePage />);
+    await openIde(user);
+    await user.click(screen.getByRole("button", { name: "Outro" }));
+    const intro = screen.getByRole("tab", { name: "Intro" });
+    await user.click(intro);
+    await user.keyboard("{ArrowRight}");
+    const outro = screen.getByRole("tab", { name: "Outro" });
+    await waitFor(() => expect(outro).toHaveFocus());
+    expect(outro).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "Outro" })).toContainElement(
+      editor(),
+    );
+    await user.keyboard("{ArrowLeft}");
+    await waitFor(() => expect(intro).toHaveAttribute("aria-selected", "true"));
+    fireEvent.change(editor(), { target: { value: "{ pending tab draft" } });
+    await user.click(screen.getByRole("button", { name: "Close tab Intro" }));
+    expect(screen.queryByRole("tab", { name: /^Intro/ })).not.toBeInTheDocument();
+    await waitFor(() => expect(outro).toHaveFocus());
+    expect(outro).toHaveAttribute("aria-selected", "true");
+    await user.click(screen.getByRole("button", { name: /^Intro/ }));
+    expect(editor()).toHaveValue("{ pending tab draft");
+    expect(savedRewards()).toEqual([100, 100]);
   });
 
   it("recovers unfinished JSON after reopening and blocks Apply and test export", async () => {

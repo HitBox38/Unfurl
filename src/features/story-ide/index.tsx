@@ -1,3 +1,4 @@
+import { Tabs } from "@/shared/ui/tabs";
 import { DraftReview } from "@/features/story-ide/components/draft-review";
 import { IdeToolbar } from "@/features/story-ide/components/ide-toolbar";
 import { IdeMessages } from "@/features/story-ide/components/ide-messages";
@@ -24,7 +25,11 @@ export const StoryIde = ({ fileId }: { fileId: string }) => {
       <IdeMessages ide={ide} />
       <div className="story-ide-body min-h-0 flex-1" data-sidebar={ide.sidebar}>
         <IdeSidebar ide={ide} />
-        <div className="flex min-h-0 min-w-0 flex-col">
+        <Tabs
+          value={ide.workspace.activeId ?? ""}
+          onValueChange={ide.select}
+          className="min-h-0 min-w-0 flex-1 flex-col gap-0"
+        >
           <NodeTabs ide={ide} />
           <IdeEditorPane ide={ide} />
           <IdeDiagnostics ide={ide} />
@@ -32,7 +37,7 @@ export const StoryIde = ({ fileId }: { fileId: string }) => {
             <span>JSON · Ctrl/⌘ Space for suggestions</span>
             <span>Renames and removals update story links in review.</span>
           </div>
-        </div>
+        </Tabs>
       </div>
       <DraftReview
         open={ide.reviewOpen}

@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { FilePage } from "@/app/pages/file-page";
+import type { ConfirmDialogOptions } from "@/shared/hooks/use-confirm-dialog";
+import { useStoryIdeStore } from "@/features/story-ide/hooks/use-story-ide-store";
 import {
   getEditableFile,
   saveEditableFile,
@@ -11,7 +13,8 @@ import {
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData } from "@/shared/types";
 
-const { routeState } = vi.hoisted(() => ({
+const { routeState, confirm } = vi.hoisted(() => ({
+  confirm: vi.fn<(options: ConfirmDialogOptions) => void>(),
   routeState: {
     fileId: "draft-id",
   },
@@ -22,6 +25,10 @@ vi.mock("@tanstack/react-router", () => ({
     <a href={to}>{children}</a>
   ),
   useParams: () => ({ fileId: routeState.fileId }),
+}));
+
+vi.mock("@/shared/hooks/use-confirm-dialog", () => ({
+  useConfirmDialog: () => confirm,
 }));
 
 vi.mock("@/features/graph-node-toolbar", () => ({
@@ -53,7 +60,15 @@ vi.mock("@/features/dialog-viewer", () => ({
 }));
 
 vi.mock("@/features/node-editor", () => ({
-  NodeEditor: () => <div data-testid="node-editor" />,
+  NodeEditor: ({
+    onDirtyChange,
+  }: {
+    onDirtyChange?: (dirty: boolean) => void;
+  }) => (
+    <div data-testid="node-editor">
+      <button onClick={() => onDirtyChange?.(true)}>Edit visual node</button>
+    </div>
+  ),
 }));
 
 const story: StoryData = {
@@ -74,6 +89,8 @@ describe("FilePage", () => {
     routeState.fileId = "draft-id";
     useJsonDataStore.getState().reset();
     useNodeStore.getState().setNode(null);
+    confirm.mockClear();
+    useStoryIdeStore.setState({ workspaces: {}, storageError: null });
   });
 
   it("groups file actions in separate bubbles without an upload-another-file action", async () => {
@@ -150,8 +167,12 @@ describe("FilePage", () => {
 
     render(<FilePage />);
 
-    expect(await screen.findByText(/give start a first line/i)).toBeInTheDocument();
-    expect(screen.getByText(/add a choice when the path branches/i)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/give start a first line/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/add a choice when the path branches/i),
+    ).toBeInTheDocument();
   });
 
   it("saves header file name edits on blur", async () => {
@@ -296,5 +317,37 @@ describe("FilePage", () => {
       expect(useNodeStore.getState().node?.name).toBe("Start");
       expect(useNodeStore.getState().node?.content).toEqual(["Renamed"]);
     });
+  });
+  it("keeps the graph selected until an unsaved visual edit is explicitly discarded", async () => {
+    const user = userEvent.setup();
+    saveEditableFile({
+      id: "draft-id",
+      name: "demo",
+      fileType: "json",
+      content: story,
+      projectId: "p1",
+    });
+    render(<FilePage />);
+    const graph = await screen.findByRole("tab", { name: "Graph" });
+    const ide = screen.getByRole("tab", { name: "IDE" });
+    act(() => useNodeStore.getState().setNode(story.nodes[0]));
+    await user.click(screen.getByRole("button", { name: "Edit visual node" }));
+    await user.click(graph);
+    await user.keyboard("{ArrowRight}");
+    await waitFor(() => expect(ide).toHaveFocus());
+    expect(graph).toHaveAttribute("aria-selected", "true");
+    expect(confirm).not.toHaveBeenCalled();
+    await user.keyboard("{Enter}");
+    expect(confirm).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Open IDE with unsaved node edits?" }),
+    );
+    expect(graph).toHaveAttribute("aria-selected", "true");
+    confirm.mockClear();
+    await user.click(ide);
+    expect(graph).toHaveAttribute("aria-selected", "true");
+    act(() => confirm.mock.calls[0][0].onConfirm());
+    expect(ide).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "IDE" })).toBeVisible();
+    expect(getEditableFile("draft-id")?.content).toEqual(story);
   });
 });

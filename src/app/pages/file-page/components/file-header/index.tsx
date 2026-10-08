@@ -4,11 +4,11 @@ import { GraphNodeToolbar } from "@/features/graph-node-toolbar";
 import { DownloadButton } from "@/features/download";
 import { FileHistoryControls } from "@/features/file-history";
 import { InlineNameInput } from "@/shared/components";
-import { Button } from "@/shared/ui/button";
+import { TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import type { FilePageController } from "@/app/pages/file-page/hooks/use-file-page";
 
 export const FileHeader = ({ page }: { page: FilePageController }) => {
-  const { name, setFileName, mode, chooseMode, pending } = page;
+  const { name, setFileName, mode, pending } = page;
   return (
     <header className="file-header shrink-0 text-left">
       <div
@@ -28,30 +28,25 @@ export const FileHeader = ({ page }: { page: FilePageController }) => {
         data-testid="file-toolbar"
         className="flex flex-wrap items-center gap-3"
       >
-        <div
-          className="workspace-bubble workspace-toolbar"
-          role="group"
+        <TabsList
+          className="workspace-bubble workspace-toolbar h-auto min-h-10 rounded-2xl bg-card/95 group-data-horizontal/tabs:h-auto"
           aria-label="Story view"
         >
-          <Button
-            variant={mode === "graph" ? "secondary" : "ghost"}
-            size="sm"
-            aria-pressed={mode === "graph"}
-            onClick={() => chooseMode("graph")}
+          <TabsTrigger
+            value="graph"
+            className="h-8 flex-none rounded-xl px-3 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
           >
             <GitBranch className="size-4" aria-hidden="true" />
             Graph
-          </Button>
-          <Button
-            variant={mode === "ide" ? "secondary" : "ghost"}
-            size="sm"
-            aria-pressed={mode === "ide"}
-            onClick={() => chooseMode("ide")}
+          </TabsTrigger>
+          <TabsTrigger
+            value="ide"
+            className="h-8 flex-none rounded-xl px-3 data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
           >
             <Code2 className="size-4" aria-hidden="true" />
             IDE
-          </Button>
-        </div>
+          </TabsTrigger>
+        </TabsList>
         <div
           data-testid="file-history-bubble"
           className="workspace-bubble workspace-toolbar"

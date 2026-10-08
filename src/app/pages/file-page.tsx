@@ -1,5 +1,6 @@
 import { Loader2 } from "lucide-react";
 
+import { Tabs } from "@/shared/ui/tabs";
 import { useFilePage } from "@/app/pages/file-page/hooks/use-file-page";
 import { MissingFile } from "@/app/pages/file-page/components/missing-file";
 import { FileHeader } from "@/app/pages/file-page/components/file-header";
@@ -16,10 +17,20 @@ export const FilePage = () => {
     );
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-        <FileHeader page={page} />
-        <FileWorkspace page={page} fileId={page.fileId} />
-      </section>
+      <Tabs
+        asChild
+        value={page.mode}
+        activationMode="manual"
+        onValueChange={(mode) => {
+          if (mode === "graph" || mode === "ide") page.chooseMode(mode);
+        }}
+        className="relative min-h-0 flex-1 flex-col gap-0 overflow-hidden"
+      >
+        <section>
+          <FileHeader page={page} />
+          <FileWorkspace page={page} fileId={page.fileId} />
+        </section>
+      </Tabs>
     </div>
   );
 };

@@ -2,19 +2,18 @@ import { X } from "lucide-react";
 
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/button";
+import { TabsTrigger } from "@/shared/ui/tabs";
 import { valuesEqual } from "@/features/story-ide/merge";
 import type { StoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
 
 export const NodeTab = ({
   ide,
   id,
-  index,
 }: {
   ide: StoryIdeController;
   id: string;
-  index: number;
 }) => {
-  const { workspace, result, select, actions, fileId } = ide;
+  const { workspace, result, actions, fileId } = ide;
   const document = workspace.documents.find((entry) => entry.id === id);
   if (!document) return null;
   const node = result.nodesByDocument.get(id);
@@ -30,37 +29,14 @@ export const NodeTab = ({
     );
   return (
     <div
-      key={id}
       className={cn(
-        "flex shrink-0 items-center border-r",
-        workspace.activeId === id && "bg-card",
+        "flex shrink-0 items-center rounded-xl pr-1",
+        workspace.activeId === id && "bg-secondary",
       )}
     >
-      <button
-        id={`ide-tab-${id}`}
-        role="tab"
-        aria-selected={workspace.activeId === id}
-        aria-controls="node-json-panel"
-        tabIndex={workspace.activeId === id ? 0 : -1}
-        className="flex max-w-52 items-center gap-2 px-3 py-3 font-mono text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        onClick={() => select(id)}
-        onKeyDown={(event) => {
-          let next: string | undefined;
-          if (event.key === "ArrowRight")
-            next = workspace.tabs[(index + 1) % workspace.tabs.length];
-          else if (event.key === "ArrowLeft")
-            next =
-              workspace.tabs[
-                (index - 1 + workspace.tabs.length) % workspace.tabs.length
-              ];
-          else if (event.key === "Home") next = workspace.tabs[0];
-          else if (event.key === "End") next = workspace.tabs.at(-1);
-          if (next) {
-            event.preventDefault();
-            select(next);
-            window.document.getElementById(`ide-tab-${next}`)?.focus();
-          }
-        }}
+      <TabsTrigger
+        value={id}
+        className="h-8 max-w-52 flex-none justify-start gap-2 rounded-xl px-3 font-mono text-xs data-[state=active]:bg-secondary data-[state=active]:text-secondary-foreground"
       >
         <span className={cn("truncate", document.deleted && "line-through")}>
           {name}
@@ -71,13 +47,25 @@ export const NodeTab = ({
             aria-label="Pending changes"
           />
         ) : null}
-      </button>
+      </TabsTrigger>
       <Button
         variant="ghost"
         size="icon-xs"
         className="mr-1 shrink-0"
         aria-label={`Close tab ${name}`}
-        onClick={() => actions.closeTab(fileId, id)}
+        onClick={(event) => {
+          const list = event.currentTarget.closest('[role="tablist"]');
+          const addNode = list
+            ?.closest('[aria-label="Story IDE"]')
+            ?.querySelector<HTMLButtonElement>('[aria-label="Add draft node"]');
+          actions.closeTab(fileId, id);
+          requestAnimationFrame(() => {
+            const activeTab = list?.querySelector<HTMLButtonElement>(
+              '[role="tab"][data-state="active"]',
+            );
+            (activeTab ?? addNode)?.focus();
+          });
+        }}
       >
         <X className="size-3" />
       </Button>

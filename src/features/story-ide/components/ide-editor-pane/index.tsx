@@ -1,5 +1,6 @@
 import { Code2 } from "lucide-react";
 
+import { TabsContent } from "@/shared/ui/tabs";
 import { JsonNodeEditor } from "@/features/story-ide/components/json-node-editor";
 import { NodeEditorToolbar } from "@/features/story-ide/components/node-editor-toolbar";
 import type { StoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
@@ -19,10 +20,9 @@ export const IdeEditorPane = ({ ide }: { ide: StoryIdeController }) => {
   return activeDocument ? (
     <>
       <NodeEditorToolbar ide={ide} />
-      <div
-        id="node-json-panel"
-        role="tabpanel"
-        aria-labelledby={`ide-tab-${activeDocument.id}`}
+      <TabsContent
+        value={activeDocument.id}
+        forceMount
         className="min-h-0 flex-1 overflow-hidden"
       >
         {activeDocument.deleted ? (
@@ -46,7 +46,7 @@ export const IdeEditorPane = ({ ide }: { ide: StoryIdeController }) => {
             }}
           />
         )}
-      </div>
+      </TabsContent>
     </>
   ) : (
     <div className="flex min-h-0 flex-1 items-center justify-center p-8">
