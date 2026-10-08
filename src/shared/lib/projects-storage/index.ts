@@ -1,4 +1,5 @@
 import { deleteEditableFilesByProject } from "@/shared/lib/editable-files-storage";
+import { metadataUndoKey } from "@/shared/lib/metadata-refactor-storage";
 import type { MetadataConfigTemplate, ProjectRecord } from "@/shared/types";
 
 import {
@@ -102,4 +103,5 @@ export const deleteProject = (
     storage,
     projects.filter((project) => project.id !== id),
   );
+  storage.removeItem(metadataUndoKey(id));
 };
