@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Checkbox } from "@/shared/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 
 interface StorySearchProps {
@@ -28,9 +29,17 @@ export const StorySearch = ({ documents, search, onSearch, onSelect, onReplace }
       <div className="space-y-3 border-b p-3">
         <div className="relative"><Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" /><Input className="pl-8" aria-label="Search story data" placeholder="Search story data…" value={search.query} onChange={(event) => onSearch({ query: event.target.value })} /></div>
         <label className="block space-y-1 text-xs text-muted-foreground">Search in
-          <select className="ide-select" aria-label="Search scope" value={search.scope} onChange={(event) => onSearch({ scope: event.target.value as SearchState["scope"] })}>
-            <option value="all">All fields and text</option><option value="name">Node names</option><option value="content">Narrative content</option><option value="choices">Choices</option><option value="destination">Destinations</option><option value="metadata">Metadata values</option>
-          </select>
+          <Select value={search.scope} onValueChange={(scope) => onSearch({ scope: scope as SearchState["scope"] })}>
+            <SelectTrigger className="w-full" aria-label="Search scope"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All fields and text</SelectItem>
+              <SelectItem value="name">Node names</SelectItem>
+              <SelectItem value="content">Narrative content</SelectItem>
+              <SelectItem value="choices">Choices</SelectItem>
+              <SelectItem value="destination">Destinations</SelectItem>
+              <SelectItem value="metadata">Metadata values</SelectItem>
+            </SelectContent>
+          </Select>
         </label>
         {search.scope === "metadata" ? <Input aria-label="Metadata field filter" placeholder="Field name (optional)" value={search.field} onChange={(event) => onSearch({ field: event.target.value })} /> : null}
         <div className="flex flex-wrap gap-3 text-xs">

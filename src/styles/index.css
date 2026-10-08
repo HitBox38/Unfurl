@@ -372,23 +372,6 @@
   grid-template-columns: 16rem minmax(0, 1fr);
   overflow: hidden;
 }
-.ide-select {
-  display: block;
-  width: 100%;
-  min-height: 36px;
-  margin-top: 4px;
-  padding: 4px 8px;
-  border: 1px solid var(--input);
-  border-radius: var(--radius-md);
-  background: var(--card);
-  color: var(--foreground);
-  font: inherit;
-  font-size: 14px;
-}
-.ide-select:focus-visible {
-  outline: 2px solid var(--ring);
-  outline-offset: 2px;
-}
 .ide-code-editor .cm-editor {
   height: 100%;
 }

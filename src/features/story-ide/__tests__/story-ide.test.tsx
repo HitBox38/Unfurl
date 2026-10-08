@@ -47,7 +47,8 @@ describe("story IDE editing flow", () => {
   it("stages field-aware replacements, exports the fix, and applies every node in one undoable action", async () => {
     const user = userEvent.setup(); render(<FilePage />); await openIde(user);
     await user.click(screen.getByRole("button", { name: "Search" }));
-    await user.selectOptions(screen.getByRole("combobox", { name: "Search scope" }), "metadata");
+    await user.click(screen.getByRole("combobox", { name: "Search scope" }));
+    await user.click(await screen.findByRole("option", { name: "Metadata values" }));
     await user.type(screen.getByRole("textbox", { name: "Metadata field filter" }), "reward");
     await user.type(screen.getByRole("textbox", { name: "Search story data" }), "100");
     await user.type(screen.getByRole("textbox", { name: "Replacement value" }), "25");

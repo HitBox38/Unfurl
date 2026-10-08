@@ -6,6 +6,7 @@ import { useStorageSnapshot } from "@/shared/hooks/use-storage-snapshot";
 import { applyMetadataRefactor, createMetadataEdits, getMetadataUndo, metadataUndoKey, planMetadataRefactor, undoMetadataRefactor, type MetadataEdit, type MetadataRefactorPlan } from "@/shared/lib/project-metadata-refactor";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 
 export const ProjectMetadataRefactor = ({ projectId }: { projectId: string | null }) => {
@@ -57,18 +58,33 @@ export const ProjectMetadataRefactor = ({ projectId }: { projectId: string | nul
                       <>
                         <div className="grid gap-3 sm:grid-cols-4">
                           <label className="space-y-1 text-xs text-muted-foreground">Name<Input aria-label={`Metadata field ${index + 1} name`} value={edit.field.name} onChange={(event) => patchField(edit, { name: event.target.value })} /></label>
-                          <label className="space-y-1 text-xs text-muted-foreground">Type<select className="ide-select" aria-label={`Metadata field ${index + 1} type`} value={edit.field.type} onChange={(event) => {
-                            const type = event.target.value as "number" | "boolean";
-                            patch(edit.id, { field: { ...edit.field!, type }, defaultValue: type === "number" ? 0 : false });
-                          }}><option value="number">Number</option><option value="boolean">Boolean</option></select></label>
+                          <label className="space-y-1 text-xs text-muted-foreground">Type
+                            <Select value={edit.field.type} onValueChange={(value) => {
+                              const type = value as "number" | "boolean";
+                              patch(edit.id, { field: { ...edit.field!, type }, defaultValue: type === "number" ? 0 : false });
+                            }}>
+                              <SelectTrigger className="w-full" aria-label={`Metadata field ${index + 1} type`}><SelectValue /></SelectTrigger>
+                              <SelectContent><SelectItem value="number">Number</SelectItem><SelectItem value="boolean">Boolean</SelectItem></SelectContent>
+                            </Select>
+                          </label>
                           <label className="space-y-1 text-xs text-muted-foreground">Import sign<Input aria-label={`Metadata field ${index + 1} sign`} value={edit.field.sign} onChange={(event) => patchField(edit, { sign: event.target.value })} /></label>
                           <label className="space-y-1 text-xs text-muted-foreground">Author label<Input aria-label={`Metadata field ${index + 1} label`} value={edit.field.label ?? ""} onChange={(event) => patchField(edit, { label: event.target.value })} /></label>
                         </div>
                         <div className="flex flex-wrap items-end gap-3">
                           <label className="min-w-32 space-y-1 text-xs text-muted-foreground">Fill missing values with
-                            {edit.field.type === "number" ? <Input type="number" aria-label={`Metadata field ${index + 1} default`} value={String(edit.defaultValue)} onChange={(event) => patch(edit.id, { defaultValue: event.target.value === "" ? NaN : Number(event.target.value) })} /> : <select className="ide-select" aria-label={`Metadata field ${index + 1} default`} value={String(edit.defaultValue)} onChange={(event) => patch(edit.id, { defaultValue: event.target.value === "true" })}><option value="false">False</option><option value="true">True</option></select>}
+                            {edit.field.type === "number" ? <Input type="number" aria-label={`Metadata field ${index + 1} default`} value={String(edit.defaultValue)} onChange={(event) => patch(edit.id, { defaultValue: event.target.value === "" ? NaN : Number(event.target.value) })} /> : (
+                              <Select value={String(edit.defaultValue)} onValueChange={(value) => patch(edit.id, { defaultValue: value === "true" })}>
+                                <SelectTrigger className="w-full" aria-label={`Metadata field ${index + 1} default`}><SelectValue /></SelectTrigger>
+                                <SelectContent><SelectItem value="false">False</SelectItem><SelectItem value="true">True</SelectItem></SelectContent>
+                              </Select>
+                            )}
                           </label>
-                          <label className="min-w-48 space-y-1 text-xs text-muted-foreground">Type conversion<select className="ide-select" aria-label={`Metadata field ${index + 1} conversion`} value={edit.conversion} onChange={(event) => patch(edit.id, { conversion: event.target.value as MetadataEdit["conversion"] })}><option value="none">Keep matching values</option><option value="binary">Convert 0/1 ↔ false/true</option></select></label>
+                          <label className="min-w-48 space-y-1 text-xs text-muted-foreground">Type conversion
+                            <Select value={edit.conversion} onValueChange={(conversion) => patch(edit.id, { conversion: conversion as MetadataEdit["conversion"] })}>
+                              <SelectTrigger className="w-full" aria-label={`Metadata field ${index + 1} conversion`}><SelectValue /></SelectTrigger>
+                              <SelectContent><SelectItem value="none">Keep matching values</SelectItem><SelectItem value="binary">Convert 0/1 ↔ false/true</SelectItem></SelectContent>
+                            </Select>
+                          </label>
                           <Button variant="ghost" size="icon" aria-label={`Remove metadata field ${edit.field.name || index + 1}`} onClick={() => patch(edit.id, { field: null })}><Trash2 className="size-4" /></Button>
                         </div>
                       </>
