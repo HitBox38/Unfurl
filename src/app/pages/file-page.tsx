@@ -5,6 +5,7 @@ import { useFilePage } from "@/app/pages/file-page/hooks/use-file-page";
 import { MissingFile } from "@/app/pages/file-page/components/missing-file";
 import { FileHeader } from "@/app/pages/file-page/components/file-header";
 import { FileWorkspace } from "@/app/pages/file-page/components/file-workspace";
+import { FileMotion } from "@/app/pages/file-page/components/file-motion";
 
 export const FilePage = () => {
   const page = useFilePage();
@@ -26,10 +27,10 @@ export const FilePage = () => {
         }}
         className="relative min-h-0 flex-1 flex-col gap-0 overflow-hidden"
       >
-        <section>
+        <FileMotion key={page.fileId}>
           <FileHeader page={page} />
           <FileWorkspace page={page} fileId={page.fileId} />
-        </section>
+        </FileMotion>
       </Tabs>
     </div>
   );

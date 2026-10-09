@@ -77,6 +77,29 @@ local storage when reopening the story.
 Only pending fixes retain a full recovery workspace; a clean story stores its
 view preferences separately. Deleting a story also removes its recovery data.
 
+The file workspace uses Motion for its bubble transitions. Switching Graph / IDE
+slides the selected-view pill and reflows the title and history bubbles with
+the same spring as the node tabs. Export remains anchored. Graph-only actions
+fade and gently contract on exit, becoming inert and hidden from assistive
+technology immediately. The IDE toolbar fades and gently expands on each
+pointer-initiated entry, including returns to an already-open IDE. Keyboard
+switching is instant; reduced motion keeps the fade and removes movement.
+The IDE surface fades over the restored graph on exit, immediately becoming
+inert and hidden from assistive technology. Its Activity is suspended after
+the fade so returning preserves the editor and investigation state.
+
+Inside the IDE, pointer interactions use 180 ms
+transitions for the Nodes / Search selection, investigation panes, messages,
+and saved / pending status. The node-tab selection pill uses a spring with a
+small bounce to expand and contract between tab widths. Inactive tabs collapse
+their close-button space. Hover, selection, or keyboard focus expands the tab
+to reveal its close button, with neighboring tabs moving together. Keyboard
+interactions remain instant. Reduced motion keeps opacity fades and removes
+selection movement. The editor switches nodes
+immediately; code editing and the graph do not animate. Exiting messages are
+immediately hidden from assistive technology and made inert until their fade
+finishes.
+
 **Metadata refactor** reviews definitions and saved values across the current
 project. Type changes require matching values or an explicit binary conversion.
 **Undo last refactor** restores the project only if subsequent saved edits would

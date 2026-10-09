@@ -53,6 +53,7 @@
     "codemirror": "^6.0.2",
     "dagre": "^0.8.5",
     "lucide-react": "^1.47.0",
+    "motion": "^14.0.0",
     "posthog-js": "^1.434.5",
     "radix-ui": "^1.6.7",
     "react": "19.3.0",

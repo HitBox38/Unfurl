@@ -1,25 +1,21 @@
 import { X } from "lucide-react";
+import { AnimatePresence } from "motion/react";
 
 import { Button } from "@/shared/ui/button";
+import { IdeMessage } from "@/features/story-ide/components/ide-message";
 import type { StoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
 
 export const IdeMessages = ({ ide }: { ide: StoryIdeController }) => {
   const { storageError, error, notice, setNotice } = ide;
   return (
-    <>
+    <AnimatePresence initial={false}>
       {storageError || error ? (
-        <p
-          role="alert"
-          className="shrink-0 border-b bg-destructive/10 px-4 py-2 text-sm text-destructive"
-        >
+        <IdeMessage key="error" role="alert">
           {storageError ?? error}
-        </p>
+        </IdeMessage>
       ) : null}
       {notice ? (
-        <p
-          role="status"
-          className="flex shrink-0 items-center justify-between gap-2 border-b bg-muted/50 px-4 py-2 text-xs text-muted-foreground"
-        >
+        <IdeMessage key="notice" role="status">
           {notice}
           <Button
             variant="ghost"
@@ -29,8 +25,8 @@ export const IdeMessages = ({ ide }: { ide: StoryIdeController }) => {
           >
             <X className="size-3" />
           </Button>
-        </p>
+        </IdeMessage>
       ) : null}
-    </>
+    </AnimatePresence>
   );
 };

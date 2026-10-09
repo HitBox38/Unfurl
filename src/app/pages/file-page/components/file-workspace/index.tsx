@@ -1,12 +1,11 @@
-import { Activity, lazy, Suspense } from "react";
-import { Loader2 } from "lucide-react";
+import { Activity } from "react";
 
 import { TabsContent } from "@/shared/ui/tabs";
 import { NodeEditor } from "@/features/node-editor";
 import { FileGraphPane } from "@/app/pages/file-page/components/file-graph-pane";
+import { FileIdePane } from "@/app/pages/file-page/components/file-ide-pane";
 import type { FilePageController } from "@/app/pages/file-page/hooks/use-file-page";
 
-const LazyStoryIde = lazy(() => import("@/features/story-ide"));
 export const FileWorkspace = ({
   page,
   fileId,
@@ -16,32 +15,8 @@ export const FileWorkspace = ({
 }) => {
   const { hasOpenedIde, mode, node, pending, setVisualEditorDirty } = page;
   return (
-    <div className="file-workspace min-h-0 flex-1">
-      <TabsContent
-        value="ide"
-        forceMount
-        hidden={mode !== "ide"}
-        className="m-0 h-full min-h-0"
-      >
-        {hasOpenedIde || mode === "ide" ? (
-          <Activity mode={mode === "ide" ? "visible" : "hidden"}>
-            <div className="h-full min-h-0 px-4 pb-4">
-              <Suspense
-                fallback={
-                  <div className="flex h-full items-center justify-center">
-                    <Loader2
-                      className="animate-spin"
-                      aria-label="Loading story IDE"
-                    />
-                  </div>
-                }
-              >
-                <LazyStoryIde key={fileId} fileId={fileId} />
-              </Suspense>
-            </div>
-          </Activity>
-        ) : null}
-      </TabsContent>
+    <div className="file-workspace relative min-h-0 flex-1">
+      <FileIdePane active={mode === "ide"} fileId={fileId} opened={hasOpenedIde} />
       <TabsContent
         value="graph"
         forceMount

@@ -105,6 +105,52 @@ describe("story IDE editing flow", () => {
     expect(savedRewards()).toEqual([100, 100]);
   });
 
+  it("reveals a collapsed tab's close button on hover and closes it without switching nodes", async () => {
+    const matchMedia = window.matchMedia;
+    const media = vi.spyOn(window, "matchMedia").mockImplementation((query) => ({
+      ...matchMedia(query),
+      matches: query === "(hover: hover) and (pointer: fine)",
+    }));
+    try {
+      // Explicit hover avoids user-event's missing relatedTarget when moving to the close button.
+      const user = userEvent.setup({ skipHover: true });
+      render(<FilePage />);
+      await openIde(user);
+      await user.click(screen.getByRole("button", { name: "Outro" }));
+      const intro = screen.getByRole("tab", { name: "Intro" });
+      expect(screen.queryByRole("button", { name: "Close tab Intro" })).not.toBeInTheDocument();
+      await user.hover(intro);
+      expect(screen.getByRole("button", { name: "Close tab Intro" })).toBeInTheDocument();
+      await user.unhover(intro);
+      expect(screen.queryByRole("button", { name: "Close tab Intro" })).not.toBeInTheDocument();
+      await user.hover(intro);
+      const close = screen.getByRole("button", { name: "Close tab Intro" });
+      await user.click(close);
+      expect(screen.queryByRole("tab", { name: "Intro" })).not.toBeInTheDocument();
+      const outro = screen.getByRole("tab", { name: "Outro" });
+      expect(outro).toHaveAttribute("aria-selected", "true");
+      await waitFor(() => expect(outro).toHaveFocus());
+      expect(savedRewards()).toEqual([100, 100]);
+    } finally {
+      media.mockRestore();
+    }
+  });
+
+  it("removes dismissed messages from accessibility immediately and can show them again during exit", async () => {
+    const user = userEvent.setup();
+    render(<FilePage />);
+    await openIde(user);
+    await user.click(screen.getByRole("button", { name: "Export test copy" }));
+    const message = screen.getByText("Test copy exported. The saved story has not changed.");
+    await user.click(screen.getByRole("button", { name: "Dismiss IDE message" }));
+    expect(screen.queryByRole("button", { name: "Dismiss IDE message" })).not.toBeInTheDocument();
+    expect(message).toHaveAttribute("aria-hidden", "true");
+    expect(message).toHaveAttribute("inert");
+    await user.click(screen.getByRole("button", { name: "Export test copy" }));
+    expect(screen.getAllByRole("button", { name: "Dismiss IDE message" })).toHaveLength(1);
+    expect(screen.getByText("Test copy exported. The saved story has not changed.")).not.toHaveAttribute("aria-hidden");
+  });
+
   it("recovers unfinished JSON after reopening and blocks Apply and test export", async () => {
     const user = userEvent.setup(); const page = render(<FilePage />); await openIde(user);
     fireEvent.change(editor(), { target: { value: "{ unfinished" } });
