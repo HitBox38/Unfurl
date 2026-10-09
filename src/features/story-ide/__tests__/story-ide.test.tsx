@@ -105,6 +105,34 @@ describe("story IDE editing flow", () => {
     expect(savedRewards()).toEqual([100, 100]);
   });
 
+  it("collapses the sidebar accessibly while preserving the search, replacement, and editor draft", async () => {
+    const user = userEvent.setup();
+    render(<FilePage />);
+    await openIde(user);
+    fireEvent.change(editor(), { target: { value: "{ pending draft" } });
+    await user.click(screen.getByRole("button", { name: "Search" }));
+    await user.type(screen.getByRole("textbox", { name: "Search story data" }), "100");
+    await user.type(screen.getByRole("textbox", { name: "Replacement value" }), "25");
+    const toggle = screen.getByRole("button", { name: "Collapse IDE sidebar" });
+    const content = document.getElementById(toggle.getAttribute("aria-controls")!)!;
+    await user.click(toggle);
+    expect(toggle).toHaveAccessibleName("Expand IDE sidebar");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle).toHaveFocus();
+    expect(content).toHaveAttribute("inert");
+    expect(content).toHaveAttribute("aria-hidden", "true");
+    expect(screen.queryByRole("textbox", { name: "Search story data" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Graph preview window" })).not.toBeInTheDocument();
+    expect(editor()).toHaveValue("{ pending draft");
+    await user.keyboard("{Enter}");
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(content).not.toHaveAttribute("inert");
+    expect(screen.getByRole("textbox", { name: "Search story data" })).toHaveValue("100");
+    expect(screen.getByRole("textbox", { name: "Replacement value" })).toHaveValue("25");
+    expect(screen.getByRole("region", { name: "Graph preview window" })).toBeInTheDocument();
+    expect(editor()).toHaveValue("{ pending draft");
+  });
+
   it("reveals a collapsed tab's close button on hover and closes it without switching nodes", async () => {
     const matchMedia = window.matchMedia;
     const media = vi.spyOn(window, "matchMedia").mockImplementation((query) => ({

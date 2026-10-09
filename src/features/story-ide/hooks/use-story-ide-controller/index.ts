@@ -26,6 +26,7 @@ export const useStoryIdeController = (fileId: string) => {
   const project = useProject(projectId);
   const confirm = useConfirmDialog();
   const [sidebar, setSidebar] = useState<"nodes" | "search">("nodes");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [location, setLocation] = useState<EditorLocation | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +185,8 @@ export const useStoryIdeController = (fileId: string) => {
     project,
     sidebar,
     setSidebar,
+    sidebarCollapsed,
+    setSidebarCollapsed,
     reviewOpen,
     setReviewOpen,
     location,
