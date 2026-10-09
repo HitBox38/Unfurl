@@ -1,11 +1,14 @@
 import { Code2, Download, ListChecks } from "lucide-react";
+import * as m from "motion/react-m";
 
 import { ProjectMetadataRefactor } from "@/features/project-metadata-refactor";
 import { Button } from "@/shared/ui/button";
 import { IdeFixStatus } from "@/features/story-ide/components/ide-fix-status";
+import { useViewReveal } from "@/shared/hooks/use-view-reveal";
 import type { StoryIdeController } from "@/features/story-ide/hooks/use-story-ide-controller";
 
 export const IdeToolbar = ({ ide }: { ide: StoryIdeController }) => {
+  const reveal = useViewReveal();
   const {
     pending,
     changedNodes,
@@ -17,7 +20,11 @@ export const IdeToolbar = ({ ide }: { ide: StoryIdeController }) => {
     setReviewOpen,
   } = ide;
   return (
-    <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b px-4 py-3">
+    <m.div
+      animate={reveal}
+      className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b px-4 py-3"
+      style={{ transformOrigin: "top right" }}
+    >
       <div className="flex min-w-0 items-center gap-2">
         <Code2 className="size-4 text-chart-2" />
         <span className="text-sm font-medium">Story IDE</span>
@@ -54,6 +61,6 @@ export const IdeToolbar = ({ ide }: { ide: StoryIdeController }) => {
           Review fix
         </Button>
       </div>
-    </div>
+    </m.div>
   );
 };

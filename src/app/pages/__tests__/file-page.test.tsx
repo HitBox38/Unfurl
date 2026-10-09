@@ -13,11 +13,17 @@ import {
 import { useJsonDataStore, useNodeStore } from "@/shared/stores";
 import type { StoryData } from "@/shared/types";
 
-const { routeState, confirm } = vi.hoisted(() => ({
+const { routeState, confirm, motionPreferences } = vi.hoisted(() => ({
   confirm: vi.fn<(options: ConfirmDialogOptions) => void>(),
+  motionPreferences: { reduced: false },
   routeState: {
     fileId: "draft-id",
   },
+}));
+
+vi.mock("motion/react", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("motion/react")>()),
+  useReducedMotion: () => motionPreferences.reduced,
 }));
 
 vi.mock("@tanstack/react-router", () => ({
@@ -86,6 +92,7 @@ const story: StoryData = {
 
 describe("FilePage", () => {
   afterEach(() => {
+    motionPreferences.reduced = false;
     routeState.fileId = "draft-id";
     useJsonDataStore.getState().reset();
     useNodeStore.getState().setNode(null);
@@ -140,6 +147,63 @@ describe("FilePage", () => {
     expect(
       screen.queryByRole("link", { name: /upload another file/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("makes exiting graph controls inert and survives rapid view reversals", async () => {
+    const user = userEvent.setup();
+    saveEditableFile({
+      id: "draft-id",
+      name: "demo",
+      fileType: "twee",
+      content: story,
+      projectId: "p1",
+    });
+    render(<FilePage />);
+    const graph = await screen.findByRole("tab", { name: "Graph" });
+    const ide = screen.getByRole("tab", { name: "IDE" });
+    const actions = screen.getByTestId("file-add-node-bubble");
+    const name = screen.getByRole("textbox", { name: "File name" });
+    await user.click(ide);
+    expect(actions).toHaveAttribute("inert");
+    expect(actions).toHaveAttribute("aria-hidden", "true");
+    expect(screen.queryByRole("button", { name: "Delete nodes" })).not.toBeInTheDocument();
+    const idePanel = screen.getByRole("tabpanel", { name: "IDE" });
+    await user.click(graph);
+    expect(idePanel).toHaveAttribute("inert");
+    expect(idePanel).toHaveAttribute("aria-hidden", "true");
+    expect(screen.getByRole("button", { name: "Delete nodes" })).toBeVisible();
+    await user.click(ide);
+    await waitFor(() => expect(screen.queryByTestId("file-add-node-bubble")).not.toBeInTheDocument());
+    expect(ide).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tabpanel", { name: "IDE" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "File name" })).toBe(name);
+    await user.keyboard("{ArrowLeft}{Enter}");
+    expect(graph).toHaveAttribute("aria-selected", "true");
+    expect(idePanel).toHaveAttribute("hidden");
+    expect(screen.getAllByTestId("file-add-node-bubble")).toHaveLength(1);
+    expect(getEditableFile("draft-id")?.content).toEqual(story);
+  });
+
+  it("keeps the IDE toolbar and graph controls free of scaling with reduced motion", async () => {
+    motionPreferences.reduced = true;
+    const user = userEvent.setup();
+    saveEditableFile({
+      id: "draft-id",
+      name: "demo",
+      fileType: "twee",
+      content: story,
+      projectId: "p1",
+    });
+    render(<FilePage />);
+    await user.click(await screen.findByRole("tab", { name: "IDE" }));
+    const workspace = await screen.findByRole("region", { name: "Story IDE" });
+    const toolbar = workspace.firstElementChild as HTMLElement;
+    await waitFor(() => expect(toolbar).toHaveStyle({ opacity: "1" }));
+    expect(toolbar).toHaveStyle({ transform: "none" });
+    await user.click(screen.getByRole("tab", { name: "Graph" }));
+    const actions = screen.getByTestId("file-add-node-bubble");
+    await waitFor(() => expect(actions).toHaveStyle({ opacity: "1" }));
+    expect(actions).toHaveStyle({ transform: "none" });
   });
 
   it("shows a creative cue for a blank in-editor story", async () => {
