@@ -1,0 +1,25 @@
+:: StoryTitle
+The Lantern Gate
+
+:: Arrival {"position":"400,40","size":"180,60"}
+The gate is locked. A lantern glows in the watchtower.
+[[Ask the keeper for help->Ask for help]]
+[[Find your own way inside->Go alone]]
+
+:: Ask for help {"position":"170,240","size":"180,60"}
+The keeper lowers her lantern. "What brings you here?"
+[[Tell her about the missing courier->An ally]]
+[[Offer to repair the gate->A bargain]]
+
+:: Go alone {"position":"690,240","size":"180,60"}
+Beyond the wall, you hear water moving through an old tunnel.
+[[Follow the water->A new path]]
+
+:: An ally {"position":"40,470","size":"180,60"}
+"I knew the courier," she says, and hands you a brass key.
+
+:: A bargain {"position":"320,470","size":"180,60"}
+You mend the hinge. The keeper opens the gate with a smile.
+
+:: A new path {"position":"690,470","size":"180,60"}
+The tunnel leads beneath the gate. Your journey begins.

@@ -6,12 +6,12 @@ import { Button } from "@/shared/ui/button";
 
 import { hotkeyOptions } from "./constants";
 
-export const FileHistoryControls = () => {
+export const FileHistoryControls = ({ disabled = false }: { disabled?: boolean }) => {
   const { canUndo, canRedo, undo, redo } = useJsonDataStore();
 
   useHotkey("Mod+Z", undo, {
     ...hotkeyOptions,
-    enabled: canUndo,
+    enabled: canUndo && !disabled,
     meta: {
       name: "Undo edit",
       description: "Move back in the file edit history",
@@ -19,7 +19,7 @@ export const FileHistoryControls = () => {
   });
   useHotkey("Mod+Shift+Z", redo, {
     ...hotkeyOptions,
-    enabled: canRedo,
+    enabled: canRedo && !disabled,
     meta: {
       name: "Redo edit",
       description: "Move forward in the file edit history",
@@ -34,7 +34,7 @@ export const FileHistoryControls = () => {
         size="icon"
         aria-label="Undo edit"
         title="Undo edit"
-        disabled={!canUndo}
+        disabled={!canUndo || disabled}
         onClick={undo}
       >
         <Undo2 aria-hidden="true" />
@@ -45,7 +45,7 @@ export const FileHistoryControls = () => {
         size="icon"
         aria-label="Redo edit"
         title="Redo edit"
-        disabled={!canRedo}
+        disabled={!canRedo || disabled}
         onClick={redo}
       >
         <Redo2 aria-hidden="true" />
