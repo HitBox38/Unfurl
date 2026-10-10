@@ -105,7 +105,16 @@ function initializeLoading() {
 const { appendLoading, removeLoading } = initializeLoading();
 domReady().then(appendLoading);
 
+const TRUSTED_MESSAGE_ORIGINS = new Set([
+  "file://",
+  "http://localhost:3000",
+]);
+
 window.onmessage = (ev) => {
+  if (!TRUSTED_MESSAGE_ORIGINS.has(ev.origin)) {
+    return;
+  }
+
   if (ev.data?.payload === "removeLoading") {
     removeLoading();
   }
