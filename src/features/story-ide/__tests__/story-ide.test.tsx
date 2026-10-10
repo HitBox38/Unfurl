@@ -18,7 +18,10 @@ vi.mock("@tanstack/react-router", () => ({
   useParams: () => ({ fileId: "file" }),
 }));
 vi.mock("@/features/dialog-viewer", () => ({ DialogViewer: () => <div>Saved graph</div> }));
-vi.mock("@/features/story-graph-preview", () => ({ StoryGraphPreview: () => <div>Read-only preview</div> }));
+vi.mock("@/features/story-graph-preview", () => ({
+  StoryGraphPreview: ({ selectedName }: { selectedName?: string | null }) =>
+    <div data-testid="graph-preview" data-selected-node={selectedName}>Read-only preview</div>,
+}));
 vi.mock("@/features/graph-node-toolbar", () => ({ GraphNodeToolbar: () => <button>Add saved node</button> }));
 vi.mock("@/features/node-editor", () => ({ NodeEditor: () => <div>Visual node editor</div> }));
 vi.mock("@/shared/lib/download-json-file", () => ({ downloadJsonFile: download }));
@@ -28,6 +31,7 @@ vi.mock("@/features/story-ide/components/json-node-editor", () => ({
   ),
 }));
 
+const graphPreview = () => within(screen.getByRole("region", { name: "Graph preview window" })).getByTestId("graph-preview");
 const editor = () => screen.getByRole("textbox", { name: "Node JSON editor" });
 const savedRewards = () => getEditableFile("file")!.content.nodes.map((node) => node.metadata.reward);
 const openIde = async (user: ReturnType<typeof userEvent.setup>) => {
@@ -84,24 +88,41 @@ describe("story IDE editing flow", () => {
     render(<FilePage />);
     await openIde(user);
     await user.click(screen.getByRole("button", { name: "Outro" }));
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Outro");
     const intro = screen.getByRole("tab", { name: "Intro" });
     await user.click(intro);
     await user.keyboard("{ArrowRight}");
     const outro = screen.getByRole("tab", { name: "Outro" });
     await waitFor(() => expect(outro).toHaveFocus());
     expect(outro).toHaveAttribute("aria-selected", "true");
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Outro");
     expect(screen.getByRole("tabpanel", { name: "Outro" })).toContainElement(
       editor(),
     );
     await user.keyboard("{ArrowLeft}");
     await waitFor(() => expect(intro).toHaveAttribute("aria-selected", "true"));
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Intro");
     fireEvent.change(editor(), { target: { value: "{ pending tab draft" } });
     await user.click(screen.getByRole("button", { name: "Close tab Intro" }));
     expect(screen.queryByRole("tab", { name: /^Intro/ })).not.toBeInTheDocument();
     await waitFor(() => expect(outro).toHaveFocus());
     expect(outro).toHaveAttribute("aria-selected", "true");
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Outro");
     await user.click(screen.getByRole("button", { name: /^Intro/ }));
     expect(editor()).toHaveValue("{ pending tab draft");
+    expect(savedRewards()).toEqual([100, 100]);
+  });
+
+  it("retains the renamed node's preview selection while its JSON is incomplete", async () => {
+    const user = userEvent.setup();
+    render(<FilePage />);
+    await openIde(user);
+    fireEvent.change(editor(), { target: {
+      value: serializeNode({ ...makeIdeStory().nodes[0], name: "Start" }),
+    } });
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Start");
+    fireEvent.change(editor(), { target: { value: "{ unfinished" } });
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Start");
     expect(savedRewards()).toEqual([100, 100]);
   });
 
@@ -131,6 +152,51 @@ describe("story IDE editing flow", () => {
     expect(screen.getByRole("textbox", { name: "Replacement value" })).toHaveValue("25");
     expect(screen.getByRole("region", { name: "Graph preview window" })).toBeInTheDocument();
     expect(editor()).toHaveValue("{ pending draft");
+  });
+
+  it("collapses just the graph preview and restores the current node on keyboard expansion", async () => {
+    const user = userEvent.setup();
+    render(<FilePage />);
+    await openIde(user);
+    const toggle = screen.getByRole("button", { name: "Collapse graph preview" });
+    const content = document.getElementById(toggle.getAttribute("aria-controls")!)!;
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+    await user.click(toggle);
+    expect(toggle).toHaveAccessibleName("Expand graph preview");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(toggle).toHaveFocus();
+    expect(content).toHaveAttribute("aria-hidden", "true");
+    expect(content).toHaveAttribute("inert");
+    await user.click(screen.getByRole("button", { name: "Outro" }));
+    expect(screen.getByRole("tab", { name: "Outro" })).toHaveAttribute("aria-selected", "true");
+
+    await user.click(screen.getByRole("button", { name: "Collapse IDE sidebar" }));
+    await user.click(screen.getByRole("button", { name: "Expand IDE sidebar" }));
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    toggle.focus();
+    await user.keyboard("{Enter}");
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(content).toBeVisible();
+    expect(content).not.toHaveAttribute("aria-hidden");
+    expect(content).not.toHaveAttribute("inert");
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Outro");
+    expect(editor()).toBeInTheDocument();
+  });
+
+  it("can reopen the graph preview while its collapse animation is running", async () => {
+    const user = userEvent.setup();
+    render(<FilePage />);
+    await openIde(user);
+    const toggle = screen.getByRole("button", { name: "Collapse graph preview" });
+    const content = document.getElementById(toggle.getAttribute("aria-controls")!)!;
+    await user.click(toggle);
+    expect(content).toHaveAttribute("inert");
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(content).not.toHaveAttribute("inert");
+    expect(content).not.toHaveAttribute("aria-hidden");
+    expect(graphPreview()).toHaveAttribute("data-selected-node", "Intro");
   });
 
   it("reveals a collapsed tab's close button on hover and closes it without switching nodes", async () => {

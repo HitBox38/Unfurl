@@ -423,12 +423,11 @@
     border-left: 1px solid var(--border);
     border-top: 0;
     bottom: auto;
-    height: 210px;
   }
   .ide-sidebar-controls {
     flex-wrap: wrap;
   }
-  .ide-graph-window > div:last-child {
+  .ide-graph-content {
     height: 175px;
   }
   .story-ide-body[data-collapsed="true"] {
