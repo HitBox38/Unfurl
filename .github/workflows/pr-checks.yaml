@@ -56,6 +56,32 @@ jobs:
       - name: Build web bundle
         run: pnpm build:web
 
+  test-windows:
+    name: Test Windows
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Test
+        run: pnpm test
+
   package:
     # master pushes publish installers, so prove every platform still packages
     # before the merge rather than after.
