@@ -34,6 +34,9 @@ vi.mock("@/features/story-ide/components/json-node-editor", () => ({
 const graphPreview = () => within(screen.getByRole("region", { name: "Graph preview window" })).getByTestId("graph-preview");
 const editor = () => screen.getByRole("textbox", { name: "Node JSON editor" });
 const savedRewards = () => getEditableFile("file")!.content.nodes.map((node) => node.metadata.reward);
+// This flow crosses search, export, preview, apply, and history UI; Windows
+// release runners have completed it just over Vitest's default 5s timeout.
+const heavyIntegrationTimeoutMs = 10_000;
 const openIde = async (user: ReturnType<typeof userEvent.setup>) => {
   await screen.findByRole("tab", { name: "IDE" });
   await user.click(screen.getByRole("tab", { name: "IDE" }));
@@ -49,13 +52,24 @@ describe("story IDE editing flow", () => {
   });
 
   it("stages field-aware replacements, exports the fix, and applies every node in one undoable action", async () => {
-    const user = userEvent.setup(); render(<FilePage />); await openIde(user);
+    const user = userEvent.setup({ delay: null });
+    render(<FilePage />);
+    await openIde(user);
     await user.click(screen.getByRole("button", { name: "Search" }));
     await user.click(screen.getByRole("combobox", { name: "Search scope" }));
     await user.click(await screen.findByRole("option", { name: "Metadata values" }));
-    await user.type(screen.getByRole("textbox", { name: "Metadata field filter" }), "reward");
-    await user.type(screen.getByRole("textbox", { name: "Search story data" }), "100");
-    await user.type(screen.getByRole("textbox", { name: "Replacement value" }), "25");
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Metadata field filter" }),
+      { target: { value: "reward" } },
+    );
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Search story data" }),
+      { target: { value: "100" } },
+    );
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Replacement value" }),
+      { target: { value: "25" } },
+    );
     await user.click(screen.getByRole("button", { name: /Intro.*reward/ }));
     expect(editor()).toHaveAttribute("data-location", '["metadata","reward"]');
     await user.click(screen.getByRole("button", { name: "Preview replacements" }));
@@ -81,7 +95,7 @@ describe("story IDE editing flow", () => {
     expect(savedRewards()).toEqual([100, 100]);
     await user.click(screen.getByRole("button", { name: "Redo edit" }));
     expect(savedRewards()).toEqual([25, 25]);
-  });
+  }, heavyIntegrationTimeoutMs);
 
   it("uses keyboard-accessible node tabs and retains drafts after closing and reopening a tab", async () => {
     const user = userEvent.setup();
